@@ -10,6 +10,5 @@
     "typescript": "^5"
   },
   "scripts": {
-    "start": "bun index.ts /Users/zavx0z/ai -e node_modules"
   }
 }  

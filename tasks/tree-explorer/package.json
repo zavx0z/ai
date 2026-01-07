@@ -1,0 +1,23 @@
+{
+  "name": "tree-explorer",
+  "version": "1.0.0",
+  "description": "Интерактивный файловый менеджер для терминала",
+  "type": "module",
+  "main": "index.ts",
+  "bin": {
+    "tree-explorer": "./index.ts"
+  },
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev": "bun --watch index.ts",
+    "build": "bun build ./index.ts --outdir ./dist --target bun",
+    "compile": "bun build --compile ./index.ts --outfile tree-explorer"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "keywords": ["cli", "file-manager", "terminal", "tui"],
+  "author": "zavx0z",
+  "license": "MIT"
+}
