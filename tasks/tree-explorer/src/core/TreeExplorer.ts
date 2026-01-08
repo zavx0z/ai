@@ -165,8 +165,8 @@ export class TreeExplorer {
       // Пробел
       this.toggleSelection()
     } else if (normalizedKey === "a" || normalizedKey === "ф") {
-      // Выбрать всё (без исключений)
-      this.selectAllExcluding()
+      // ВЫБРАТЬ ВСЁ (РЕКУРСИВНО) - ИСПРАВЛЕННЫЙ ВАРИАНТ
+      this.selectAllRecursively()
     } else if (normalizedKey === "A") {
       // Выбрать всё (полностью)
       this.selectAllCompletely()
@@ -190,7 +190,25 @@ export class TreeExplorer {
       this.showExcludeInfo()
     }
   }
+  private async selectAllRecursively(): Promise<void> {
+    try {
+      // Сначала выбираем всё что видно на экране
+      this.selection.selectAll(this.entries)
 
+      // Затем рекурсивно выбираем содержимое всех директорий
+      const directories = this.entries.filter(
+        (entry) => entry.isDirectory && !this.excludePatterns.isExcluded(entry.path)
+      )
+
+      for (const dir of directories) {
+        await this.selection.selectDirectory(dir.path)
+      }
+
+      this.render()
+    } catch (error) {
+      console.error(`❌ Ошибка при выборе всего: ${error.message}`)
+    }
+  }
   private handleFilterInput(key: string, normalizedKey: string): void {
     if (key === "\r") {
       // Enter

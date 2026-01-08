@@ -8,10 +8,13 @@
     "tree-explorer": "./index.ts"
   },
   "scripts": {
-    "start": "bun run index.ts /Users/zavx0z/ai/actions/commit -e node_modules",
+    "start": "bun run index.ts  -e node_modules",
     "dev": "bun --watch index.ts",
     "build": "bun build ./index.ts --outdir ./dist --target bun",
-    "compile": "bun build --compile ./index.ts --outfile tree-explorer"
+    "compile": "bun build --compile ./index.ts --outfile tree-explorer",
+    "join": "bun run ../../actions/join/cli.ts --file tmp/files.txt --output tmp/join.md --no-numbers",
+    "diff": "git diff --staged > ./tmp/diff.patch",
+    "commit": "bun run ../../actions/commit/cli.ts ./tmp/diff.patch -c ./tmp/join.md -o ./tmp/commit.md"
   },
   "dependencies": {},
   "devDependencies": {

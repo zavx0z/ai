@@ -114,6 +114,25 @@ export class SelectionManager {
     }
   }
 
+  // НОВЫЙ МЕТОД: Выбрать всё рекурсивно
+  async selectAllRecursively(): Promise<void> {
+    // Для каждой директории в выбранных файлах
+    const directories = Array.from(this.selectedFiles).filter((path) => {
+      try {
+        // Проверяем, является ли путь директорией
+        return path.endsWith("/") || (path.includes(".") ? false : true) // Простая эвристика
+      } catch {
+        return false
+      }
+    })
+
+    for (const dirPath of directories) {
+      if (!this.excludePatterns.isExcluded(dirPath)) {
+        await this.selectDirectory(dirPath)
+      }
+    }
+  }
+
   selectAllIncludingExcluded(entries: FileEntry[]): void {
     for (const entry of entries) {
       this.select(entry.path)

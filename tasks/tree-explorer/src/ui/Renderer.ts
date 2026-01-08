@@ -186,12 +186,12 @@ export class Renderer {
       this.theme.cyan +
       "Пробел" +
       this.theme.reset +
-      " - Выбрать директорию\n" +
+      " - Выбрать директорию (рекурсивно)\n" + // ← добавил "рекурсивно"
       "  " +
       this.theme.cyan +
       "a (ф)" +
       this.theme.reset +
-      " - Выбрать всё (без исключений)  " +
+      " - Выбрать всё (рекурсивно)  " + // ← исправил описание
       this.theme.cyan +
       "A (Ф)" +
       this.theme.reset +
