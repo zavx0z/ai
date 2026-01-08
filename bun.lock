@@ -20,8 +20,17 @@
         "typescript": "^5",
       },
     },
-    "actions/fix": {
-      "name": "fix",
+    "actions/commit": {
+      "name": "commit",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
+    "actions/join": {
+      "name": "join",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -38,8 +47,8 @@
         "typescript": "^5",
       },
     },
-    "actions/project": {
-      "name": "project",
+    "actions/lint": {
+      "name": "fix",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -58,11 +67,12 @@
     },
     "tasks/tree-explorer": {
       "name": "tree-explorer",
+      "version": "1.0.0",
+      "bin": {
+        "tree-explorer": "./index.ts",
+      },
       "devDependencies": {
         "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
       },
     },
   },
@@ -77,11 +87,13 @@
 
     "comment": ["comment@workspace:actions/comment"],
 
-    "fix": ["fix@workspace:actions/fix"],
+    "commit": ["commit@workspace:actions/commit"],
+
+    "fix": ["fix@workspace:actions/lint"],
+
+    "join": ["join@workspace:actions/join"],
 
     "lines": ["lines@workspace:actions/lines"],
-
-    "project": ["project@workspace:actions/project"],
 
     "tree-explorer": ["tree-explorer@workspace:tasks/tree-explorer"],
 

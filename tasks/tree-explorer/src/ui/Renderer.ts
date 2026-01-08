@@ -271,8 +271,14 @@ export class Renderer {
     if (selectedFiles.length === 0) {
       output += this.theme.yellow + "Файлы не выбраны" + this.theme.reset + "\n"
     } else {
-      selectedFiles.forEach((file, index) => {
-        output += `${index + 1}. ${file}\n`
+      selectedFiles.forEach((file) => {
+        // Проверяем расширение или наличие точки в имени как простой признак файла
+        const hasExtension = file.includes(".") && !file.endsWith("/")
+        const isLikelyFile = hasExtension || !file.includes("/") || file.split("/").pop()?.includes(".")
+
+        if (isLikelyFile) {
+          output += `${file}\n`
+        }
       })
     }
 
