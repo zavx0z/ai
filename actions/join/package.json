@@ -1,5 +1,5 @@
 {
-  "name": "project",
+  "name": "join",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -10,6 +10,6 @@
     "typescript": "^5"
   },
   "scripts": {
-    "start": "bun run scripts/collect-files.ts"
+    "start": "bun run cli.ts --file tmp/input.txt --output tmp/output.md --no-numbers"
   }
 }
