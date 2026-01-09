@@ -1,0 +1,13 @@
+{
+  "name": "project",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run cli.ts",
+    "files": "bun run ../../tasks/tree-explorer/index.ts -e node_modules -e tmp",
+    "join": "bun run ../../actions/join/cli.ts --file tmp/files.txt --output tmp/join.md",
+    "lint": "bun run ../../actions/lint/cli.ts . -o tmp/lint.md",
+    "commit": "git diff --staged > tmp/diff.patch && bun run ../../actions/commit/cli.ts tmp/diff.patch -c tmp/join.md -o tmp/commit.md"
+  }
+}
