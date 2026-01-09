@@ -8,56 +8,32 @@
         "@types/bun": "latest",
       },
       "peerDependencies": {
-        "typescript": "^5",
+        "typescript": "^5.9.3",
       },
     },
     "actions/comment": {
       "name": "comment",
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
     },
     "actions/commit": {
       "name": "commit",
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
     },
     "actions/join": {
       "name": "join",
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
     },
     "actions/lines": {
       "name": "lines",
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
     },
     "actions/lint": {
       "name": "fix",
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
+    },
+    "generator/bun": {
+      "name": "bun",
     },
     "generator/cli": {
       "name": "cli",
+    },
+    "generator/project": {
+      "name": "project",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -71,15 +47,14 @@
       "bin": {
         "tree-explorer": "./index.ts",
       },
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
     },
   },
   "packages": {
     "@types/bun": ["@types/bun@1.3.5", "", { "dependencies": { "bun-types": "1.3.5" } }, "sha512-RnygCqNrd3srIPEWBd5LFeUYG7plCoH2Yw9WaZGyNmdTEei+gWaHqydbaIRkIkcbXwhBT94q78QljxN0Sk838w=="],
 
     "@types/node": ["@types/node@25.0.3", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-W609buLVRVmeW693xKfzHeIV6nJGGz98uCPfeXI1ELMLXVeKYZ9m15fAMSaUPBHYLGFsVRcMmSCksQOrZV9BYA=="],
+
+    "bun": ["bun@workspace:generator/bun"],
 
     "bun-types": ["bun-types@1.3.5", "", { "dependencies": { "@types/node": "*" } }, "sha512-inmAYe2PFLs0SUbFOWSVD24sg1jFlMPxOjOSSCYqUgn4Hsc3rDc7dFvfVYjFPNHtov6kgUeulV4SxbuIV/stPw=="],
 
@@ -94,6 +69,8 @@
     "join": ["join@workspace:actions/join"],
 
     "lines": ["lines@workspace:actions/lines"],
+
+    "project": ["project@workspace:generator/project"],
 
     "tree-explorer": ["tree-explorer@workspace:tasks/tree-explorer"],
 
