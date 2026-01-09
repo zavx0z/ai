@@ -15,7 +15,7 @@ async function main() {
     const explorer = new TreeExplorer(path, excludePatterns)
     await explorer.run()
   } catch (error) {
-    console.error("🔥 Фатальная ошибка:", error.message)
+    console.error("🔥 Фатальная ошибка:", error instanceof Error ? error.message : String(error))
     process.exit(1)
   }
 }

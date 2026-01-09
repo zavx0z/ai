@@ -18,7 +18,7 @@ export class FileSystem {
 
       return entries
     } catch (error) {
-      throw new Error(`Не удалось прочитать директорию ${path}: ${error.message}`)
+      throw new Error(`Не удалось прочитать директорию ${path}: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 

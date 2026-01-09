@@ -62,7 +62,7 @@ export class TreeExplorer {
       // Главный цикл
       await this.mainLoop()
     } catch (error) {
-      console.error("🔥 Ошибка:", error.message)
+      console.error("🔥 Ошибка:", error instanceof Error ? error.message : String(error))
       this.cleanup()
       process.exit(1)
     }
@@ -111,7 +111,7 @@ export class TreeExplorer {
         this.cursorPosition = Math.max(0, this.entries.length - 1)
       }
     } catch (error) {
-      console.error(`❌ Ошибка загрузки директории: ${error.message}`)
+      console.error(`❌ Ошибка загрузки директории: ${error instanceof Error ? error.message : String(error)}`)
       this.entries = []
 
       // Пробуем перейти в домашнюю директорию
@@ -188,6 +188,9 @@ export class TreeExplorer {
     } else if (normalizedKey === "e" || normalizedKey === "у") {
       // Исключения
       this.showExcludeInfo()
+    } else if (normalizedKey === "j" || normalizedKey === "о") {
+      // Сохранить выбранное в JSON
+      this.saveSelectionToJson()
     }
   }
   private async selectAllRecursively(): Promise<void> {
@@ -197,7 +200,7 @@ export class TreeExplorer {
 
       // Затем рекурсивно выбираем содержимое всех директорий
       const directories = this.entries.filter(
-        (entry) => entry.isDirectory && !this.excludePatterns.isExcluded(entry.path)
+        (entry) => entry && entry.isDirectory && !this.excludePatterns.isExcluded(entry.path)
       )
 
       for (const dir of directories) {
@@ -206,7 +209,7 @@ export class TreeExplorer {
 
       this.render()
     } catch (error) {
-      console.error(`❌ Ошибка при выборе всего: ${error.message}`)
+        console.error(`❌ Ошибка при выборе всего: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
   private handleFilterInput(key: string, normalizedKey: string): void {
@@ -247,18 +250,18 @@ export class TreeExplorer {
   private async enterDirectory(): Promise<void> {
     if (this.entries.length === 0) return
 
-    const entry = this.entries[this.cursorPosition]
-    if (entry.isDirectory) {
-      try {
-        this.currentPath = entry.path
-        this.history.add(this.currentPath, 0)
-        this.cursorPosition = 0
-        await this.loadEntries()
-        this.render()
-      } catch (error) {
-        console.error(`❌ Не удалось войти в директорию: ${error.message}`)
+      const entry = this.entries[this.cursorPosition]
+      if (entry && entry.isDirectory) {
+        try {
+          this.currentPath = entry.path
+          this.history.add(this.currentPath, 0)
+          this.cursorPosition = 0
+          await this.loadEntries()
+          this.render()
+        } catch (error) {
+          console.error(`❌ Не удалось войти в директорию: ${error instanceof Error ? error.message : String(error)}`)
+        }
       }
-    }
   }
 
   private async goBack(): Promise<void> {
@@ -276,6 +279,8 @@ export class TreeExplorer {
     if (this.entries.length === 0) return
 
     const entry = this.entries[this.cursorPosition]
+    if (!entry) return
+    
     if (entry.isDirectory) {
       await this.selection.toggleDirectory(entry.path)
     } else {
@@ -314,10 +319,16 @@ export class TreeExplorer {
     const output = this.renderer.renderSelectedFilesScreen(selectedFiles)
     process.stdout.write(output)
 
-    // Временный обработчик для возврата
-    const returnHandler = (key: string) => {
-      this.inputHandler.removeInputCallback(returnHandler)
-      this.render()
+    // Временный обработчик для возврата и сохранения
+    const returnHandler = (key: string, normalizedKey: string) => {
+      if (normalizedKey === "j" || normalizedKey === "о") {
+        // Сохраняем в JSON
+        this.saveSelectionToJson(selectedFiles)
+      } else {
+        // Возвращаемся к основному интерфейсу
+        this.inputHandler.removeInputCallback(returnHandler)
+        this.render()
+      }
     }
 
     this.inputHandler.onInput(returnHandler)
@@ -335,6 +346,96 @@ export class TreeExplorer {
     }
 
     this.inputHandler.onInput(returnHandler)
+  }
+
+  // Новый метод: Сохранить выбранные файлы в JSON
+  private async saveSelectionToJson(selectedFiles?: string[]): Promise<void> {
+    try {
+      const files = selectedFiles || this.selection.getSelectedFiles()
+      
+      if (files.length === 0) {
+        const theme = this.renderer["theme"]
+        const message = "\x1b[2J\x1b[H" + 
+          (theme["errorText"] ? theme["errorText"]("❌ Файлы не выбраны") : "❌ Файлы не выбраны") + "\n\n" +
+          (theme["yellow"] || "") + "Нажмите любую клавишу для продолжения..." + 
+          (theme["reset"] || "")
+        
+        process.stdout.write(message)
+        
+        // Ждем нажатия любой клавиши
+        await new Promise<void>((resolve) => {
+          const handler = () => {
+            this.inputHandler.removeInputCallback(handler)
+            this.render()
+            resolve()
+          }
+          this.inputHandler.onInput(handler)
+        })
+        return
+      }
+
+      // Создаем структурированный объект
+      const data = {
+        generated: new Date().toISOString(),
+        totalFiles: files.length,
+        directory: this.currentPath,
+        files: files.map(file => ({
+          path: file,
+          name: file.split(/[\\/]/).pop() || file,
+          isDirectory: file.endsWith("/") || (!file.includes(".") && !file.includes("/"))
+        }))
+      }
+
+      // Создаем имя файла с временной меткой
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19)
+      const filename = `selected-files-${timestamp}.json`
+      const filePath = `${this.currentPath}/${filename}`
+
+      // Записываем файл
+      await Bun.write(filePath, JSON.stringify(data, null, 2))
+
+      // Показываем сообщение об успехе
+      const theme = this.renderer["theme"]
+      const message = "\x1b[2J\x1b[H" + 
+        (theme["successText"] ? theme["successText"]("✅ Список файлов сохранен!") : "✅ Список файлов сохранен!") + "\n\n" +
+        (theme["cyan"] || "") + `Файл: ${filename}` + "\n" +
+        (theme["cyan"] || "") + `Путь: ${filePath}` + "\n" +
+        (theme["cyan"] || "") + `Количество: ${files.length} файлов` + "\n\n" +
+        (theme["yellow"] || "") + "Нажмите любую клавишу для продолжения..." + 
+        (theme["reset"] || "")
+      
+      process.stdout.write(message)
+      
+      // Ждем нажатия любой клавиши
+      await new Promise<void>((resolve) => {
+        const handler = () => {
+          this.inputHandler.removeInputCallback(handler)
+          this.render()
+          resolve()
+        }
+        this.inputHandler.onInput(handler)
+      })
+      
+    } catch (error) {
+      const theme = this.renderer["theme"]
+      const message = "\x1b[2J\x1b[H" + 
+        (theme["errorText"] ? theme["errorText"]("❌ Ошибка сохранения") : "❌ Ошибка сохранения") + "\n\n" +
+        (theme["red"] || "") + (error instanceof Error ? error.message : String(error)) + "\n\n" +
+        (theme["yellow"] || "") + "Нажмите любую клавишу для продолжения..." + 
+        (theme["reset"] || "")
+      
+      process.stdout.write(message)
+      
+      // Ждем нажатия любой клавиши
+      await new Promise<void>((resolve) => {
+        const handler = () => {
+          this.inputHandler.removeInputCallback(handler)
+          this.render()
+          resolve()
+        }
+        this.inputHandler.onInput(handler)
+      })
+    }
   }
 
   // Вспомогательные методы

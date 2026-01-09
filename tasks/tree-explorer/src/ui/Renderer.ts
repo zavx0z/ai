@@ -84,7 +84,9 @@ export class Renderer {
 
     for (let i = startIndex; i < endIndex; i++) {
       const entry = entries[i]
-      output += this.renderFileEntry(entry, i === cursorPosition, options)
+      if (entry) {
+        output += this.renderFileEntry(entry, i === cursorPosition, options)
+      }
     }
 
     // Индикаторы скролла
@@ -159,7 +161,7 @@ export class Renderer {
     }
   }
 
-  private renderMainFooter(): string {
+  renderMainFooter(): string {
     const footer =
       "\n" +
       this.theme.gray +
@@ -222,7 +224,11 @@ export class Renderer {
       this.theme.cyan +
       "e (у)" +
       this.theme.reset +
-      " - Режим исключений\n"
+      " - Режим исключений  " +
+      this.theme.cyan +
+      "j (о)" +
+      this.theme.reset +
+      " - Сохранить в JSON\n"
 
     return footer
   }
@@ -274,7 +280,8 @@ export class Renderer {
       selectedFiles.forEach((file) => {
         // Проверяем расширение или наличие точки в имени как простой признак файла
         const hasExtension = file.includes(".") && !file.endsWith("/")
-        const isLikelyFile = hasExtension || !file.includes("/") || file.split("/").pop()?.includes(".")
+        const lastPart = file.split("/").pop()
+        const isLikelyFile = hasExtension || !file.includes("/") || (lastPart ? lastPart.includes(".") : false)
 
         if (isLikelyFile) {
           output += `${file}\n`
@@ -283,7 +290,8 @@ export class Renderer {
     }
 
     output += "\n" + this.theme.gray + "─".repeat(this.getTerminalWidth()) + this.theme.reset + "\n"
-    output += this.theme.yellow + "Нажмите любую клавишу для возврата..." + this.theme.reset
+    output += this.theme.yellow + "Нажмите любую клавишу для возврата..." + this.theme.reset + "\n"
+    output += this.theme.cyan + "Нажмите 'j' для сохранения списка в JSON файл" + this.theme.reset
 
     return output
   }

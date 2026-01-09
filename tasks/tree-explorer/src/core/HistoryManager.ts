@@ -31,7 +31,8 @@ export class HistoryManager {
   goBack(): NavigationHistory | null {
     if (this.currentIndex > 0) {
       this.currentIndex--
-      return this.history[this.currentIndex]
+      const history = this.history[this.currentIndex]
+      return history ?? null
     }
     return null
   }
@@ -39,21 +40,26 @@ export class HistoryManager {
   goForward(): NavigationHistory | null {
     if (this.currentIndex < this.history.length - 1) {
       this.currentIndex++
-      return this.history[this.currentIndex]
+      const history = this.history[this.currentIndex]
+      return history ?? null
     }
     return null
   }
 
   getCurrent(): NavigationHistory | null {
     if (this.currentIndex >= 0 && this.currentIndex < this.history.length) {
-      return this.history[this.currentIndex]
+      const history = this.history[this.currentIndex]
+      return history ?? null
     }
     return null
   }
 
   setCursorPosition(position: number): void {
-    if (this.currentIndex >= 0) {
-      this.history[this.currentIndex].cursorPosition = position
+    if (this.currentIndex >= 0 && this.currentIndex < this.history.length) {
+      const history = this.history[this.currentIndex]
+      if (history) {
+        history.cursorPosition = position
+      }
     }
   }
 

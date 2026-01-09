@@ -46,7 +46,7 @@ export class SelectionManager {
         }
       }
     } catch (error) {
-      throw new Error(`Не удалось выбрать директорию ${dirPath}: ${error.message}`)
+      throw new Error(`Не удалось выбрать директорию ${dirPath}: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 

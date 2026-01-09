@@ -15,19 +15,33 @@ export function parseArgs(argv: string[]): ParsedArgs {
   while (i < args.length) {
     const arg = args[i]
 
+    if (!arg) {
+      i++
+      continue
+    }
+
     if (arg === "--exclude" || arg === "-e") {
       i++
       if (i < args.length) {
-        excludePatterns.push(args[i])
+        const pattern = args[i]
+        if (pattern !== undefined) {
+          excludePatterns.push(pattern)
+        }
       }
     } else if (arg.startsWith("--exclude=")) {
-      excludePatterns.push(arg.substring(10))
+      const pattern = arg.substring(10)
+      if (pattern !== undefined && pattern !== "") {
+        excludePatterns.push(pattern)
+      }
     } else if (arg.startsWith("-e=")) {
-      excludePatterns.push(arg.substring(3))
+      const pattern = arg.substring(3)
+      if (pattern !== undefined && pattern !== "") {
+        excludePatterns.push(pattern)
+      }
     } else if (arg === "--help" || arg === "-h") {
       showHelp()
       process.exit(0)
-    } else if (!arg.startsWith("-")) {
+    } else if (!arg.startsWith("-") && arg) {
       path = arg
     }
 
