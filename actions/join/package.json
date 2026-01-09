@@ -3,12 +3,6 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
   "scripts": {
     "start": "bun run cli.ts --file tmp/input.txt --output tmp/output.md --no-numbers"
   }

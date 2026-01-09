@@ -7,7 +7,7 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.5"
+    "typescript": "^5.9.3"
   },
   "workspaces": [
     "./actions/*",
@@ -15,8 +15,8 @@
     "./generator/*"
   ],
   "scripts": {
-    "patch": "git diff --staged > diff.patch",
-    "commit": "bun run actions/commit/cli.ts ./diff.patch -o ./tmp/output.md",
+    "patch": "",
+    "commit": "git diff --staged > tmp/diff.patch && bun run actions/commit/cli.ts tmp/diff.patch -o tmp/commit.md",
     "files": "bun run tasks/tree-explorer/index.ts /Users/zavx0z/ai/actions -e node_modules"
   }
 }

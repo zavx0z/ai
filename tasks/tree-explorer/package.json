@@ -12,13 +12,11 @@
     "dev": "bun --watch index.ts",
     "build": "bun build ./index.ts --outdir ./dist --target bun",
     "compile": "bun build --compile ./index.ts --outfile tree-explorer",
-    "join": "bun run ../../actions/join/cli.ts --file tmp/files.txt --output tmp/join.md --no-numbers",
+    "join-numbers": "bun run ../../actions/join/cli.ts --file tmp/files.txt --output tmp/join.md --no-numbers",
+    "join": "bun run ../../actions/join/cli.ts --file tmp/files.txt --output tmp/join.md",
     "diff": "git diff --staged > ./tmp/diff.patch",
-    "commit": "bun run ../../actions/commit/cli.ts ./tmp/diff.patch -c ./tmp/join.md -o ./tmp/commit.md"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "@types/bun": "latest"
+    "commit": "bun run ../../actions/commit/cli.ts ./tmp/diff.patch -c ./tmp/join.md -o ./tmp/commit.md",
+    "lint": "bun run ../../actions/lint/cli.ts . -o tmp/lint.md"
   },
   "keywords": [
     "cli",

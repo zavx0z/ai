@@ -3,12 +3,6 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.9.3"
-  },
   "scripts": {
     "start": "bun run cli.ts . -o tmp/lint.json",
     "files": "bun run ../../tasks/tree-explorer/index.ts -e node_modules -e tmp",
