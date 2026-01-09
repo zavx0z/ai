@@ -6,7 +6,8 @@ import { addLineNumbersToContent } from "./src/format"
 // Конфигурация по умолчанию
 const DEFAULT_CONFIG = {
   ADD_LINE_NUMBERS: true,
-  EXCLUDE_LINE_NUMBERS: [".md", ".mdx", ".txt", ".json", ".yaml", ".yml", ".env", ".gitignore"],
+  EXCLUDE_LINE_NUMBERS: []
+  // [".md", ".mdx", ".txt", ".json", ".yaml", ".yml", ".env", ".gitignore"],
 }
 
 // Языки для блоков кода
