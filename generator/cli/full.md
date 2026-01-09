@@ -45,6 +45,8 @@ project/
 ## 📝 шаблон `cli.ts`
 
 ```typescript
+import { mainProcess } from './index'
+
 const APP_NAME = 'МоеПриложение'
 
 function help() {
@@ -122,7 +124,6 @@ export async function runCLI() {
     
     // 2. Обработка через ГЛАВНЫЙ модуль index.ts (из корня)
     console.log('🔄 Обработка...')
-    const { mainProcess } = await import('./index')
     const result = mainProcess(inputContent, { verbose })
     
     // 3. Вывод результата (ТОЛЬКО в CLI)
