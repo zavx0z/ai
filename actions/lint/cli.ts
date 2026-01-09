@@ -291,15 +291,10 @@ export async function runCLI() {
 
     // 5. Вывод результата
     if (outputFile) {
-      await saveOutput(outputFile, formattedResults)
-      if (verbose) {
-        console.log(`\n✅ ${colorize("Результат сохранён:", "green")} ${colorize(outputFile, "cyan")}`)
-      }
-      
+
       // Чтение сохраненного результата и вывод статистики по ошибкам в файлах
       try {
-        const savedContent = await Bun.file(outputFile).text()
-        const diagnostics = JSON.parse(savedContent)
+        const diagnostics = JSON.parse(formattedResults)
         
         // Подсчет статистики по файлам
         const fileStats: Record<string, number> = {}
@@ -314,10 +309,15 @@ export async function runCLI() {
         
         // Вывод красивой статистики
         printFileStats(sortedStats, results.summary.totalErrors)
-        
       } catch (error) {
         console.log(`⚠️ ${colorize("Не удалось прочитать сохраненный результат:", "yellow")} ${error}`)
       }
+
+      await saveOutput(outputFile, rules + formattedResults)
+      if (verbose) {
+        console.log(`\n✅ ${colorize("Результат сохранён:", "green")} ${colorize(outputFile, "cyan")}`)
+      }
+      
     } else {
       // Выводим только JSON в stdout, без дополнительного текста
       console.log(formattedResults)
