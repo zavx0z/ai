@@ -28,6 +28,73 @@ function help() {
 `)
 }
 
+// Функция для вывода цветного текста
+function colorize(text: string, color: "green" | "yellow" | "red" | "blue" | "cyan" | "gray" = "gray") {
+  const colors = {
+    green: "\x1b[32m",
+    yellow: "\x1b[33m",
+    red: "\x1b[31m",
+    blue: "\x1b[34m",
+    cyan: "\x1b[36m",
+    gray: "\x1b[90m",
+    reset: "\x1b[0m"
+  }
+  return `${colors[color]}${text}${colors.reset}`
+}
+
+// Функция для вывода статистики по файлам
+function printFileStats(sortedStats: [string, number][], totalErrors: number) {
+  console.log(`\n📊 ${colorize("Статистика ошибок по файлам:", "cyan")}`)
+  
+  if (sortedStats.length === 0) {
+    console.log(`   ${colorize("✅ Нет ошибок в файлах", "green")}`)
+    return
+  }
+  
+  // Находим максимальную длину пути и максимальное количество ошибок
+  const maxPathLength = Math.max(...sortedStats.map(([file]) => 
+    path.relative(process.cwd(), file).length
+  ))
+  const maxErrors = Math.max(...sortedStats.map(([, count]) => count))
+  
+  sortedStats.forEach(([file, count], index) => {
+    const relativePath = path.relative(process.cwd(), file)
+    
+    // Определяем цвет в зависимости от количества ошибок
+    let fileColor: "green" | "yellow" | "red"
+    if (count === 0) fileColor = "green"
+    else if (count <= 3) fileColor = "yellow"
+    else fileColor = "red"
+    
+    // Форматируем номер
+    const numberStr = `${index + 1}.`.padStart(3, ' ')
+    
+    // Форматируем путь
+    const pathStr = relativePath.padEnd(maxPathLength, ' ')
+    
+    // Форматируем текст с количеством ошибок (правильное склонение)
+    const errorsText = count === 1 ? "ошибка" : 
+                      count >= 2 && count <= 4 ? "ошибки" : "ошибок"
+    const countStr = `${count} ${errorsText}`
+    
+    // Создаем график прогресс-бара (фиксированная длина 20 символов)
+    const barLength = 20
+    const filledLength = count === 0 ? 0 : Math.max(1, Math.round((count / maxErrors) * barLength))
+    const bar = '█'.repeat(filledLength) + '░'.repeat(barLength - filledLength)
+    
+    // Выводим с выравниванием - индикатор слева
+    console.log(
+      `   ${colorize(numberStr, "gray")} ` +
+      `${colorize(pathStr, fileColor)} ` +
+      `${colorize(countStr, fileColor)} ` +
+      `${colorize(bar, fileColor)}`
+    )
+  })
+  
+  console.log(`\n   ${colorize("Всего файлов с ошибками:", "cyan")} ${colorize(sortedStats.length.toString(), "yellow")}`)
+  console.log(`   ${colorize("Всего ошибок:", "cyan")} ${colorize(totalErrors.toString(), totalErrors > 0 ? "red" : "green")}`)
+}
+
 async function findTsConfig(startDir: string): Promise<string | null> {
   let currentDir = path.resolve(startDir)
 
@@ -138,7 +205,7 @@ interface FileWithContent {
 }
 
 export async function runCLI() {
-  console.error(`🚀 ${APP_NAME} - линтинг TypeScript файлов\n`)
+  console.log(`\n🚀 ${colorize(APP_NAME, "cyan")} - ${colorize("линтинг TypeScript файлов", "blue")}`)
 
   const args = Bun.argv.slice(2)
 
@@ -153,9 +220,9 @@ export async function runCLI() {
   const inputPath = inputIndex !== -1 ? args[inputIndex] : null
 
   if (!inputPath) {
-    console.error("❌ Укажите путь к файлу или директории для линтинга")
+    console.error(`${colorize("❌ Укажите путь к файлу или директории для линтинга", "red")}`)
     help()
-    process.exit(1)
+    return // Вместо process.exit(1)
   }
 
   // Флаги вывода
@@ -172,14 +239,14 @@ export async function runCLI() {
 
   try {
     if (verbose) {
-      console.error(`📖 Поиск TypeScript файлов: ${inputPath}`)
+      console.log(`📖 ${colorize("Поиск TypeScript файлов:", "gray")} ${colorize(inputPath, "cyan")}`)
     }
 
     // Автоматически находим tsconfig если не указан явно
     if (!configFile) {
       configFile = (await findTsConfig(inputPath)) || undefined
       if (configFile && verbose) {
-        console.error(`📋 Найден tsconfig: ${path.relative(process.cwd(), configFile)}`)
+        console.log(`📋 ${colorize("Найден tsconfig:", "gray")} ${colorize(path.relative(process.cwd(), configFile), "cyan")}`)
       }
     }
 
@@ -187,18 +254,18 @@ export async function runCLI() {
     const files = await getFilesToLint(inputPath)
 
     if (files.length === 0) {
-      console.error("🤷 Не найдено ни одного TypeScript файла для линтинга.")
-      process.exit(0)
+      console.log(`\n${colorize("🤷 Не найдено ни одного TypeScript файла для линтинга.", "yellow")}`)
+      return // Вместо process.exit(0)
     }
 
     if (verbose) {
-      console.error(`📄 Найдено файлов: ${files.length}`)
-      files.forEach((file, i) => console.error(`  ${i + 1}. ${path.relative(process.cwd(), file)}`))
+      console.log(`📄 ${colorize("Найдено файлов:", "gray")} ${colorize(files.length.toString(), "cyan")}`)
+      files.forEach((file, i) => console.log(`  ${colorize((i + 1).toString(), "gray")}. ${colorize(path.relative(process.cwd(), file), "blue")}`))
     }
 
     // 2. Чтение содержимого каждого файла
     if (verbose) {
-      console.error("📖 Чтение файлов...")
+      console.log(`📖 ${colorize("Чтение файлов...", "gray")}`)
     }
     const filesWithContent: FileWithContent[] = await Promise.all(
       files.map(async (filePath) => ({
@@ -209,7 +276,7 @@ export async function runCLI() {
 
     // 3. Обработка
     if (verbose) {
-      console.error("🔄 Линтинг...")
+      console.log(`🔄 ${colorize("Линтинг...", "gray")}`)
     }
     const { lintFiles } = await import("./index")
     const results = await lintFiles(filesWithContent, {
@@ -226,25 +293,45 @@ export async function runCLI() {
     if (outputFile) {
       await saveOutput(outputFile, formattedResults)
       if (verbose) {
-        console.error(`\n✅ Результат сохранён: ${outputFile}`)
+        console.log(`\n✅ ${colorize("Результат сохранён:", "green")} ${colorize(outputFile, "cyan")}`)
+      }
+      
+      // Чтение сохраненного результата и вывод статистики по ошибкам в файлах
+      try {
+        const savedContent = await Bun.file(outputFile).text()
+        const diagnostics = JSON.parse(savedContent)
+        
+        // Подсчет статистики по файлам
+        const fileStats: Record<string, number> = {}
+        diagnostics.forEach((diag: any) => {
+          const file = diag.resource
+          fileStats[file] = (fileStats[file] || 0) + 1
+        })
+        
+        // Сортировка по количеству ошибок (по убыванию)
+        const sortedStats = Object.entries(fileStats)
+          .sort(([, a], [, b]) => b - a)
+        
+        // Вывод красивой статистики
+        printFileStats(sortedStats, results.summary.totalErrors)
+        
+      } catch (error) {
+        console.log(`⚠️ ${colorize("Не удалось прочитать сохраненный результат:", "yellow")} ${error}`)
       }
     } else {
       // Выводим только JSON в stdout, без дополнительного текста
       console.log(formattedResults)
     }
 
-    // 6. Выходной код (только в stderr, чтобы не мешать JSON)
+    // 6. Сообщение о завершении (без установки кода ошибки)
     if (results.errors.length > 0) {
-      if (verbose) {
-        console.error("\n❌ Найдены ошибки в TypeScript файлах")
-      }
-      process.exitCode = 1
+      console.log(`\n${colorize("ℹ️ Найдены ошибки в TypeScript файлах", "yellow")}`)
     } else if (verbose) {
-      console.error("\n✅ Линтинг завершён успешно!")
+      console.log(`\n${colorize("✅ Линтинг завершён успешно!", "green")}`)
     }
   } catch (error) {
-    console.error("💥 Ошибка:", error instanceof Error ? error.message : String(error))
-    process.exit(1)
+    console.error(`${colorize("💥 Ошибка:", "red")} ${error instanceof Error ? error.message : String(error)}`)
+    return // Вместо process.exit(1)
   }
 }
 
