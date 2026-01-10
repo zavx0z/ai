@@ -98,16 +98,21 @@ const TOOLS: ToolDefinition[] = [
   {
     id: "commit",
     name: "📦 Commit",
-    description: "Git Add + Diff + Context -> Commit Msg",
+    description: "Git Add + Diff + Context -> Commit Msg (+Copy)",
     getCommand: () => {
-      // "commit": "git add . && git diff --staged > tmp/diff.patch && bun run join && bun run ... -c tmp/join.md ..."
-
       const cmdGitAdd = `git add .`
-      // Используем --staged, так как мы сделали add .
       const cmdGitDiff = `git diff --staged > tmp/diff.patch`
       const cmdCommitGen = `bun run ${Tool("actions/commit/cli.ts")} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
 
-      return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${CHAIN_GEN_CONTEXT} && ${cmdCommitGen}`
+      // 👇 Добавляем команду копирования
+      // 1. cat tmp/commit.md — читает файл
+      // 2. | pbcopy — передает прочитанное в буфер обмена macOS
+      const cmdCopy = `cat tmp/commit.md | pbcopy`
+
+      // 👇 Добавляем echo для уведомления пользователя
+      const cmdNotify = `echo "✅ Текст коммита скопирован в буфер обмена!"`
+
+      return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${CHAIN_GEN_CONTEXT} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
     },
   },
 ]
