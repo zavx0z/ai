@@ -380,17 +380,13 @@ export class TreeExplorer {
         return
       }
 
-      // Создаем структурированный объект
-      const data = {
-        generated: new Date().toISOString(),
-        totalFiles: files.length,
-        directory: this.currentPath,
-        files: files.map(file => ({
-          path: file,
-          name: file.split(/[\\/]/).pop() || file,
-          isDirectory: file.endsWith("/") || (!file.includes(".") && !file.includes("/"))
-        }))
-      }
+      // Создаем новый формат JSON: только абсолютные пути
+      // Преобразуем все пути к абсолютным
+      const { resolve } = await import("path")
+      const absoluteFiles = files.map(file => resolve(file))
+      
+      // Формируем простой массив абсолютных путей без статистики и имен файлов
+      const data = absoluteFiles
 
       // Определяем путь для сохранения (из конфигурации или генерируем с временной меткой)
       let filePath: string
@@ -417,7 +413,7 @@ export class TreeExplorer {
         filePath = join(this.currentPath, filename)
       }
 
-      // Записываем файл
+      // Записываем файл - простой массив абсолютных путей
       await Bun.write(filePath, JSON.stringify(data, null, 2))
 
       // Показываем сообщение об успехе
@@ -426,7 +422,7 @@ export class TreeExplorer {
         (theme["successText"] ? theme["successText"]("✅ Список файлов сохранен!") : "✅ Список файлов сохранен!") + "\n\n" +
         (theme["cyan"] || "") + `Файл: ${filename}` + "\n" +
         (theme["cyan"] || "") + `Путь: ${filePath}` + "\n" +
-        (theme["cyan"] || "") + `Количество: ${files.length} файлов` + "\n\n" +
+        (theme["cyan"] || "") + `Количество: ${data.length} абсолютных путей` + "\n\n" +
         (theme["yellow"] || "") + "Нажмите любую клавишу для продолжения..." + 
         (theme["reset"] || "")
       

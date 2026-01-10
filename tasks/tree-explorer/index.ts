@@ -62,17 +62,12 @@ async function selectAllAndSave(path: string, excludePatterns: string[], outputF
   
   await traverse(path)
   
-  // Создаем структурированный объект для сохранения
-  const data = {
-    generated: new Date().toISOString(),
-    totalFiles: allFiles.length,
-    directory: path,
-    files: allFiles.map(file => ({
-      path: file,
-      name: file.split(/[\\/]/).pop() || file,
-      isDirectory: file.endsWith("/") || (!file.includes(".") && !file.includes("/"))
-    }))
-  }
+  // Преобразуем все пути к абсолютным
+  const { resolve } = await import("path")
+  const absoluteFiles = allFiles.map(file => resolve(file))
+  
+  // Формируем простой массив абсолютных путей без статистики и имен файлов
+  const data = absoluteFiles
   
   // Определяем путь для сохранения
   let filePath: string
@@ -86,11 +81,11 @@ async function selectAllAndSave(path: string, excludePatterns: string[], outputF
     filePath = join(path, filename)
   }
   
-  // Сохраняем в файл
+  // Сохраняем в файл - простой массив абсолютных путей
   await Bun.write(filePath, JSON.stringify(data, null, 2))
-  console.log(`✅ Сохранено ${allFiles.length} файлов в: ${filePath}`)
+  console.log(`✅ Сохранено ${data.length} абсолютных путей в: ${filePath}`)
   
-  return allFiles
+  return absoluteFiles
 }
 
 async function main() {
