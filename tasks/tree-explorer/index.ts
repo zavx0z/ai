@@ -99,30 +99,22 @@ async function main() {
     const config = await loadConfig()
     
     // Парсинг аргументов командной строки
-    const { path, excludePatterns, selectAll, outputFile, exitAfterSave } = parseArgs(process.argv)
+    const { path, excludePatterns, pipelineMode, outputFile } = parseArgs(process.argv)
 
-    // Неинтерактивный режим: выбор всех файлов и сохранение
-    if (selectAll) {
-      const selectedFiles = await selectAllAndSave(path, excludePatterns, outputFile || config.outputFile)
-      
-      if (exitAfterSave) {
-        console.log("🚪 Выход после сохранения (--exit)")
-        process.exit(0)
-      } else {
-        console.log("\nℹ️  Для выхода используйте Ctrl+C или 'q'")
-        console.log("ℹ️  Для запуска в интерактивном режиме запустите без параметра --all")
-        
-        // Ожидаем нажатия любой клавиши для выхода
-        process.stdin.setRawMode(true)
-        process.stdin.resume()
-        process.stdin.on("data", (key) => {
-          if (key.toString() === "\u0003" || key.toString().toLowerCase() === "q") {
-            console.log("\n👋 Выход из программы...")
-            process.exit(0)
-          }
-        })
+    // Режим пайплайна: выбрать всё, сохранить и выйти
+    if (pipelineMode) {
+      console.log("🚀 Запуск в режиме пайплайна...")
+      console.log("📁 Директория:", path)
+      if (excludePatterns.length > 0) {
+        console.log("🚫 Исключения:", excludePatterns)
       }
-      return
+      if (outputFile || config.outputFile) {
+        console.log("💾 Сохранение в:", outputFile || config.outputFile)
+      }
+      
+      const selectedFiles = await selectAllAndSave(path, excludePatterns, outputFile || config.outputFile)
+      console.log("✅ Пайплайн завершен. Выход.")
+      process.exit(0)
     }
     
     // Интерактивный режим
