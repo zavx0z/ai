@@ -7,8 +7,8 @@ import { Theme } from "./src/ui/theme"
 
 async function main() {
   while (true) {
+    // 1. Выбор контекста (Проект или Пакет)
     const contexts = await scanTargetProject()
-    
     const context = await select(
       "Где запускаем?", 
       contexts, 
@@ -17,15 +17,20 @@ async function main() {
     
     if (!context) process.exit(0)
 
-    const tool = await select(
-      `Контекст: ${context.name}`,
-      TOOLS,
-      (t) => `${t.name} ${Theme.gray}| ${t.description}${Theme.reset}`
-    )
-    
-    if (!tool) continue
+    // 2. Цикл работы внутри выбранного контекста
+    while (true) {
+      const tool = await select(
+        `Контекст: ${context.name}`,
+        TOOLS,
+        (t) => `${t.name} ${Theme.gray}| ${t.description}${Theme.reset}`
+      )
+      
+      // Если нажали Esc (tool == null), выходим из этого цикла назад к выбору контекста
+      if (!tool) break
 
-    await runTool(tool, context)
+      await runTool(tool, context)
+      // После выполнения возвращаемся в начало этого цикла (меню инструментов)
+    }
   }
 }
 
