@@ -70,17 +70,31 @@ export const TASKS: TaskDefinition[] = [
     },
   },
   {
-    id: "commit",
-    name: "📦 Коммит",
-    description: "Сбор данных для коммита",
-    getCommand: async (ctx) => {
+    id: "git",
+    name: "📦 GIT",
+    description: "Git операции + Контекст",
+    actions: [
+      { id: "commit", name: "📦 Полный контекст", description: "Добавить все изменения в коммит и подготовить контекст" },
+    ],
+    getCommand: async (ctx, actionId) => {
       const chain = await getContextChain(ctx)
-      const cmdGitAdd = `git add .`
-      const cmdGitDiff = `git diff --staged > tmp/diff.patch`
-      const cmdCommitGen = `bun run ${PATH_COMMIT} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
-      const cmdCopy = `cat tmp/commit.md | pbcopy`
-      const cmdNotify = `echo "✅ Скопировано в буфер!"`
-      return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${chain} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
+      switch (actionId) {
+        case "commit": {
+          const cmdGitAdd = `git add .`
+          const cmdGitDiff = `git diff --staged > tmp/diff.patch`
+          const cmdCommitGen = `bun run ${PATH_COMMIT} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
+          const cmdCopy = `cat tmp/commit.md | pbcopy`
+          const cmdNotify = `echo "✅ Скопировано в буфер!"`
+          return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${chain} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
+        }
+        default:
+          const cmdGitAdd = `git add .`
+          const cmdGitDiff = `git diff --staged > tmp/diff.patch`
+          const cmdCommitGen = `bun run ${PATH_COMMIT} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
+          const cmdCopy = `cat tmp/commit.md | pbcopy`
+          const cmdNotify = `echo "✅ Скопировано в буфер!"`
+          return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${chain} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
+      }
     },
   },
 ]
