@@ -1,15 +1,23 @@
 import { Tool } from "./constants"
 import { join } from "path"
+import { input } from "../ui/input"
 import type { TargetContext } from "./scanner"
 
-export interface ToolDefinition {
+export interface TaskAction {
+  id: string
+  name: string
+  description?: string
+}
+
+export interface TaskDefinition {
   id: string
   name: string
   description: string
-  getCommand: (ctx: TargetContext) => string | Promise<string>
+  actions?: TaskAction[]
+  getCommand: (ctx: TargetContext, actionId?: string) => Promise<string>
 }
 
-// --- Helpers ---
+// --- Path Constants ---
 
 const PATH_TREE = Tool("ui/tree-explorer/index.ts")
 const PATH_JOIN = Tool("actions/join/cli.ts")
@@ -17,9 +25,14 @@ const PATH_LINT = Tool("actions/lint/cli.ts")
 const PATH_EDIT = Tool("actions/edit/cli.ts")
 const PATH_COMMIT = Tool("actions/commit/cli.ts")
 
-/**
- * Читает настройки exclude из zavx0z.yaml текущего контекста
- */
+// --- Helpers ---
+
+async function getContextCmd(ctx: TargetContext) {
+  const filesCmd = await getFilesCmd(ctx)
+  const joinCmd = `bun run ${PATH_JOIN} --file tmp/files.json --output tmp/join.md`
+  return `${filesCmd} && ${joinCmd}`
+}
+
 async function getExcludes(ctx: TargetContext): Promise<string> {
   const defaultExcludes = [
     "node_modules",
@@ -31,6 +44,8 @@ async function getExcludes(ctx: TargetContext): Promise<string> {
     ".idx",
     "bun.lock",
     "package-lock.json",
+    ".cursor",
+    "zavx0z.yaml",
   ]
 
   try {
@@ -39,41 +54,54 @@ async function getExcludes(ctx: TargetContext): Promise<string> {
 
     if (await file.exists()) {
       const text = await file.text()
-      const yaml = Bun.YAML.parse(text)
+      const yaml = Bun.YAML.parse(text) as { exclude?: string[] }
 
-      // Явное приведение типа для TypeScript
-      const config = yaml as { exclude?: string[] }
-      if (config && Array.isArray(config.exclude)) {
-        return config.exclude.map((e: string) => `-e "${e}"`).join(" ")
+      if (yaml && Array.isArray(yaml.exclude)) {
+        return yaml.exclude.map((e: string) => `-e "${e}"`).join(" ")
       }
     }
-  } catch (e) {
-    // Fallback to default if error
-  }
+  } catch (e) {}
 
   return defaultExcludes.map((e) => `-e "${e}"`).join(" ")
 }
 
-/**
- * Генерирует команду для создания files.json с учетом исключений
- */
 async function getFilesCmd(ctx: TargetContext) {
   const excludes = await getExcludes(ctx)
   return `bun run ${PATH_TREE} ${excludes} -p -o tmp/files.json`
 }
 
-/**
- * Генерирует цепочку: Files -> Join
- */
-async function getContextCmd(ctx: TargetContext) {
-  const filesCmd = await getFilesCmd(ctx)
-  const joinCmd = `bun run ${PATH_JOIN} --file tmp/files.json --output tmp/join.md`
-  return `${filesCmd} && ${joinCmd}`
+function getJoinCmd() {
+  return `bun run ${PATH_JOIN} --file tmp/files.json --output tmp/join.md`
 }
 
-// --- Tools ---
+async function getContextChain(ctx: TargetContext) {
+  const files = await getFilesCmd(ctx)
+  const join = getJoinCmd()
+  return `mkdir -p tmp && ${files} && ${join}`
+}
 
-export const TOOLS: ToolDefinition[] = [
+// --- Tasks ---
+
+export const TASKS: TaskDefinition[] = [
+  {
+    id: "edit-context",
+    name: "🤖 Задача",
+    description: "Подготовка контекста (edit.md)",
+    getCommand: async (ctx) => {
+      const taskDescription = await input("📝 Опишите задачу:")
+      if (taskDescription === null) return "echo '❌ Отменено'"
+
+      await Bun.write("tmp/task.md", `# Задача\n\n${taskDescription}\n\n`)
+
+      const chain = await getContextChain(ctx)
+      const docBun = Tool("generator/bun/README.md")
+      const docEdit = Tool("actions/edit/edit.md")
+      const cmdConcat = `cat tmp/task.md tmp/join.md ${docBun} ${docEdit} > tmp/edit.md`
+      const cmdCopy = `cat tmp/edit.md | pbcopy`
+      const cmdNotify = `echo "✅ Скопировано в буфер!"`
+      return `${chain} && ${cmdConcat} && ${cmdCopy} && ${cmdNotify}`
+    },
+  },
   {
     id: "files",
     name: "📂 Files JSON",
@@ -91,52 +119,44 @@ export const TOOLS: ToolDefinition[] = [
     name: "🧹 Lint",
     description: "Линтинг + Контекст (join >> lint.md)",
     getCommand: async (ctx) => {
-      const ctxCmd = await getContextCmd(ctx)
+      const chain = await getContextChain(ctx)
       const cmdLint = `bun run ${PATH_LINT} . -o tmp/lint.md`
       const cmdAppend = `cat tmp/join.md >> tmp/lint.md`
-
       const cmdCopy = `cat tmp/lint.md | pbcopy`
-      const cmdNotify = `echo "✅ Текст скопирован в буфер обмена!"`
-
-      return `mkdir -p tmp && ${ctxCmd} && ${cmdLint} && ${cmdAppend} && ${cmdCopy} && ${cmdNotify}`
-    },
-  },
-  {
-    id: "edit-context",
-    name: "🤖 Edit Context",
-    description: "Подготовка контекста для редактирования (edit.md)",
-    getCommand: async (ctx) => {
-      const ctxCmd = await getContextCmd(ctx)
-      const docBun = Tool("generator/bun/README.md")
-      const docEdit = Tool("actions/edit/edit.md")
-      const cmdConcat = `cat tmp/join.md ${docBun} ${docEdit} > tmp/edit.md`
-      const cmdCopy = `cat tmp/edit.md | pbcopy`
-      const cmdNotify = `echo "✅ Текст скопирован в буфер обмена!"`
-      return `mkdir -p tmp && ${ctxCmd} && ${cmdConcat} && ${cmdCopy} && ${cmdNotify}`
+      const cmdNotify = `echo "✅ Скопировано в буфер!"`
+      return `${chain} && ${cmdLint} && ${cmdAppend} && ${cmdCopy} && ${cmdNotify}`
     },
   },
   {
     id: "edit",
     name: "🔨 Apply Edit",
-    description: "Применить изменения из tmp/edit.json",
-    getCommand: () => {
-      const cmdCopy = `cat tmp/edit.json | pbcopy`
-      const cmdNotify = `echo "✅ Текст скопирован в буфер обмена!"`
-      return `bun run ${PATH_EDIT} tmp/edit.json && ${cmdCopy} && ${cmdNotify}`
+    description: "Применить изменения кода",
+    actions: [
+      { id: "clipboard", name: "📋 Из буфера", description: "pbpaste > edit.json" },
+      { id: "file", name: "📄 Из файла", description: "tmp/edit.json" },
+    ],
+    getCommand: async (ctx, actionId) => {
+      const runEdit = `bun run ${PATH_EDIT} tmp/edit.json`
+      const cmdNotify = `echo "✅ Изменения применены!"`
+
+      if (actionId === "clipboard") {
+        return `pbpaste > tmp/edit.json && ${runEdit} && ${cmdNotify}`
+      }
+      return `${runEdit} && ${cmdNotify}`
     },
   },
   {
     id: "commit",
     name: "📦 Commit",
-    description: "Git Add + Diff + Context -> Commit Msg (+Copy)",
+    description: "Git Add + Diff -> Commit Msg",
     getCommand: async (ctx) => {
-      const ctxCmd = await getContextCmd(ctx)
+      const chain = await getContextChain(ctx)
       const cmdGitAdd = `git add .`
       const cmdGitDiff = `git diff --staged > tmp/diff.patch`
       const cmdCommitGen = `bun run ${PATH_COMMIT} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
       const cmdCopy = `cat tmp/commit.md | pbcopy`
-      const cmdNotify = `echo "✅ Текст коммита скопирован в буфер обмена!"`
-      return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${ctxCmd} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
+      const cmdNotify = `echo "✅ Скопировано в буфер!"`
+      return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${chain} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
     },
   },
 ]

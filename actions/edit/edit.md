@@ -28,7 +28,7 @@
   "description": "Исправление бага",
   "operations": [
     {
-      "file": "src/App.ts",
+      "file": "/abspath/file.ts",
       "action": "replace",
       "search": "  const val = 1",
       "replace": "  const val = 2"

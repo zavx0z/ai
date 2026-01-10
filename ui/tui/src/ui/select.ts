@@ -88,7 +88,7 @@ export async function select<T>(
         process.stdin.off("data", handler)
         Theme.clearScreen()
         const selected = items[idx]
-        resolve(selected || null)
+        resolve(selected ?? null)
       }
     }
 
