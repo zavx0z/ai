@@ -77,11 +77,15 @@ export const TASKS: TaskDefinition[] = [
     description: "Git операции + Контекст",
     actions: [
       { id: "ful-context", name: "📦 Полный контекст", description: "Добавить все изменения в коммит и подготовить контекст" },
-      { id: "commit-buf", name: "Коммит", description: "Сделать коммит с сообщением из буфера" },
+      { id: "commit-buf", name: "📝 Коммит", description: "Сделать коммит с сообщением из буфера" },
+      { id: "push", name: "🚀 Push", description: "git push" },
     ],
     getCommand: async (ctx, actionId) => {
       const chain = await getContextChain(ctx)
       switch (actionId) {
+        case "push": {
+          return `git push && echo "✅ Отправлено!"`
+        }
         case "commit-buf": {
           const proc = Bun.spawn(["pbpaste"])
           const msg = await new Response(proc.stdout).text()
