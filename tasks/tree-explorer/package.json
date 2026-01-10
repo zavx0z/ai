@@ -8,10 +8,10 @@
     "tree-explorer": "./index.ts"
   },
   "scripts": {
-    "start": "bun run index.ts  -e node_modules",
+    "start": "bun run index.ts .  -e node_modules -e tmp",
     "join": "bun run ../../actions/join/cli.ts --file tmp/files.txt --output tmp/join.md",
     "commit": "git diff --staged > tmp/diff.patch && bun run ../../actions/commit/cli.ts tmp/diff.patch -c tmp/join.md -o tmp/commit.md",
-    "edit": "bun run ../../action/edit/cli.ts tmp/edit.json"
+    "edit": "bun run ../../actions/edit/cli.ts tmp/edit.json"
   },
   "keywords": [
     "cli",

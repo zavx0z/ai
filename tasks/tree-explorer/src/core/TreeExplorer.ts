@@ -1,11 +1,13 @@
 import { existsSync } from "fs"
+import { mkdir } from "fs/promises"
+import { join, dirname, resolve } from "path"
 import { FileSystem } from "./FileSystem"
 import { HistoryManager } from "./HistoryManager"
 import { SelectionManager } from "./SelectionManager"
 import { ExcludePatterns } from "../utils/ExcludePatterns"
 import { Renderer } from "../ui/Renderer"
 import { InputHandler, type InputCallback } from "../ui/InputHandler"
-import type { FileEntry, RenderOptions } from "../types/types"
+import type { FileEntry, RenderOptions, AppConfig } from "../types/types"
 
 export class TreeExplorer {
   // Основные менеджеры
@@ -14,6 +16,9 @@ export class TreeExplorer {
   private excludePatterns: ExcludePatterns
   private renderer: Renderer
   private inputHandler: InputHandler
+
+  // Конфигурация
+  private config: AppConfig
 
   // Состояние приложения
   private currentPath: string
@@ -25,7 +30,7 @@ export class TreeExplorer {
   private inFilterMode = false
   private isRunning = true
 
-  constructor(startPath: string = process.cwd(), excludePatterns: string[] = []) {
+  constructor(startPath: string = process.cwd(), excludePatterns: string[] = [], config?: AppConfig) {
     // Проверка платформы
     if (process.platform === "win32") {
       console.error("❌ Не поддерживается на Windows")
@@ -41,6 +46,7 @@ export class TreeExplorer {
     this.history = new HistoryManager()
     this.renderer = new Renderer(this.selection)
     this.inputHandler = new InputHandler()
+    this.config = config || {}
 
     // Добавляем начальную точку в историю
     this.history.add(this.currentPath, 0)
@@ -386,10 +392,30 @@ export class TreeExplorer {
         }))
       }
 
-      // Создаем имя файла с временной меткой
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19)
-      const filename = `selected-files-${timestamp}.json`
-      const filePath = `${this.currentPath}/${filename}`
+      // Определяем путь для сохранения (из конфигурации или генерируем с временной меткой)
+      let filePath: string
+      let filename: string
+      
+      if (this.config.outputFile) {
+        // Используем путь из конфигурации
+        filePath = resolve(this.config.outputFile)
+        filename = filePath.split(/[\\/]/).pop() || 'output.json'
+        
+        // Создаем родительскую директорию, если она не существует
+        const parentDir = dirname(filePath)
+        if (parentDir !== '.') {
+          try {
+            await mkdir(parentDir, { recursive: true })
+          } catch (error) {
+            console.error(`❌ Не удалось создать директорию ${parentDir}: ${error instanceof Error ? error.message : String(error)}`)
+          }
+        }
+      } else {
+        // Генерируем имя файла с временной меткой
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19)
+        filename = `selected-files-${timestamp}.json`
+        filePath = join(this.currentPath, filename)
+      }
 
       // Записываем файл
       await Bun.write(filePath, JSON.stringify(data, null, 2))

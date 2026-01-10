@@ -40,3 +40,7 @@ export interface ColorTheme {
 export interface KeyMapping {
   [key: string]: string
 }
+
+export interface AppConfig {
+  outputFile?: string
+}
