@@ -90,8 +90,10 @@ export const TASKS: TaskDefinition[] = [
     getCommand: async (ctx) => {
       const taskDescription = await input("📝 Опишите задачу:")
       if (taskDescription === null) return "echo '❌ Отменено'"
-
-      await Bun.write("tmp/task.md", `# Задача\n\n${taskDescription}\n\n`)
+      
+      const tmpDir = join(ctx.path, "tmp")
+      Bun.spawnSync(["mkdir", "-p", tmpDir])
+      await Bun.write(join(tmpDir, "task.md"), `# Задача\n\n${taskDescription}\n\n`)
 
       const chain = await getContextChain(ctx)
       const docBun = Tool("generator/bun/README.md")
