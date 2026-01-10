@@ -14,13 +14,13 @@ export async function select<T>(
     
     if (showHelp) {
       Theme.printTitle("Справка по управлению")
-      console.log(`${Theme.bold}Клавиши:${Theme.reset}`)
-      console.log(`  ${Theme.cyan}↑ / k / л${Theme.reset}    - Вверх`)
-      console.log(`  ${Theme.cyan}↓ / j / о${Theme.reset}    - Вниз`)
-      console.log(`  ${Theme.cyan}Enter${Theme.reset}        - Выбрать`)
-      console.log(`  ${Theme.cyan}Esc${Theme.reset}          - Назад / Выход`)
-      console.log(`  ${Theme.cyan}?${Theme.reset}            - Закрыть справку`)
-      console.log(`\n${Theme.gray}Нажмите любую клавишу для возврата...${Theme.reset}`)
+      console.log(`${Theme.bold}Навигация:${Theme.reset}`)
+      console.log(`  ${Theme.cyan}k / ↑${Theme.reset}        - Вверх`)
+      console.log(`  ${Theme.cyan}j / ↓${Theme.reset}        - Вниз`)
+      console.log(`  ${Theme.cyan}l / Enter${Theme.reset}    - Выбрать`)
+      console.log(`  ${Theme.cyan}h / q / Esc${Theme.reset}  - Назад`)
+      console.log(`\n${Theme.gray}(Работает русская раскладка: л/о/д/р/й)${Theme.reset}`)
+      console.log(`\n${Theme.gray}Нажмите любую клавишу...${Theme.reset}`)
       return
     }
 
@@ -44,30 +44,33 @@ export async function select<T>(
     const handler = (key: string) => {
       if (key === Keys.CTRL_C) process.exit(0)
 
-      // Режим справки
       if (showHelp) {
         showHelp = false
         render()
         return
       }
 
-      // Включение справки
       if (key === "?") {
         showHelp = true
         render()
         return
       }
 
-      if (key === Keys.ESC) {
+      // Exit / Back: Esc, q (й), h (р)
+      const isExit = key === Keys.ESC || key === "q" || key === "й" || key === "h" || key === "р"
+      if (isExit) {
         process.stdin.off("data", handler)
         Theme.clearScreen()
         resolve(null)
         return
       }
 
-      // Навигация (Стрелки + Vim + Русская раскладка)
+      // Up: Arrow, k (л)
       const isUp = key === Keys.UP || key === "k" || key === "л"
+      // Down: Arrow, j (о)
       const isDown = key === Keys.DOWN || key === "j" || key === "о"
+      // Select: Enter, l (д)
+      const isSelect = key === Keys.ENTER || key === "l" || key === "д"
 
       if (isUp) {
         idx = (idx - 1 + items.length) % items.length
@@ -75,7 +78,7 @@ export async function select<T>(
       } else if (isDown) {
         idx = (idx + 1) % items.length
         render()
-      } else if (key === Keys.ENTER) {
+      } else if (isSelect) {
         process.stdin.off("data", handler)
         Theme.clearScreen()
         const selected = items[idx]
