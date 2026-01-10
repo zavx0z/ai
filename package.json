@@ -7,7 +7,7 @@
     "@types/bun": "latest"
   },
   "bin": {
-    "ai": "./bin/ai.ts"
+    "ai": "ui/tui/ai.ts"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
@@ -15,7 +15,8 @@
   "workspaces": [
     "./actions/*",
     "./tasks/*",
-    "./generator/*"
+    "./generator/*",
+    "./ui/*"
   ],
   "scripts": {
     "ai": "bun index",
