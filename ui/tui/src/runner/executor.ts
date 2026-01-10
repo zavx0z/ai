@@ -7,7 +7,7 @@ import { ensureConfigFile } from "../core/config"
 export async function runTool(tool: ToolDefinition, context: TargetContext) {
   await ensureConfigFile(context.path)
 
-  const shellCommand = tool.getCommand()
+  const shellCommand = await tool.getCommand(context)
 
   console.log(`\n${Theme.green}🚀 Запуск: ${tool.name}${Theme.reset}`)
   console.log(`📂 Контекст: ${Theme.bold}${context.path}${Theme.reset}`)
