@@ -30,26 +30,28 @@ async function getExcludes(ctx: TargetContext): Promise<string> {
     ".idea",
     ".idx",
     "bun.lock",
-    "package-lock.json"
+    "package-lock.json",
   ]
 
   try {
     const configPath = join(ctx.path, "zavx0z.yaml")
     const file = Bun.file(configPath)
-    
+
     if (await file.exists()) {
       const text = await file.text()
       const yaml = Bun.YAML.parse(text)
-      
-      if (yaml && Array.isArray(yaml.exclude)) {
-        return yaml.exclude.map((e: string) => `-e "${e}"`).join(" ")
+
+      // Явное приведение типа для TypeScript
+      const config = yaml as { exclude?: string[] }
+      if (config && Array.isArray(config.exclude)) {
+        return config.exclude.map((e: string) => `-e "${e}"`).join(" ")
       }
     }
   } catch (e) {
     // Fallback to default if error
   }
 
-  return defaultExcludes.map(e => `-e "${e}"`).join(" ")
+  return defaultExcludes.map((e) => `-e "${e}"`).join(" ")
 }
 
 /**
@@ -92,7 +94,11 @@ export const TOOLS: ToolDefinition[] = [
       const ctxCmd = await getContextCmd(ctx)
       const cmdLint = `bun run ${PATH_LINT} . -o tmp/lint.md`
       const cmdAppend = `cat tmp/join.md >> tmp/lint.md`
-      return `mkdir -p tmp && ${ctxCmd} && ${cmdLint} && ${cmdAppend}`
+
+      const cmdCopy = `cat tmp/lint.md | pbcopy`
+      const cmdNotify = `echo "✅ Текст скопирован в буфер обмена!"`
+
+      return `mkdir -p tmp && ${ctxCmd} && ${cmdLint} && ${cmdAppend} && ${cmdCopy} && ${cmdNotify}`
     },
   },
   {

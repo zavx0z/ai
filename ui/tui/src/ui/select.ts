@@ -46,7 +46,13 @@ export async function select<T>(
       } else if (key === Keys.ENTER) {
         process.stdin.off("data", handler)
         Theme.clearScreen()
-        resolve(items[idx])
+        // Проверяем существование элемента перед возвратом
+        const selected = items[idx]
+        if (selected) {
+           resolve(selected)
+        } else {
+           resolve(null)
+        }
       }
     }
 
