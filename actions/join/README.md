@@ -5,10 +5,8 @@
 ## Особенности
 
 - 📁 **Структура проекта** — автоматически генерирует дерево файлов
-- 📝 **Нумерация строк** — добавляет нумерацию для удобства обсуждения кода
-- 🎯 **Гибкие настройки** — контроль над нумерацией для разных типов файлов
-- 🔍 **Проверка файлов** — сообщает о недостающих файлах
 - 📊 **Подсветка синтаксиса** — автоматически определяет язык для блоков кода
+- 🔍 **Проверка файлов** — сообщает о недостающих файлах
 - 🚀 **Быстрая работа** — построена на Bun для максимальной производительности
 
 ## Использование
@@ -25,18 +23,6 @@ bun cli.ts files.txt
 bun cli.ts files.txt --output docs/project.md
 ```
 
-### Без нумерации строк
-
-```bash
-bun cli.ts files.txt --no-numbers
-```
-
-### Кастомные исключения нумерации
-
-```bash
-bun cli.ts files.txt --exclude-numbers .txt,.json,.env
-```
-
 ### Полный синтаксис
 
 ```bash
@@ -49,8 +35,6 @@ bun cli.ts <путь-к-файлу> [опции]
 |----------|----------------|----------|
 | `--file <путь>` | `-f` | Путь к файлу со списком файлов |
 | `--output <путь>` | `-o` | Путь к выходному файлу (по умолчанию: `ai-documentation.md`) |
-| `--no-numbers` | | Отключить нумерацию строк |
-| `--exclude-numbers <расширения>` | | Расширения файлов без нумерации (через запятую) |
 | `--help` | `-h` | Показать справку |
 | `--version` | `-v` | Показать версию |
 
@@ -83,9 +67,9 @@ bun cli.ts <путь-к-файлу> [опции]
 └── README.md
 
     ```typescript /path/to/project/src/main.ts
-    1 | export function main() {
-    2 |   console.log("Hello, world!");
-    3 | }
+    export function main() {
+      console.log("Hello, world!");
+    }
     ```
 
 ...и так далее для каждого файла.
@@ -112,9 +96,7 @@ import { createDocumentationFromFileList } from './index'
 
 await createDocumentationFromFileList({
   fileListPath: 'files.txt',
-  outputFile: 'output.md',
-  addLineNumbers: true,
-  excludeLineNumbers: ['.md', '.json']
+  outputFile: 'output.md'
 })
 ```
 
@@ -123,15 +105,5 @@ await createDocumentationFromFileList({
 - **`readFileList(filePath)`** — читает список файлов из текстового файла
 - **`checkFilesExist(files)`** — проверяет существование файлов
 - **`getCommonRoot(files)`** — находит общий корневой путь
-- **`addLineNumbersToContent(content)`** — добавляет нумерацию строк
 - **`createFileTree(files)`** — строит дерево файлов в виде строки
-
-## Настройка по умолчанию
-
-```typescript
-const DEFAULT_CONFIG = {
-  OUTPUT_FILE: "./tmp/output.md",
-  ADD_LINE_NUMBERS: true,
-  EXCLUDE_LINE_NUMBERS: [".md", ".mdx", ".txt", ".json", ".yaml", ".yml", ".env", ".gitignore"],
-}
 ```

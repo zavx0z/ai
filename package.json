@@ -17,8 +17,8 @@
   "scripts": {
     "files": "bun run tasks/tree-explorer/index.ts -e node_modules -e tmp",
     "join": "bun run actions/join/cli.ts --file tmp/files.txt --output tmp/join.md",
-    "start-edit-join": "bun run actions/join/cli.ts --file tmp/files.txt --output tmp/start-edit-join.md",
     "commit-src": "git diff --staged > tmp/diff.patch && bun run actions/commit/cli.ts tmp/diff.patch -c tmp/start-edit-join.md -o tmp/commit.md",
-    "commit": "git diff --staged > tmp/diff.patch && bun run actions/commit/cli.ts tmp/diff.patch -o tmp/commit.md"
+    "commit": "git diff --staged > tmp/diff.patch && bun run actions/commit/cli.ts tmp/diff.patch -o tmp/commit.md",
+    "edit": "bun run actions/edit/cli.ts tmp/edit.json"
   }
 }

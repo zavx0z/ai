@@ -1,9 +1,0 @@
-{
-  "name": "lines",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "start": "bun cli.ts /Users/zavx0z/ai/comment/src/cli.ts ./tmp/lines.ts"
-  }
-}

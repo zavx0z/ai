@@ -1,14 +1,6 @@
 import { extname } from "path"
 import { readFileList, checkFilesExist } from "./src/file"
 import { createFileTree } from "./src/tree"
-import { addLineNumbersToContent } from "./src/format"
-
-// Конфигурация по умолчанию
-const DEFAULT_CONFIG = {
-  ADD_LINE_NUMBERS: true,
-  EXCLUDE_LINE_NUMBERS: []
-  // [".md", ".mdx", ".txt", ".json", ".yaml", ".yml", ".env", ".gitignore"],
-}
 
 // Языки для блоков кода
 const LANGUAGES: Record<string, string> = {
@@ -35,17 +27,10 @@ const LANGUAGES: Record<string, string> = {
  */
 export async function createContextFromFileList(options: {
   fileListPath: string
-  addLineNumbers?: boolean
-  excludeLineNumbers?: string[]
 }): Promise<string> {
   const {
     fileListPath,
-    shouldAddLineNumbers = DEFAULT_CONFIG.ADD_LINE_NUMBERS,
-    excludeLineNumbers = DEFAULT_CONFIG.EXCLUDE_LINE_NUMBERS,
-  } = {
-    ...options,
-    shouldAddLineNumbers: options.addLineNumbers,
-  }
+  } = options
 
   console.log(`📖 Чтение списка файлов из ${fileListPath}...`)
   const files = await readFileList(fileListPath)
@@ -81,14 +66,8 @@ export async function createContextFromFileList(options: {
       const ext = extname(filePath).toLowerCase()
       const language = LANGUAGES[ext] || "text"
 
-      // Решаем, добавлять ли нумерацию
-      let fileContent = content
-      if (shouldAddLineNumbers && !excludeLineNumbers.includes(ext)) {
-        fileContent = addLineNumbersToContent(content)
-      }
-
       sections.push(`\`\`\`${language} ${filePath}`)
-      sections.push(fileContent)
+      sections.push(content)
       sections.push(`\`\`\``)
       sections.push("")
     } catch (error) {
