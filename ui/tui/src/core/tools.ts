@@ -8,7 +8,7 @@ export interface ToolDefinition {
 }
 
 const CMD_FILES = `bun run ${Tool(
-  "tasks/tree-explorer/index.ts"
+  "ui/tree-explorer/index.ts"
 )} -e node_modules -e tmp -e .git -e .vscode -p -o tmp/files.json`
 
 const CMD_JOIN = `bun run ${Tool("actions/join/cli.ts")} --file tmp/files.json --output tmp/join.md`
@@ -71,7 +71,8 @@ export const TOOLS: ToolDefinition[] = [
       const cmdCommitGen = `bun run ${Tool("actions/commit/cli.ts")} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
       const cmdCopy = `cat tmp/commit.md | pbcopy`
       const cmdNotify = `echo "✅ Текст коммита скопирован в буфер обмена!"`
-      return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${CHAIN_GEN_CONTEXT} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
+      return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
+      // return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${CHAIN_GEN_CONTEXT} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
     },
   },
 ]
