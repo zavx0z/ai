@@ -1,6 +1,8 @@
 #!/usr/bin/env bun
 import { scanTargetProject } from "./src/core/scanner"
-import { TASKS } from "./src/core/tools"
+
+import { TASKS } from "./src/core/tasks"
+
 import { runTool } from "./src/runner/executor"
 import { select } from "./src/ui/select"
 import { Theme } from "./src/ui/theme"

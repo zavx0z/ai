@@ -59,8 +59,10 @@ export async function select<T>(
 
       // --- Navigation Logic ---
       
-      // Exit / Back: Esc, q (й), h (р), Backspace
-      const isExit = key === Keys.ESC || key === "q" || key === "й" || key === "h" || key === "р" || key === "\x7f"
+      if (key === "q" || key === "й") process.exit(0)
+
+      // Back: Esc, h (р), Backspace
+      const isExit = key === Keys.ESC || key === "h" || key === "р" || key === "\x7f"
       
       // Up: Arrow Up, k (л)
       const isUp = key === Keys.UP || key === "k" || key === "л"
