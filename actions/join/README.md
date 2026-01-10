@@ -40,18 +40,34 @@ bun cli.ts <путь-к-файлу> [опции]
 
 ## Формат файла со списком
 
-Создайте текстовый файл со списком файлов для обработки:
 
-```txt
-# Пример файла files.txt
-# Пути могут быть абсолютными или относительными
-# Пустые строки и строки, начинающиеся с #, игнорируются
 
-/path/to/project/src/main.ts
-/path/to/project/src/utils.ts
-/path/to/project/package.json
-/path/to/project/README.md
+### 2. JSON формат (новый)
+
+Создайте JSON файл с расширенными возможностями:
+
+```json
+[
+  {
+    "path": "/path/to/project/src/main.ts"
+  },
+  {
+    "path": "/path/to/project/src/utils.ts",
+    "skip": true  // Файл будет пропущен
+  },
+  {
+    "path": "/path/to/project/config.yaml",
+    "content": "apiKey: 123\nenv: prod"  // Прямое указание содержимого
+  },
+  "/path/to/project/README.md"  // Простая строка тоже работает
+]
 ```
+
+**Преимущества JSON формата:**
+
+- Пропуск файлов через флаг `skip`
+- Прямое указание содержимого в поле `content`
+- Более структурированный формат
 
 ## Пример выходного файла
 
@@ -106,4 +122,5 @@ await createDocumentationFromFileList({
 - **`checkFilesExist(files)`** — проверяет существование файлов
 - **`getCommonRoot(files)`** — находит общий корневой путь
 - **`createFileTree(files)`** — строит дерево файлов в виде строки
+
 ```

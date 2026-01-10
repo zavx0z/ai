@@ -1,5 +1,5 @@
-import { extname } from "path"
-import { readFileList, checkFilesExist } from "./src/file"
+import { extname } from "node:path"
+import { readFileList, checkFilesExist, readJsonFileList } from "./src/file"
 import { createFileTree } from "./src/tree"
 
 // Языки для блоков кода
@@ -22,31 +22,55 @@ const LANGUAGES: Record<string, string> = {
   ".tsconfig.json": "json",
 }
 
+interface FileEntry {
+  path: string
+  content?: string
+  skip?: boolean
+}
+
 /**
  * Собирает контекст из списка файлов
  */
-export async function createContextFromFileList(options: {
-  fileListPath: string
-}): Promise<string> {
-  const {
-    fileListPath,
-  } = options
+export async function createContextFromFileList(options: { fileListPath: string }): Promise<string> {
+  const { fileListPath } = options
 
   console.log(`📖 Чтение списка файлов из ${fileListPath}...`)
-  const files = await readFileList(fileListPath)
 
-  console.log(`📁 Найдено ${files.length} файлов в списке`)
+  // Определяем формат файла по расширению
+  const fileListExt = extname(fileListPath).toLowerCase() // Переименовано во избежание конфликта
+  let files: string[] = []
+  let fileEntries: FileEntry[] = []
 
-  // Проверяем существование файлов
-  const { existingFiles, missingFiles } = await checkFilesExist(files)
+  if (fileListExt === ".json") {
+    // JSON формат
+    fileEntries = await readJsonFileList(fileListPath)
+    files = fileEntries.map((entry) => entry.path)
+    console.log(`📁 Найдено ${fileEntries.length} записей в JSON файле`)
+  } else {
+    // Текстовый формат (старый)
+    files = await readFileList(fileListPath)
+    console.log(`📁 Найдено ${files.length} файлов в списке`)
+  }
 
-  if (missingFiles.length > 0) {
-    console.warn(`⚠️  Предупреждение: ${missingFiles.length} файлов не найдено`)
-    if (missingFiles.length <= 10) {
-      missingFiles.forEach((file) => console.warn(`  - ${file}`))
-    } else {
-      console.warn(`  Первые 10 файлов: ${missingFiles.slice(0, 10).join(", ")}...`)
+  // Проверяем существование файлов (только для текстового формата)
+  let existingFiles: string[] = []
+  let missingFiles: string[] = []
+
+  if (fileListExt !== ".json") {
+    const result = await checkFilesExist(files)
+    existingFiles = result.existingFiles
+    missingFiles = result.missingFiles
+
+    if (missingFiles.length > 0) {
+      console.warn(`⚠️  Предупреждение: ${missingFiles.length} файлов не найдено`)
+      if (missingFiles.length <= 10) {
+        missingFiles.forEach((file) => console.warn(`  - ${file}`))
+      } else {
+        console.warn(`  Первые 10 файлов: ${missingFiles.slice(0, 10).join(", ")}...`)
+      }
     }
+  } else {
+    existingFiles = files
   }
 
   const sections: string[] = []
@@ -59,12 +83,28 @@ export async function createContextFromFileList(options: {
   }
 
   // Добавляем содержимое файлов
-  for (const filePath of existingFiles) {
+  for (let i = 0; i < existingFiles.length; i++) {
+    const filePath = existingFiles[i]
+
+    // Для JSON формата проверяем флаг skip
+    if (fileListExt === ".json" && fileEntries[i]?.skip) {
+      console.log(`⏭️  Пропущен файл: ${filePath}`)
+      continue
+    }
+
     try {
-      const file = Bun.file(filePath)
-      const content = await file.text()
-      const ext = extname(filePath).toLowerCase()
-      const language = LANGUAGES[ext] || "text"
+      let content: string
+
+      // Для JSON формата берем контент из записи или читаем файл
+      if (fileListExt === ".json" && fileEntries[i]?.content !== undefined) {
+        content = fileEntries[i].content!
+      } else {
+        const file = Bun.file(filePath)
+        content = await file.text()
+      }
+
+      const fileExt = extname(filePath).toLowerCase() // Переименовано
+      const language = LANGUAGES[fileExt] || "text"
 
       sections.push(`\`\`\`${language} ${filePath}`)
       sections.push(content)

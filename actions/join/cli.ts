@@ -37,6 +37,14 @@ import { createContextFromFileList } from "./index"
   /path/to/project/src/utils.ts
   # Это комментарий
   /path/to/project/README.md
+
+Пример JSON файла files.json:
+  [
+    {"path": "/path/to/project/src/main.ts"},
+    {"path": "/path/to/project/src/utils.ts", "skip": true},
+    {"path": "/path/to/project/config.yaml", "content": "apiKey: 123\nenv: prod"},
+    "/path/to/project/README.md"
+  ]
 `)
 }
 
@@ -97,11 +105,11 @@ export async function runCLI(): Promise<void> {
   }
 
   try {
-  const result = await createContextFromFileList({
-    fileListPath: options.fileListPath,
-  })
+    const result = await createContextFromFileList({
+      fileListPath: options.fileListPath,
+    })
     await Bun.write(options.outputFile || "./tmp/output.md", result)
-    console.log(`✅ Результат успешно записан в файл ${options.outputFile || "./tmp/output.md"}:`)
+    console.log(`✅ Результат успешно записан в файл ${options.outputFile || "./tmp/output.md"}`)
   } catch (error) {
     console.error(`❌ Ошибка: ${error instanceof Error ? error.message : String(error)}`)
     process.exit(1)
