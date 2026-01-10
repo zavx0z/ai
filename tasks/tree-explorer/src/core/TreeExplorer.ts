@@ -380,13 +380,21 @@ export class TreeExplorer {
         return
       }
 
-      // Создаем новый формат JSON: только абсолютные пути
-      // Преобразуем все пути к абсолютным
+      // Создаем новый формат JSON: только абсолютные пути к регулярным файлам (не директории и не симлинки)
       const { resolve } = await import("path")
-      const absoluteFiles = files.map(file => resolve(file))
+
+      // Отфильтруем только регулярные файлы
+      const filePaths = []
+      for (const file of files) {
+        const absolutePath = resolve(file)
+        const entry = await FileSystem.getFileEntry(absolutePath)
+        if (entry && !entry.isDirectory && !entry.isSymlink) {
+          filePaths.push(absolutePath)
+        }
+      }
       
       // Формируем простой массив абсолютных путей без статистики и имен файлов
-      const data = absoluteFiles
+      const data = filePaths
 
       // Определяем путь для сохранения (из конфигурации или генерируем с временной меткой)
       let filePath: string
@@ -422,7 +430,7 @@ export class TreeExplorer {
         (theme["successText"] ? theme["successText"]("✅ Список файлов сохранен!") : "✅ Список файлов сохранен!") + "\n\n" +
         (theme["cyan"] || "") + `Файл: ${filename}` + "\n" +
         (theme["cyan"] || "") + `Путь: ${filePath}` + "\n" +
-        (theme["cyan"] || "") + `Количество: ${data.length} абсолютных путей` + "\n\n" +
+        (theme["cyan"] || "") + `Количество: ${data.length} файлов` + "\n\n" +
         (theme["yellow"] || "") + "Нажмите любую клавишу для продолжения..." + 
         (theme["reset"] || "")
       

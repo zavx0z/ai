@@ -49,10 +49,10 @@ async function selectAllAndSave(path: string, excludePatterns: string[], outputF
           continue
         }
         
-        allFiles.push(entry.path)
-        
         if (entry.isDirectory) {
           await traverse(entry.path)
+        } else if (!entry.isSymlink) {   // регулярный файл
+          allFiles.push(entry.path)
         }
       }
     } catch (error) {
@@ -83,7 +83,7 @@ async function selectAllAndSave(path: string, excludePatterns: string[], outputF
   
   // Сохраняем в файл - простой массив абсолютных путей
   await Bun.write(filePath, JSON.stringify(data, null, 2))
-  console.log(`✅ Сохранено ${data.length} абсолютных путей в: ${filePath}`)
+  console.log(`✅ Сохранено ${data.length} файлов в: ${filePath}`)
   
   return absoluteFiles
 }
