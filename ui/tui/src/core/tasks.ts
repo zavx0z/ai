@@ -74,12 +74,16 @@ export const TASKS: TaskDefinition[] = [
     name: "📦 GIT",
     description: "Git операции + Контекст",
     actions: [
-      { id: "commit", name: "📦 Полный контекст", description: "Добавить все изменения в коммит и подготовить контекст" },
+      { id: "ful-context", name: "📦 Полный контекст", description: "Добавить все изменения в коммит и подготовить контекст" },
+      { id: "commit-buf", name: "Коммит", description: "Сделать коммит с сообщением из буфера" },
     ],
     getCommand: async (ctx, actionId) => {
       const chain = await getContextChain(ctx)
       switch (actionId) {
-        case "commit": {
+        case "commit-buf": {
+          return `git add . && pbpaste | git commit -F - && echo "✅ Закоммичено!"`
+        }
+        case "ful-context": {
           const cmdGitAdd = `git add .`
           const cmdGitDiff = `git diff --staged > tmp/diff.patch`
           const cmdCommitGen = `bun run ${PATH_COMMIT} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
