@@ -18,7 +18,8 @@ export async function select<T>(
       console.log(`  ${Theme.cyan}k / ↑ / л${Theme.reset}      - Вверх`)
       console.log(`  ${Theme.cyan}j / ↓ / о${Theme.reset}      - Вниз`)
       console.log(`  ${Theme.cyan}l / Enter / д${Theme.reset}  - Выбрать`)
-      console.log(`  ${Theme.cyan}h / q / Esc / р${Theme.reset}- Назад`)
+      console.log(`  ${Theme.cyan}h / Esc / р${Theme.reset}    - Назад`)
+      console.log(`  ${Theme.cyan}q / й${Theme.reset}          - Выход`)
       console.log(`\n${Theme.gray}Нажмите любую клавишу для возврата...${Theme.reset}`)
       return
     }
