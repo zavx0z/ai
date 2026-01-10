@@ -1,64 +1,66 @@
 # ⚡ Принципы разработки Bun: Приоритет API
 
-**Главная цель:** Максимальная производительность (native performance) и минимум зависимостей (zero-dependency).
+**Главная цель:** Максимальная производительность (native performance) и **zero-dependency**.
 
 ### 1. Bun Native API — ПРИОРИТЕТ №1
 
-**Всегда начинайте с этого.** Встроенные инструменты Bun быстрее, не требуют зависимостей и оптимизированы на уровне ядра.
+**Всегда** используйте инструменты Bun. Они написаны на Zig/C++ и работают быстрее JS-аналогов.
 
-* **Файловая система:** `Bun.file()`, `Bun.write()` (вместо `fs`).
-* **Сервер:** `Bun.serve()` (вместо `express`/`fastify` для простых задач).
-* **Конфиги и данные:** **Нативный импорт YAML/JSON** (`import config from './conf.yaml'`).
-* **Утилиты:** `Bun.password`, `Bun.hash`, `Bun.gzipSync`.
-* **Shell:** `Bun.$` (вместо `execa`/`shelljs`).
+* **Файловая система:** `Bun.file()`, `Bun.write()`.
+* **Сервер:** `Bun.serve()`.
+* **YAML (Static & Dynamic):**
+  * **Файлы:** `import config from './conf.yaml'` (нативный импорт).
+  * **Строки:** `Bun.YAML.parse(string)` (встроенный парсер).
+* **Пароли:** `Bun.password` (Argon2).
+* **Shell:** `Bun.$`.
 
-### 2. Node.js Native API — ПРИОРИТЕТ №2
+### 2. Web Standard & Node API — ПРИОРИТЕТ №2
 
-Используйте, если функционала нет в `Bun.*`. Bun обеспечивает полную совместимость со стандартами Node.js.
+Используйте, если метода нет в `Bun.*`, но он есть в стандартах.
 
-* **Примеры:** `node:path`, `node:crypto` (для специфичных алгоритмов), `node:stream`.
-* **Правило:** Всегда используйте префикс `node:` (например, `import ... from 'node:path'`).
+* **Криптография (SHA, AES):** `node:crypto` или Web Crypto.
+* **Пути:** `node:path`.
+* **Потоки:** `node:stream` (если не хватает `ReadableStream`).
+* **Правило:** Всегда используйте префикс `node:`.
 
 ### 3. Сторонние пакеты (NPM) — ПРИОРИТЕТ №3
 
-**Last Resort (крайняя мера).** Подключайте только если задача не решается нативными средствами.
+**Last Resort.** Только если нативные решения не поддерживают специфичный кейс.
 
-* **Критерии:** Нужна сложная бизнес-логика (ORM, Zod) или специфичный драйвер, которого нет в стандарте.
-* **Вопрос перед установкой:** "Могу ли я сделать это на `Bun.*` или `node:*` без потери качества?"
-
----
-
-### 🧠 Алгоритм принятия решений
-
-1. **Bun Native?** ➡️ Да: **Используем.**
-    * *Есть ли `Bun.file`, `Bun.serve` или импорт `.yaml`?*
-2. **Node Native?** ➡️ Да: **Используем.**
-    * *Есть ли `node:crypto`, `node:utils`?*
-3. **NPM Package?** ➡️ **Только при необходимости.**
-    * *Нужен ORM, сложная валидация или специфичный SDK.*
+* **Пример:** Специфичный формат даты, которого нет в `Temporal` (когда выйдет) или `Date`, сложная валидация (`zod`).
+* **YAML:** Пакет `js-yaml` нужен **только** если `Bun.YAML` не проходит специфичный тест (он покрывает >90% спецификации).
 
 ---
 
-### 💻 Пример кода (Best Practices)
+### 🧠 Памятка по выбору
+
+| Задача | Решение | Приоритет |
+| :--- | :--- | :--- |
+| **Прочитать config.yaml** | `import cfg from "./c.yaml"` | ✅ **1 (Bun)** |
+| **Распарсить YAML-строку** | `Bun.YAML.parse(str)` | ✅ **1 (Bun)** |
+| **Хешировать пароль** | `Bun.password.hash()` | ✅ **1 (Bun)** |
+| **SHA-256 / AES** | `node:crypto` | ✅ **2 (Node)** |
+| **Валидация данных** | `zod` | ⚠️ **3 (NPM)** |
+
+---
+
+### 💻 Пример кода (Corrected)
 
 ```javascript
 // 1. ✅ Bun Native (Приоритет 1)
-// Чтение файлов, переменных и импорт YAML без лишних парсеров
-import dbConfig from "./database.yaml"; // Нативная поддержка YAML
-import { version } from "./package.json";
-const readme = await Bun.file("README.md").text();
+import config from "./config.yaml"; // Статический импорт
+
+// Динамический парсинг (например, YAML пришел по сети)
+const yamlString = `
+name: Bun
+features: [speed, native]
+`;
+const data = Bun.YAML.parse(yamlString); // Встроенный метод!
 
 // 2. ✅ Node Native (Приоритет 2)
-// Функции, отсутствующие в Bun, берем из стандарта Node
-import { join } from "node:path";
-const fullPath = join(import.meta.dir, "logs");
+import { createHmac } from "node:crypto";
+const sig = createHmac("sha256", "key").update("data").digest("hex");
 
 // 3. ⚠️ NPM Package (Приоритет 3)
-// Используем только для сложной логики (например, валидация)
-import { z } from "zod";
-
-const UserSchema = z.object({
-  username: z.string(),
-  role: z.enum(["admin", "user"])
-});
-```
+// Только если нативный парсер падает на специфичном кейсе (редко)
+// import yaml from "js-yaml"; 
