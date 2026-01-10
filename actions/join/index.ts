@@ -84,10 +84,11 @@ export async function createContextFromFileList(options: { fileListPath: string 
 
   // Добавляем содержимое файлов
   for (let i = 0; i < existingFiles.length; i++) {
-    const filePath = existingFiles[i]
+    const filePath = existingFiles[i]!
+    const fileEntry = fileEntries[i]
 
     // Для JSON формата проверяем флаг skip
-    if (fileListExt === ".json" && fileEntries[i]?.skip) {
+    if (fileListExt === ".json" && fileEntry?.skip) {
       console.log(`⏭️  Пропущен файл: ${filePath}`)
       continue
     }
@@ -96,10 +97,13 @@ export async function createContextFromFileList(options: { fileListPath: string 
       let content: string
 
       // Для JSON формата берем контент из записи или читаем файл
-      if (fileListExt === ".json" && fileEntries[i]?.content !== undefined) {
-        content = fileEntries[i].content!
+      if (fileListExt === ".json" && fileEntry?.content !== undefined) {
+        content = fileEntry.content!
       } else {
         const file = Bun.file(filePath)
+        if (!file) {
+          throw new Error(`Файл не найден: ${filePath}`)
+        }
         content = await file.text()
       }
 
