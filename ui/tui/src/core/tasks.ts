@@ -1,6 +1,7 @@
 import { Tool } from "./constants"
 import { join } from "path"
 import { input } from "../ui/input"
+import { select } from "../ui/select"
 import { Theme } from "../ui/theme"
 import type { TaskDefinition } from "./tools"
 import { getFilesCmd, getContextCmd, getContextChain, PATH_LINT, PATH_EDIT, PATH_COMMIT } from "./tools"
@@ -84,8 +85,12 @@ export const TASKS: TaskDefinition[] = [
         case "commit-buf": {
           const proc = Bun.spawn(["pbpaste"])
           const msg = await new Response(proc.stdout).text()
-          const confirm = await input(`Подтвердите коммит:\n${Theme.gray}${msg.trim()}${Theme.reset}`)
-          if (confirm === null) return "echo '❌ Отменено'"
+          const confirm = await select(
+            `Подтвердите коммит:\n${Theme.gray}${msg.trim()}${Theme.reset}`,
+            ["✅ Отправить", "❌ Отмена"],
+            (o) => o
+          )
+          if (confirm !== "✅ Отправить") return "echo '❌ Отменено'"
           return `git add . && pbpaste | git commit -F - && echo "✅ Закоммичено!"`
         }
         case "ful-context": {
