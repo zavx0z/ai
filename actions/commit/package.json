@@ -5,9 +5,11 @@
   "private": true,
   "scripts": {
     "start": "bun run cli.ts ../../diff.patch -o ./tmp/output.md",
-    "files": "bun run ../../tasks/tree-explorer/index.ts -e node_modules -e tmp",
-    "join": "bun run ../join/cli.ts --file tmp/files.txt --output tmp/join.md",
-    "commit": "git diff --staged > tmp/diff.patch && bun run cli.ts tmp/diff.patch -c tmp/join.md -o tmp/commit.md",
-    "edit": "bun run ../edit/cli.ts tmp/edit.json"
+    "files": "bun run ../../tasks/tree-explorer/index.ts -e node_modules -e tmp -p -o tmp/files.json",
+    "join": "bun run files && bun run ../../actions/join/cli.ts --file tmp/files.json --output tmp/join.md",
+    "lint": "bun run join && bun run ../../actions/lint/cli.ts . -o tmp/lint.md && cat tmp/join.md >> tmp/lint.md",
+    "edit-context": "bun run join && cat tmp/join.md ../../generator/bun/README.md ../../actions/edit/edit.md > tmp/edit.md",
+    "edit": "bun run ../edit/cli.ts tmp/edit.json",
+    "commit": "git add . && git diff --staged > tmp/diff.patch && bun run join && bun run ../../actions/commit/cli.ts tmp/diff.patch -c tmp/join.md -o tmp/commit.md"
   }
 }
