@@ -9,8 +9,10 @@
   },
   "scripts": {
     "start": "bun run index.ts .  -e node_modules -e tmp",
+    "start-no-interactive": "bun run index.ts .  -e node_modules -e tmp -a -x",
     "join": "bun run ../../actions/join/cli.ts --file tmp/files.txt --output tmp/join.md",
-    "commit": "git diff --staged > tmp/diff.patch && bun run ../../actions/commit/cli.ts tmp/diff.patch -c tmp/join.md -o tmp/commit.md",
+    "commit": "git add . && bun run join && git diff --staged > tmp/diff.patch && bun run ../../actions/commit/cli.ts tmp/diff.patch -c tmp/join.md -o tmp/commit.md",
+    "edit-context": "bun run join && cat tmp/join.md ../../generator/bun/README.md ../../actions/edit/edit.md > tmp/edit.md",
     "edit": "bun run ../../actions/edit/cli.ts tmp/edit.json"
   },
   "keywords": [
