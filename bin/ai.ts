@@ -8,40 +8,68 @@ import { fileURLToPath } from "url"
 // ==========================================
 
 const __filename = fileURLToPath(import.meta.url)
-// Корень вашего репозитория AI (на уровень выше bin/)
 const AI_ROOT = resolve(dirname(__filename), "..")
-
-/**
- * Хелпер для получения абсолютного пути к инструменту внутри AI репо
- */
 const Tool = (path: string) => `"${join(AI_ROOT, path)}"`
 
 // ==========================================
-// 🏗 БАЗОВЫЕ КОМАНДЫ (Building Blocks)
+// 🏗 БАЗОВЫЕ КОМАНДЫ
 // ==========================================
-// Эти части используются для сборки сложных команд, как в вашем package.json
 
-// 1. "files" - Сбор списка файлов
-// Исключаем node_modules, tmp, git, vscode. Сохраняем в tmp/files.json
 const CMD_FILES = `bun run ${Tool(
   "tasks/tree-explorer/index.ts"
 )} -e node_modules -e tmp -e .git -e .vscode -p -o tmp/files.json`
 
-// 2. "join" - Создание контекста (требует выполнения CMD_FILES перед этим)
 const CMD_JOIN = `bun run ${Tool("actions/join/cli.ts")} --file tmp/files.json --output tmp/join.md`
 
-// 3. Полная цепочка для генерации контекста (Files -> Join)
 const CHAIN_GEN_CONTEXT = `${CMD_FILES} && ${CMD_JOIN}`
 
 // ==========================================
-// 📋 СПИСОК ИНСТРУМЕНТОВ (МЕНЮ)
+// ⚙️ КОНФИГУРАЦИЯ
+// ==========================================
+
+const CONFIG_FILENAME = "zavx0z.yaml"
+const DEFAULT_CONFIG_CONTENT = `# zavx0z.yaml - Конфигурация проекта/пакета
+# Создано автоматически AI-CLI
+
+# Настройки для Tree Explorer (пример)
+# outputFile: ./tmp/files.json
+exclude:
+  - node_modules
+  - dist
+  - .git
+  - .vscode
+  - zavx0z.yaml
+
+# Настройки для генератора коммитов
+# contextFile: ./tmp/join.md
+`
+
+/**
+ * Проверяет и создает файл конфигурации в целевой директории
+ */
+async function ensureConfigFile(dirPath: string) {
+  const configPath = join(dirPath, CONFIG_FILENAME)
+  const file = Bun.file(configPath)
+  
+  if (!(await file.exists())) {
+    try {
+      await Bun.write(configPath, DEFAULT_CONFIG_CONTENT)
+      // Мы не выводим лог в консоль здесь, чтобы не ломать TUI меню,
+      // так как эта функция вызывается между отрисовками меню.
+    } catch (e) {
+      // Игнорируем ошибки тихо или пишем в stderr
+    }
+  }
+}
+
+// ==========================================
+// 📋 СПИСОК ИНСТРУМЕНТОВ
 // ==========================================
 
 interface ToolDefinition {
   id: string
   name: string
   description: string
-  /** Возвращает строку команды для выполнения в Shell */
   getCommand: () => string
 }
 
@@ -63,10 +91,8 @@ const TOOLS: ToolDefinition[] = [
     name: "🧹 Lint",
     description: "Линтинг + Контекст (join >> lint.md)",
     getCommand: () => {
-      // "lint": "bun run join && bun run actions/lint/cli.ts . -o tmp/lint.md && cat tmp/join.md >> tmp/lint.md"
       const cmdLint = `bun run ${Tool("actions/lint/cli.ts")} . -o tmp/lint.md`
       const cmdAppend = `cat tmp/join.md >> tmp/lint.md`
-
       return `mkdir -p tmp && ${CHAIN_GEN_CONTEXT} && ${cmdLint} && ${cmdAppend}`
     },
   },
@@ -75,15 +101,12 @@ const TOOLS: ToolDefinition[] = [
     name: "🤖 Edit Context",
     description: "Подготовка контекста для редактирования (edit.md)",
     getCommand: () => {
-      // "edit-context": "bun run join && cat tmp/join.md ... > tmp/edit.md"
-
-      // Пути к доп файлам контекста (из вашего скрипта)
       const docBun = Tool("generator/bun/README.md")
       const docEdit = Tool("actions/edit/edit.md")
-
       const cmdConcat = `cat tmp/join.md ${docBun} ${docEdit} > tmp/edit.md`
-
-      return `mkdir -p tmp && ${CHAIN_GEN_CONTEXT} && ${cmdConcat}`
+      const cmdCopy = `cat tmp/edit.md | pbcopy`
+      const cmdNotify = `echo "✅ Текст скопирован в буфер обмена!"`
+      return `mkdir -p tmp && ${CHAIN_GEN_CONTEXT} && ${cmdConcat} && ${cmdCopy} && ${cmdNotify}`
     },
   },
   {
@@ -91,8 +114,9 @@ const TOOLS: ToolDefinition[] = [
     name: "🔨 Apply Edit",
     description: "Применить изменения из tmp/edit.json",
     getCommand: () => {
-      // "edit": "bun run actions/edit/cli.ts tmp/edit.json"
-      return `bun run ${Tool("actions/edit/cli.ts")} tmp/edit.json`
+      const cmdCopy = `cat tmp/edit.json | pbcopy`
+      const cmdNotify = `echo "✅ Текст скопирован в буфер обмена!"`
+      return `bun run ${Tool("actions/edit/cli.ts")} tmp/edit.json && ${cmdCopy} && ${cmdNotify}`
     },
   },
   {
@@ -103,22 +127,15 @@ const TOOLS: ToolDefinition[] = [
       const cmdGitAdd = `git add .`
       const cmdGitDiff = `git diff --staged > tmp/diff.patch`
       const cmdCommitGen = `bun run ${Tool("actions/commit/cli.ts")} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
-
-      // 👇 Добавляем команду копирования
-      // 1. cat tmp/commit.md — читает файл
-      // 2. | pbcopy — передает прочитанное в буфер обмена macOS
       const cmdCopy = `cat tmp/commit.md | pbcopy`
-
-      // 👇 Добавляем echo для уведомления пользователя
       const cmdNotify = `echo "✅ Текст коммита скопирован в буфер обмена!"`
-
       return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${CHAIN_GEN_CONTEXT} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
     },
   },
 ]
 
 // ==========================================
-// 🎯 Сканирование Проекта (как раньше)
+// 🎯 Сканирование
 // ==========================================
 
 interface TargetContext {
@@ -131,34 +148,37 @@ async function scanTargetProject(): Promise<TargetContext[]> {
   const currentDir = process.cwd()
   const contexts: TargetContext[] = []
 
-  // Root
   let rootName = "Root"
   try {
-    const pkg = await Bun.file(join(currentDir, "package.json")).json()
-    rootName = pkg.name || "Root"
-    contexts.push({ name: `${rootName} (Root)`, path: currentDir, type: "root" })
+    const pkgPath = join(currentDir, "package.json")
+    if (await Bun.file(pkgPath).exists()) {
+      const pkg = await Bun.file(pkgPath).json()
+      rootName = pkg.name || "Root"
+      contexts.push({ name: `${rootName} (Root)`, path: currentDir, type: "root" })
 
-    // Workspaces
-    const workspaces = pkg.workspaces
-    if (workspaces && Array.isArray(workspaces)) {
-      for (const pattern of workspaces) {
-        const cleanPattern = pattern.replace(/\/\*$/, "")
-        const workspaceRoot = join(currentDir, cleanPattern)
+      const workspaces = pkg.workspaces
+      if (workspaces && Array.isArray(workspaces)) {
+        for (const pattern of workspaces) {
+          const cleanPattern = pattern.replace(/\/\*$/, "")
+          const workspaceRoot = join(currentDir, cleanPattern)
 
-        if (!(await Bun.file(workspaceRoot).exists()) && (await readdir(workspaceRoot).catch(() => [])).length > 0) {
-          const dirs = await readdir(workspaceRoot, { withFileTypes: true })
-          for (const dir of dirs) {
-            if (dir.isDirectory()) {
-              const pkgPath = join(workspaceRoot, dir.name)
-              const pkgJsonPath = join(pkgPath, "package.json")
-              if (await Bun.file(pkgJsonPath).exists()) {
-                const subPkg = await Bun.file(pkgJsonPath).json()
-                contexts.push({ name: subPkg.name || dir.name, path: pkgPath, type: "package" })
+          if (await Bun.file(workspaceRoot).exists() || (await readdir(workspaceRoot).catch(() => [])).length > 0) {
+            const dirs = await readdir(workspaceRoot, { withFileTypes: true })
+            for (const dir of dirs) {
+              if (dir.isDirectory()) {
+                const pkgPath = join(workspaceRoot, dir.name)
+                const pkgJsonPath = join(pkgPath, "package.json")
+                if (await Bun.file(pkgJsonPath).exists()) {
+                  const subPkg = await Bun.file(pkgJsonPath).json()
+                  contexts.push({ name: subPkg.name || dir.name, path: pkgPath, type: "package" })
+                }
               }
             }
           }
         }
       }
+    } else {
+       contexts.push({ name: "Current Directory", path: currentDir, type: "root" })
     }
   } catch (e) {
     contexts.push({ name: "Current Directory", path: currentDir, type: "root" })
@@ -234,24 +254,19 @@ async function menu<T>(title: string, items: T[], fmt: (i: T) => string): Promis
 // ==========================================
 
 async function runTool(tool: ToolDefinition, context: TargetContext) {
-  // Получаем полную строку команды shell
   const shellCommand = tool.getCommand()
 
   console.log(`\n${C.green}🚀 Запуск: ${tool.name}${C.reset}`)
   console.log(`📂 Контекст: ${C.bold}${context.path}${C.reset}`)
-
+  
   if (process.env.VERBOSE) {
     console.log(`🛠  Команда: ${C.gray}${shellCommand}${C.reset}\n`)
   }
 
-  // Запускаем через системный shell (sh), чтобы работали &&, >, >>, |
   const proc = Bun.spawn(["sh", "-c", shellCommand], {
-    cwd: context.path, // Выполняем ВНУТРИ целевой папки
+    cwd: context.path,
     stdio: ["inherit", "inherit", "inherit"],
-    env: {
-      ...process.env,
-      AI_ROOT: AI_ROOT, // Передаем путь к корню на всякий случай
-    },
+    env: { ...process.env, AI_ROOT: AI_ROOT },
   })
 
   await proc.exited
@@ -273,17 +288,25 @@ async function runTool(tool: ToolDefinition, context: TargetContext) {
 
 async function main() {
   while (true) {
+    // 1. Выбор контекста
     const contexts = await scanTargetProject()
     const context = await menu("Где запускаем?", contexts, (c) => (c.type === "root" ? `📁 ${c.name}` : `📦 ${c.name}`))
+    
     if (!context) process.exit(0)
 
+    // 2. Создание конфига СРАЗУ ПОСЛЕ ВЫБОРА КОНТЕКСТА
+    await ensureConfigFile(context.path)
+
+    // 3. Выбор инструмента
     const tool = await menu(
       `Контекст: ${context.name}`,
       TOOLS,
       (t) => `${t.name} ${C.gray}| ${t.description}${C.reset}`
     )
+    
     if (!tool) continue
 
+    // 4. Запуск
     await runTool(tool, context)
   }
 }
