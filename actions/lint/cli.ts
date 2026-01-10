@@ -1,4 +1,4 @@
-import rules from "./rules.md" with {type: "text"}
+import rules from "../edit/edit.md" with {type: "text"}
 
 import fs from "fs"
 import path from "path"
