@@ -9,6 +9,7 @@ async function main() {
   while (true) {
     // 1. Выбор контекста (Проект или Пакет)
     const contexts = await scanTargetProject()
+    
     const context = await select(
       "Где запускаем?", 
       contexts, 
@@ -19,13 +20,19 @@ async function main() {
 
     // 2. Цикл работы внутри выбранного контекста
     while (true) {
+      // Вычисляем отступ для выравнивания
+      const maxNameLen = Math.max(...TOOLS.map((t) => t.name.length))
+
       const tool = await select(
         `Контекст: ${context.name}`,
         TOOLS,
-        (t) => `${t.name} ${Theme.gray}| ${t.description}${Theme.reset}`
+        (t) => {
+          const padding = " ".repeat(maxNameLen - t.name.length)
+          return `${t.name}${padding}  ${Theme.gray}| ${t.description}${Theme.reset}`
+        }
       )
       
-      // Если нажали Esc (tool == null), выходим из этого цикла назад к выбору контекста
+      // Если нажали Esc/Back (tool == null), выходим из этого цикла назад к выбору контекста
       if (!tool) break
 
       await runTool(tool, context)
