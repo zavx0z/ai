@@ -4,7 +4,7 @@ import { input } from "../ui/input"
 import { select } from "../ui/select"
 import { Theme } from "../ui/theme"
 import type { TaskDefinition } from "./tools"
-import { getFilesCmd, getContextCmd, getContextChain, PATH_LINT, PATH_EDIT, PATH_COMMIT } from "./tools"
+import { getFilesCmd, getContextCmd, getContextChain, PATH_LINT, PATH_EDIT, PATH_COMMIT, PATH_TREE, getExcludes, getJoinCmd } from "./tools"
 
 export const TASKS: TaskDefinition[] = [
   {
@@ -77,12 +77,20 @@ export const TASKS: TaskDefinition[] = [
     description: "Git операции + Контекст",
     actions: [
       { id: "ful-context", name: "📦 Полный контекст", description: "Добавить все изменения в коммит и подготовить контекст" },
+      { id: "select-context", name: "📂 Выбрать файлы", description: "Интерактивный выбор файлов для контекста" },
       { id: "commit-buf", name: "📝 Коммит", description: "Сделать коммит с сообщением из буфера" },
       { id: "push", name: "🚀 Push", description: "git push" },
     ],
     getCommand: async (ctx, actionId) => {
       const chain = await getContextChain(ctx)
       switch (actionId) {
+        case "select-context": {
+          const excludes = await getExcludes(ctx)
+          const cmdTree = `bun run ${PATH_TREE} ${excludes} -o tmp/files.json`
+          const cmdJoin = getJoinCmd()
+          const cmdNotify = `echo "✅ Контекст обновлен!"`
+          return `mkdir -p tmp && ${cmdTree} && ${cmdJoin} && ${cmdNotify}`
+        }
         case "push": {
           return `git push && echo "✅ Отправлено!"`
         }
