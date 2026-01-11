@@ -4,7 +4,18 @@ import { input } from "../ui/input"
 import { select } from "../ui/select"
 import { Theme } from "../ui/theme"
 import type { TaskDefinition } from "./tools"
-import { getFilesCmd, getContextCmd, getContextChain, PATH_LINT, PATH_EDIT, PATH_COMMIT, PATH_TREE, getExcludes, getJoinCmd } from "./tools"
+import {
+  getFilesCmd,
+  getContextCmd,
+  getContextChain,
+  PATH_LINT,
+  PATH_EDIT,
+  PATH_COMMIT,
+  PATH_TREE,
+  getExcludes,
+  getJoinCmd,
+  PATH_JOIN,
+} from "./tools"
 
 export const TASKS: TaskDefinition[] = [
   {
@@ -18,11 +29,11 @@ export const TASKS: TaskDefinition[] = [
     getCommand: async (ctx, actionId) => {
       const taskDescription = await input("📝 Опишите задачу:")
       if (taskDescription === null) return "echo '❌ Отменено'"
-      
+
       const tmpDir = join(ctx.path, "tmp")
       Bun.spawnSync(["mkdir", "-p", tmpDir])
       await Bun.write(join(tmpDir, "task.md"), `# Задача\n\n${taskDescription}\n\n`)
-      
+
       const docBun = Tool("generator/bun/README.md")
       const docEdit = Tool("actions/edit/edit.md")
       const cmdConcat = `cat tmp/task.md tmp/join.md ${docBun} ${docEdit} > tmp/edit.md`
@@ -33,7 +44,7 @@ export const TASKS: TaskDefinition[] = [
         case "select": {
           const excludes = await getExcludes(ctx)
           const cmdTree = `bun run ${PATH_TREE} ${excludes} -o tmp/files.json`
-          const cmdJoin = getJoinCmd()
+          const cmdJoin = `bun run ${PATH_JOIN} --file tmp/files.json --output tmp/join.md`
           const chain = `mkdir -p tmp && ${cmdTree} && ${cmdJoin}`
           return `${chain} && ${cmdConcat} && ${cmdCopy} && ${cmdNotify}`
         }
@@ -55,7 +66,7 @@ export const TASKS: TaskDefinition[] = [
     getCommand: async (ctx, actionId) => {
       const runEdit = `bun run ${PATH_EDIT} tmp/edit.json`
       const cmdNotify = `echo "✅ Изменения применены!"`
-      
+
       switch (actionId) {
         case "clipboard":
           return `pbpaste > tmp/edit.json && ${runEdit} && ${cmdNotify}`
@@ -94,7 +105,11 @@ export const TASKS: TaskDefinition[] = [
     name: "📦 GIT",
     description: "Git операции + Контекст",
     actions: [
-      { id: "ful-context", name: "📦 Полный контекст", description: "Добавить все изменения в коммит и подготовить контекст" },
+      {
+        id: "ful-context",
+        name: "📦 Полный контекст",
+        description: "Добавить все изменения в коммит и подготовить контекст",
+      },
       { id: "select-context", name: "📂 Выбрать файлы", description: "Интерактивный выбор файлов для контекста" },
       { id: "commit-buf", name: "📝 Коммит", description: "Сделать коммит с сообщением из буфера" },
       { id: "push", name: "🚀 Push", description: "git push" },
@@ -103,11 +118,18 @@ export const TASKS: TaskDefinition[] = [
       const chain = await getContextChain(ctx)
       switch (actionId) {
         case "select-context": {
+          const cmdGitAdd = `git add .`
+          const cmdGitDiff = `git diff --staged > tmp/diff.patch`
+
           const excludes = await getExcludes(ctx)
           const cmdTree = `bun run ${PATH_TREE} ${excludes} -o tmp/files.json`
           const cmdJoin = getJoinCmd()
+
+          const cmdCommitGen = `bun run ${PATH_COMMIT} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
+          const cmdCopy = `cat tmp/commit.md | pbcopy`
+
           const cmdNotify = `echo "✅ Контекст обновлен!"`
-          return `mkdir -p tmp && ${cmdTree} && ${cmdJoin} && ${cmdNotify}`
+          return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${cmdTree} && ${cmdJoin} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
         }
         case "push": {
           return `git push && echo "✅ Отправлено!"`
