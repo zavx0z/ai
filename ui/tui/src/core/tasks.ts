@@ -1,4 +1,6 @@
 import { $ } from "bun"
+import { resolve } from "node:path"
+
 import { Tool } from "./constants"
 import { input } from "../ui/input"
 import { select } from "../ui/select"
@@ -108,10 +110,11 @@ export const TASKS: TaskDefinition[] = [
       end tell'`
 
       console.log("⏳ Ожидание ответа в буфере обмена... (Нажмите Enter для отмены)")
+
       const initialClipboard = await $`pbpaste`.text()
 
-      const reader = Bun.stdin.stream().getReader()
       let stopWaiting = false
+      let cleanupInput: (() => void) | null = null
 
       const checkClipboardLoop = async () => {
         while (!stopWaiting) {
@@ -122,15 +125,18 @@ export const TASKS: TaskDefinition[] = [
         return false
       }
 
-      const waitInput = async () => {
-        await reader.read()
-        return false
-      }
+      const waitInput = new Promise<boolean>((resolve) => {
+        const handler = () => resolve(false)
+        process.stdin.once("data", handler)
+        cleanupInput = () => process.stdin.off("data", handler)
+        process.stdin.resume()
+      })
 
-      const success = await Promise.race([checkClipboardLoop(), waitInput()])
-      
+      const success = await Promise.race([checkClipboardLoop(), waitInput])
+
       stopWaiting = true
-      reader.cancel()
+      if (cleanupInput) cleanupInput()
+      process.stdin.pause()
 
       if (success) {
         console.log("✅ Буфер обновлен! Возвращаюсь...")
@@ -138,8 +144,8 @@ export const TASKS: TaskDefinition[] = [
         console.log("⚠️ Ожидание отменено.")
       }
 
-      // Возвращаем фокус
-      await $`osascript -e 'tell application id "${currentApp}" to activate'`
+      // Возвращаем фокус через System Events (более надежно)
+      await $`osascript -e 'tell application "System Events" to set frontmost of (first process whose bundle identifier is "${currentApp}") to true'`
     },
   },
   {
@@ -231,10 +237,12 @@ export const TASKS: TaskDefinition[] = [
           await $`mkdir -p ${TMP_DIR}` // Создание временной директории
           await $`git add .` // Добавление изменений в индекс
           await $`git diff --staged > ${DIFF_PATCH}` // Создание патча изменений
+          const gitRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
           const changedFiles = (await $`git diff --name-only --cached`.text())
             .trim()
             .split("\n")
             .filter((l) => l.length > 0)
+            .map((f) => resolve(gitRoot, f))
           await Bun.write(FILES_JSON, JSON.stringify(changedFiles))
           await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}` // Объединение выбранных файлов
           await $`bun run ${{ raw: PATH_COMMIT }} ${DIFF_PATCH} -c ${JOIN_MD} -o ${COMMIT_MD}` // Генерация сообщения коммита с учетом контекста
