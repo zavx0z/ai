@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import { scanTargetProject, type TargetContext } from "./src/core/scanner"
-import { TASKS } from "./src/core/tasks"
+import { TASKS } from "./tasks"
 import { runTool } from "./src/runner/executor"
 import { select } from "./src/ui/select"
 import { Theme } from "./src/ui/theme"
@@ -8,19 +8,15 @@ import { Theme } from "./src/ui/theme"
 async function main() {
   while (true) {
     const contexts = await scanTargetProject()
-    
+
     let context: TargetContext | null = null
-    
+
     if (contexts.length === 1) {
       // Если только один пакет/директория, используем его автоматически
       context = contexts[0] ?? null
     } else {
       // Если несколько вариантов, показываем выбор
-      context = await select(
-        "Где запускаем?", 
-        contexts, 
-        (c) => (c.type === "root" ? `📁 ${c.name}` : `📦 ${c.name}`)
-      )
+      context = await select("Где запускаем?", contexts, (c) => (c.type === "root" ? `📁 ${c.name}` : `📦 ${c.name}`))
     }
 
     if (!context) process.exit(0)
@@ -36,13 +32,13 @@ async function main() {
         },
         lastTaskIndex
       )
-      
+
       if (!task) break
-      
+
       // Сохраняем индекс выбранной задачи
       lastTaskIndex = TASKS.indexOf(task)
       if (lastTaskIndex === -1) lastTaskIndex = 0
-      
+
       await runTool(task, context, lastTaskIndex)
     }
   }
