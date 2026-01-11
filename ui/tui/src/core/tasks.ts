@@ -107,18 +107,36 @@ export const TASKS: TaskDefinition[] = [
         activate
       end tell'`
 
-      console.log("⏳ Ожидание ответа в буфере обмена...")
-
+      console.log("⏳ Ожидание ответа в буфере обмена... (Нажмите Enter для отмены)")
       const initialClipboard = await $`pbpaste`.text()
 
-      // Ожидаем изменения буфера
-      while (true) {
-        await Bun.sleep(1000)
-        const currentClipboard = await $`pbpaste`.text()
-        if (currentClipboard !== initialClipboard) break
+      const reader = Bun.stdin.stream().getReader()
+      let stopWaiting = false
+
+      const checkClipboardLoop = async () => {
+        while (!stopWaiting) {
+          const current = await $`pbpaste`.text()
+          if (current !== initialClipboard) return true
+          await Bun.sleep(500)
+        }
+        return false
       }
 
-      console.log("✅ Буфер обновлен! Возвращаюсь...")
+      const waitInput = async () => {
+        await reader.read()
+        return false
+      }
+
+      const success = await Promise.race([checkClipboardLoop(), waitInput()])
+      
+      stopWaiting = true
+      reader.cancel()
+
+      if (success) {
+        console.log("✅ Буфер обновлен! Возвращаюсь...")
+      } else {
+        console.log("⚠️ Ожидание отменено.")
+      }
 
       // Возвращаем фокус
       await $`osascript -e 'tell application id "${currentApp}" to activate'`
