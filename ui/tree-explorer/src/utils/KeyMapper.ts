@@ -1,50 +1,38 @@
+import { KeyMapper as BaseKeyMapper, KeyCode } from "tui-base"
 import type { KeyMapping } from "../types/types"
 
 export class KeyMapper {
-  // Standard Layout Mapping (QWERTY <-> ЙЦУКЕН)
-  private static readonly RUSSIAN_TO_ENGLISH: KeyMapping = {
-    // Row 1
-    "й": "q", "ц": "w", "у": "e", "к": "r", "е": "t", "н": "y", "г": "u", "ш": "i", "щ": "o", "з": "p", "х": "[", "ъ": "]",
-    // Row 2
-    "ф": "a", "ы": "s", "в": "d", "а": "f", "п": "g", "р": "h", "о": "j", "л": "k", "д": "l", "ж": ";", "э": "'",
-    // Row 3
-    "я": "z", "ч": "x", "с": "c", "м": "v", "и": "b", "т": "n", "ь": "m", "б": ",", "ю": ".", ".": "/"
-  }
-
+  // Using Base KeyMapper for conversion
   static convertRussianKey(key: string): string {
-    if (key.length === 1) {
-      const lowerKey = key.toLowerCase()
-      return this.RUSSIAN_TO_ENGLISH[lowerKey] || lowerKey
-    }
-    return key
+    return BaseKeyMapper.normalize(key)
   }
 
   static isSpecialKey(key: string): boolean {
     const specialKeys = [
-      "\u001b[A", // Up Arrow
-      "\u001b[B", // Down Arrow
-      "\u001b[C", // Right Arrow
-      "\u001b[D", // Left Arrow
-      "\u0003", // Ctrl+C
-      "\r", // Enter
-      " ", // Space
-      "\x7f", // Backspace
-      "\u001b", // Escape
+      KeyCode.UP,
+      KeyCode.DOWN,
+      KeyCode.RIGHT,
+      KeyCode.LEFT,
+      KeyCode.CTRL_C,
+      KeyCode.ENTER,
+      KeyCode.SPACE,
+      KeyCode.BACKSPACE,
+      KeyCode.ESC,
     ]
-    return specialKeys.includes(key)
+    return specialKeys.includes(key as any)
   }
 
   static getKeyDescription(key: string): string {
-    const descriptions: KeyMapping = {
-      "\u001b[A": "Up",
-      "\u001b[B": "Down",
-      "\u001b[C": "Right",
-      "\u001b[D": "Left",
-      "\u0003": "Ctrl+C",
-      "\r": "Enter",
-      " ": "Space",
-      "\x7f": "Backspace",
-      "\u001b": "Escape",
+    const descriptions: Record<string, string> = {
+      [KeyCode.UP]: "Up",
+      [KeyCode.DOWN]: "Down",
+      [KeyCode.RIGHT]: "Right",
+      [KeyCode.LEFT]: "Left",
+      [KeyCode.CTRL_C]: "Ctrl+C",
+      [KeyCode.ENTER]: "Enter",
+      [KeyCode.SPACE]: "Space",
+      [KeyCode.BACKSPACE]: "Backspace",
+      [KeyCode.ESC]: "Escape",
     }
     return descriptions[key] || key
   }

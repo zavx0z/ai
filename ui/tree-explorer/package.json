@@ -7,6 +7,9 @@
   "bin": {
     "tree-explorer": "./index.ts"
   },
+  "dependencies": {
+    "tui-base": "workspace:*"
+  },
   "scripts": {
     "start": "bun run index.ts .  -e node_modules -e tmp",
     "files": "bun run index.ts -e node_modules -e tmp -p -o tmp/files.json",

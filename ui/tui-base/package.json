@@ -1,0 +1,10 @@
+{
+  "name": "tui-base",
+  "version": "1.0.0",
+  "description": "Shared TUI core functionality for Bun",
+  "main": "index.ts",
+  "type": "module",
+  "peerDependencies": {
+    "bun-types": "latest"
+  }
+}

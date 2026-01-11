@@ -1,21 +1,23 @@
+import { Ansi } from "tui-base"
+
 export const Theme = {
-  reset: "\x1b[0m",
-  cyan: "\x1b[36m",
-  green: "\x1b[32m",
-  yellow: "\x1b[33m",
-  red: "\x1b[31m",
-  gray: "\x1b[90m",
-  bold: "\x1b[1m",
+  reset: Ansi.RESET,
+  cyan: Ansi.CYAN,
+  green: Ansi.GREEN,
+  yellow: Ansi.YELLOW,
+  red: Ansi.RED,
+  gray: Ansi.GRAY,
+  bold: Ansi.BOLD,
   
-  selected: "\x1b[36m❯ \x1b[1m",
+  selected: Ansi.CYAN + "❯ " + Ansi.BOLD,
   unselected: "  ",
   
   printTitle: (title: string) => {
-    console.log(`\n${Theme.bold}🤖 AI Tool Wrapper${Theme.reset}`)
-    console.log(`${Theme.yellow}${title}${Theme.reset}\n`)
+    console.log(`\n${Ansi.BOLD}🤖 AI Tool Wrapper${Ansi.RESET}`)
+    console.log(`${Ansi.YELLOW}${title}${Ansi.RESET}\n`)
   },
   
   clearScreen: () => {
-    process.stdout.write("\x1b[2J\x1b[H")
+    Ansi.clear()
   }
 }

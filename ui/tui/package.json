@@ -2,5 +2,8 @@
   "name": "tui",
   "version": "1.0.0",
   "type": "module",
-  "main": "cli.ts"
+  "main": "cli.ts",
+  "dependencies": {
+    "tui-base": "workspace:*"
+  }
 }

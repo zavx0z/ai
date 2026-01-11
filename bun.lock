@@ -17,11 +17,11 @@
     "actions/commit": {
       "name": "commit",
     },
+    "actions/edit": {
+      "name": "edit",
+    },
     "actions/join": {
       "name": "join",
-    },
-    "actions/lines": {
-      "name": "lines",
     },
     "actions/lint": {
       "name": "fix",
@@ -32,20 +32,28 @@
     "generator/cli": {
       "name": "cli",
     },
-    "generator/project": {
-      "name": "project",
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
-    },
-    "tasks/tree-explorer": {
+    "ui/tree-explorer": {
       "name": "tree-explorer",
       "version": "1.0.0",
       "bin": {
         "tree-explorer": "./index.ts",
+      },
+      "dependencies": {
+        "tui-base": "file:../tui-base",
+      },
+    },
+    "ui/tui": {
+      "name": "tui",
+      "version": "1.0.0",
+      "dependencies": {
+        "tui-base": "workspace:*",
+      },
+    },
+    "ui/tui-base": {
+      "name": "tui-base",
+      "version": "1.0.0",
+      "peerDependencies": {
+        "bun-types": "latest",
       },
     },
   },
@@ -64,15 +72,17 @@
 
     "commit": ["commit@workspace:actions/commit"],
 
+    "edit": ["edit@workspace:actions/edit"],
+
     "fix": ["fix@workspace:actions/lint"],
 
     "join": ["join@workspace:actions/join"],
 
-    "lines": ["lines@workspace:actions/lines"],
+    "tree-explorer": ["tree-explorer@workspace:ui/tree-explorer"],
 
-    "project": ["project@workspace:generator/project"],
+    "tui": ["tui@workspace:ui/tui"],
 
-    "tree-explorer": ["tree-explorer@workspace:tasks/tree-explorer"],
+    "tui-base": ["tui-base@workspace:ui/tui-base"],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 

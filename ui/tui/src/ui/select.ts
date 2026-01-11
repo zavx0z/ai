@@ -1,5 +1,6 @@
 import { Theme } from "./theme"
 import { Keys, withRawMode } from "./keyboard"
+import { KeyMapper } from "tui-base"
 
 export async function select<T>(
   title: string, 
@@ -63,16 +64,16 @@ export async function select<T>(
       if (key === "q" || key === "й") process.exit(0)
 
       // Back: Esc, h (р), Backspace
-      const isExit = key === Keys.ESC || key === "h" || key === "р" || key === "\x7f"
+      const isExit = KeyMapper.isBack(key) || key === "\x7f"
       
       // Up: Arrow Up, k (л)
-      const isUp = key === Keys.UP || key === "k" || key === "л"
+      const isUp = KeyMapper.isUp(key)
       
       // Down: Arrow Down, j (о)
-      const isDown = key === Keys.DOWN || key === "j" || key === "о"
+      const isDown = KeyMapper.isDown(key)
       
       // Select: Enter, l (д), Space
-      const isSelect = key === Keys.ENTER || key === "l" || key === "д" || key === " "
+      const isSelect = KeyMapper.isEnter(key) || key === " "
 
       if (isExit) {
         process.stdin.off("data", handler)

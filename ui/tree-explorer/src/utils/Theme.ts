@@ -1,17 +1,18 @@
 import type { ColorTheme } from "../types/types"
+import { Ansi } from "tui-base"
 
-export class Theme implements ColorTheme {
-  reset = "\x1b[0m"
-  bold = "\x1b[1m"
-  cyan = "\x1b[36m"
-  green = "\x1b[32m"
-  yellow = "\x1b[33m"
-  blue = "\x1b[34m"
-  magenta = "\x1b[35m"
-  red = "\x1b[31m"
-  gray = "\x1b[90m"
-  bgSelected = "\x1b[48;5;238m"
-  bgCursor = "\x1b[48;5;240m"
+export class Theme extends Ansi implements ColorTheme {
+  reset = Ansi.RESET
+  bold = Ansi.BOLD
+  cyan = Ansi.CYAN
+  green = Ansi.GREEN
+  yellow = Ansi.YELLOW
+  blue = Ansi.BLUE
+  magenta = Ansi.MAGENTA
+  red = Ansi.RED
+  gray = Ansi.GRAY
+  bgSelected = Ansi.BG_SELECTED
+  bgCursor = Ansi.BG_CURSOR
 
   // Дополнительные стили
   get header() {
