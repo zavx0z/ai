@@ -194,7 +194,7 @@ export class TreeExplorer {
   }
   private async selectAllRecursively(): Promise<void> {
     try {
-      // Сначала выбираем всё что видно на экране
+      // Сначала выбираем всё что видно на экране (уже фильтруется через selectAll)
       this.selection.selectAll(this.entries)
 
       // Затем рекурсивно выбираем содержимое всех директорий

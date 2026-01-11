@@ -37,11 +37,14 @@ export class SelectionManager {
       // Добавляем саму директорию
       this.select(dirPath)
 
-      // Рекурсивно добавляем все файлы внутри
+      // Рекурсивно добавляем все файлы внутри, но не исключенные
       const allFiles = await FileSystem.getAllFilesInDirectory(dirPath)
 
       for (const file of allFiles) {
-        if (!this.excludePatterns.isExcluded(file)) {
+        // Получаем информацию о файле, чтобы проверить, не является ли он директорией или симлинком
+        const entry = await FileSystem.getFileEntry(file)
+        // Добавляем только если файл существует, не является директорией/симлинком и не исключен
+        if (entry && !entry.isDirectory && !entry.isSymlink && !this.excludePatterns.isExcluded(file)) {
           this.select(file)
         }
       }
