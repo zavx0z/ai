@@ -5,7 +5,8 @@
   "main": "cli.ts",
   "dependencies": {
     "tui-base": "workspace:*",
-    "ai-window": "workspace:*"
+    "ai-window": "workspace:*",
+    "ai-keyboard": "workspace:*"
   },
   "scripts": {
     "edit": "bun run ../../actions/edit/cli.ts tmp/edit.json"
