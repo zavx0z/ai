@@ -1,4 +1,5 @@
 import { $ } from "bun"
+import * as Window from "ai-window"
 import { resolve } from "node:path"
 import { select } from "../src/ui/select"
 import { Theme } from "../src/ui/theme"
@@ -71,6 +72,41 @@ export const task: TaskDefinition = {
         await $`bun run ${{ raw: PATH_COMMIT }} ${DIFF_PATCH} -c ${JOIN_MD} -o ${COMMIT_MD}`
         await $`cat ${COMMIT_MD} | pbcopy`
         console.log("✅ Контекст изменений обновлен!")
+
+        const currentApp = await Window.getCurrentApp()
+        const windows = await Window.getChromeWindows()
+
+        if (windows.length === 0) {
+          console.log("❌ Chrome не запущен или нет открытых окон")
+          return
+        }
+
+        let targetId = windows[0]!.id!
+        if (windows.length > 1) {
+          const selectedId = await select(
+            "🌍 Выберите окно Chrome:",
+            windows.map((w) => w.id!),
+            (id) => {
+              const window = windows.find((w) => w.id === id);
+              return window?.title ?? "Без названия";
+            }
+          )
+          if (selectedId) targetId = selectedId
+        }
+
+        console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
+        await Window.focusChromeWindow(targetId)
+
+        const initialClipboard = await $`pbpaste`.text()
+        const success = await Window.waitForClipboardChange(initialClipboard)
+
+        if (success) {
+          console.log("✅ Буфер обновлен! Возвращаюсь...")
+          await Window.restoreApp(currentApp)
+        } else {
+          console.log("⚠️ Ожидание отменено.")
+          await Window.restoreApp(currentApp)
+        }
         return
 
       case "select-context":
