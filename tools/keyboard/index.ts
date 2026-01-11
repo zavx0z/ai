@@ -28,13 +28,4 @@ export async function pressSpecialKey(key: 'return' | 'escape' | 'tab' | 'delete
     end tell'`
 }
 
-/**
- * Эмулирует последовательность: Cmd+J (открыть), Cmd+V (вставить), Enter (отправить)
- */
-export async function pasteAndSend() {
-  await pressKeyWithModifier('command', 'j')
-  await Bun.sleep(200) // Задержка 200ms на уровне Bun
-  await pressKeyWithModifier('command', 'v')
-  await Bun.sleep(200) // Задержка 200ms на уровне Bun
-  await pressSpecialKey('return')
-}
+

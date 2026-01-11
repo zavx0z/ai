@@ -1,0 +1,12 @@
+{
+  "name": "ai-web-deepseek",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.ts",
+  "dependencies": {
+    "ai-keyboard": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

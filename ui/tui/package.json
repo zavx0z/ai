@@ -6,7 +6,8 @@
   "dependencies": {
     "tui-base": "workspace:*",
     "ai-window": "workspace:*",
-    "ai-keyboard": "workspace:*"
+    "ai-keyboard": "workspace:*",
+    "ai-web-deepseek": "workspace:*"
   },
   "scripts": {
     "edit": "bun run ../../actions/edit/cli.ts tmp/edit.json"
