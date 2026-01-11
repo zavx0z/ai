@@ -96,6 +96,11 @@ async function main() {
     // Парсинг аргументов командной строки
     const { path, excludePatterns, pipelineMode, outputFile } = parseArgs(process.argv)
 
+    // Если передан аргумент -o, он имеет приоритет над конфигом
+    if (outputFile) {
+      config.outputFile = outputFile
+    }
+
     // Режим пайплайна: выбрать всё, сохранить и выйти
     if (pipelineMode) {
       console.log("🚀 Запуск в режиме пайплайна...")

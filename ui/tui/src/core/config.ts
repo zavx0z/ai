@@ -1,8 +1,7 @@
 import { join } from "path"
 
 const CONFIG_FILENAME = "zavx0z.yaml"
-const DEFAULT_CONFIG_CONTENT = `# zavx0z.yaml - Конфигурация проекта
-# Создано автоматически AI-CLI
+const DEFAULT_CONFIG_CONTENT = `
 exclude:
   - node_modules
   - dist
