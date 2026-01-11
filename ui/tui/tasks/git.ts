@@ -59,18 +59,57 @@ export const task: TaskDefinition = {
         return
 
       case "changed-context":
+        // 1. Очистка старых файлов
+        console.log("🧹 Очистка временных файлов...")
+        await $`rm -f ${FILES_JSON} ${JOIN_MD} ${COMMIT_MD} ${DIFF_PATCH}`
         await $`mkdir -p ${TMP_DIR}`
+
+        // 2. Индексация изменений
+        console.log("📦 Индексация изменений (git add)...")
         await $`git add .`
+        // Задержка для синхронизации FS
+        await Bun.sleep(200)
+
+        // 3. Создание патча
+        console.log("📄 Создание патча (git diff)...")
         await $`git diff --staged > ${DIFF_PATCH}`
+        
+        if (!(await Bun.file(DIFF_PATCH).exists())) {
+          console.log("❌ Ошибка: файл патча не создан")
+          return
+        }
+
         const gitRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
         const changedFiles = (await $`git diff --name-only --cached`.text())
           .trim()
           .split("\n")
           .filter((l) => l.length > 0)
           .map((f) => resolve(gitRoot, f))
+
+        console.log(`🔎 Найдено измененных файлов: ${changedFiles.length}`)
         await Bun.write(FILES_JSON, JSON.stringify(changedFiles))
+        
+        if (!(await Bun.file(FILES_JSON).exists())) {
+          console.log("❌ Ошибка: список файлов не сохранен")
+          return
+        }
+
+        // 4. Сборка контекста
+        console.log("📝 Сборка контекста...")
         await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
+        if (!(await Bun.file(JOIN_MD).exists())) {
+          console.log("❌ Ошибка: файл контекста не создан")
+          return
+        }
+
+        // 5. Генерация промпта
+        console.log("🤖 Генерация промпта для коммита...")
         await $`bun run ${{ raw: PATH_COMMIT }} ${DIFF_PATCH} -c ${JOIN_MD} -o ${COMMIT_MD}`
+        if (!(await Bun.file(COMMIT_MD).exists())) {
+          console.log("❌ Ошибка: файл коммита не создан")
+          return
+        }
+
         await $`cat ${COMMIT_MD} | pbcopy`
         console.log("✅ Контекст изменений обновлен!")
 
