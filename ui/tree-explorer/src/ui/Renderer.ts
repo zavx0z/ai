@@ -24,11 +24,6 @@ export class Renderer {
     // Статус бар
     output += this.renderStatusBar(entries, options)
 
-    // Если в режиме фильтра
-    if (options.inFilterMode) {
-      output += this.renderFilterInput(options.filterBuffer)
-    }
-
     // Список файлов
     output += this.renderFileList(entries, cursorPosition, options)
 
@@ -58,9 +53,7 @@ export class Renderer {
       `Выбрано: ${this.selectionManager.getSelectedCount()}`,
       `Показано: ${entries.length}`,
       options.showHidden ? "Скрытые: вкл" : "Скрытые: выкл",
-      options.filter ? `Фильтр: "${options.filter}"` : "",
       options.excludePatterns.length > 0 ? `Исключений: ${options.excludePatterns.length}` : "",
-      options.inFilterMode ? "РЕЖИМ ФИЛЬТРА" : "",
     ]
       .filter(Boolean)
       .join(" | ")
@@ -68,9 +61,6 @@ export class Renderer {
     return this.theme.gray + status + this.theme.reset + "\n\n"
   }
 
-  private renderFilterInput(filterBuffer: string): string {
-    return this.theme.yellow + "Фильтр: " + this.theme.reset + filterBuffer + "_" + "\n\n"
-  }
 
   private renderFileList(entries: FileEntry[], cursorPosition: number, options: RenderOptions): string {
     if (entries.length === 0) {
@@ -78,7 +68,7 @@ export class Renderer {
     }
 
     let output = ""
-    const visibleHeight = this.getVisibleHeight(options.inFilterMode)
+    const visibleHeight = this.getVisibleHeight()
     const startIndex = Math.max(0, cursorPosition - Math.floor(visibleHeight / 2))
     const endIndex = Math.min(entries.length, startIndex + visibleHeight)
 
@@ -154,11 +144,7 @@ export class Renderer {
   }
 
   private renderFooter(options: RenderOptions): string {
-    if (options.inFilterMode) {
-      return this.renderFilterFooter()
-    } else {
-      return this.renderMainFooter()
-    }
+    return this.renderMainFooter()
   }
 
   renderMainFooter(): string {
@@ -201,11 +187,7 @@ export class Renderer {
       this.theme.cyan +
       ". (ю)" +
       this.theme.reset +
-      " - Скрытые  " +
-      this.theme.cyan +
-      "f (а)" +
-      this.theme.reset +
-      " - Фильтр\n" +
+      " - Скрытые\\n" +
       "  " +
       this.theme.cyan +
       "q (й)" +
@@ -222,28 +204,6 @@ export class Renderer {
     return footer
   }
 
-  private renderFilterFooter(): string {
-    return (
-      "\n" +
-      this.theme.gray +
-      "─".repeat(this.getTerminalWidth()) +
-      this.theme.reset +
-      "\n" +
-      this.theme.yellow +
-      "Режим фильтра:" +
-      this.theme.reset +
-      "\n" +
-      "  " +
-      this.theme.cyan +
-      "Enter" +
-      this.theme.reset +
-      " - Применить  " +
-      this.theme.cyan +
-      "Esc" +
-      this.theme.reset +
-      " - Отмена\n"
-    )
-  }
 
   private getTerminalWidth(): number {
     return process.stdout.columns || 80
@@ -253,8 +213,8 @@ export class Renderer {
     return process.stdout.rows || 24
   }
 
-  private getVisibleHeight(inFilterMode: boolean): number {
-    return this.getTerminalHeight() - (inFilterMode ? 12 : 10)
+  private getVisibleHeight(): number {
+    return this.getTerminalHeight() - 10
   }
 
   // Специальные экраны

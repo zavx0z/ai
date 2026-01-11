@@ -11,7 +11,10 @@ export class SelectionManager {
   }
 
   // Основные методы выбора
-  select(path: string): void {
+  select(path: string, force: boolean = false): void {
+    if (!force && this.excludePatterns.isExcluded(path)) {
+      return
+    }
     this.selectedFiles.add(path)
   }
 
@@ -34,20 +37,29 @@ export class SelectionManager {
   // Рекурсивные операции
   async selectDirectory(dirPath: string): Promise<void> {
     try {
-      // Добавляем саму директорию
+      // Select the root directory itself
       this.select(dirPath)
 
-      // Рекурсивно добавляем все файлы внутри, но не исключенные
-      const allFiles = await FileSystem.getAllFilesInDirectory(dirPath)
+      // Recursive traversal with exclusion checks
+      const traverse = async (currentPath: string) => {
+        const entries = await FileSystem.readDirectory(currentPath)
+        
+        for (const entry of entries) {
+          // Skip excluded items completely to avoid traversing into node_modules
+          if (this.excludePatterns.isExcluded(entry.path)) {
+            continue
+          }
 
-      for (const file of allFiles) {
-        // Получаем информацию о файле, чтобы проверить, не является ли он директорией или симлинком
-        const entry = await FileSystem.getFileEntry(file)
-        // Добавляем только если файл существует, не является директорией/симлинком и не исключен
-        if (entry && !entry.isDirectory && !entry.isSymlink && !this.excludePatterns.isExcluded(file)) {
-          this.select(file)
+          if (entry.isDirectory) {
+            this.select(entry.path)
+            await traverse(entry.path)
+          } else if (!entry.isSymlink) {
+            this.select(entry.path)
+          }
         }
       }
+
+      await traverse(dirPath)
     } catch (error) {
       throw new Error(`Не удалось выбрать директорию ${dirPath}: ${error instanceof Error ? error.message : String(error)}`)
     }
@@ -111,9 +123,7 @@ export class SelectionManager {
   // Пакетные операции
   selectAll(entries: FileEntry[]): void {
     for (const entry of entries) {
-      if (!this.excludePatterns.isExcluded(entry.path)) {
-        this.select(entry.path)
-      }
+      this.select(entry.path) // Checks exclusions internally
     }
   }
 
@@ -138,7 +148,7 @@ export class SelectionManager {
 
   selectAllIncludingExcluded(entries: FileEntry[]): void {
     for (const entry of entries) {
-      this.select(entry.path)
+      this.select(entry.path, true)
     }
   }
 

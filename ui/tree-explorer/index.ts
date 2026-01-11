@@ -96,6 +96,10 @@ async function main() {
     // Парсинг аргументов командной строки
     const { path, excludePatterns, pipelineMode, outputFile } = parseArgs(process.argv)
 
+    // Объединяем исключения из конфига и аргументов
+    const configExclusions = config.excludePatterns || []
+    const allExclusions = [...new Set([...configExclusions, ...excludePatterns])]
+
     // Если передан аргумент -o, он имеет приоритет над конфигом
     if (outputFile) {
       config.outputFile = outputFile
@@ -105,20 +109,20 @@ async function main() {
     if (pipelineMode) {
       console.log("🚀 Запуск в режиме пайплайна...")
       console.log("📁 Директория:", path)
-      if (excludePatterns.length > 0) {
-        console.log("🚫 Исключения:", excludePatterns)
+      if (allExclusions.length > 0) {
+        console.log("🚫 Исключения:", allExclusions)
       }
       if (outputFile || config.outputFile) {
         console.log("💾 Сохранение в:", outputFile || config.outputFile)
       }
       
-      const selectedFiles = await selectAllAndSave(path, excludePatterns, outputFile || config.outputFile)
+      const selectedFiles = await selectAllAndSave(path, allExclusions, outputFile || config.outputFile)
       console.log("✅ Пайплайн завершен. Выход.")
       process.exit(0)
     }
     
     // Интерактивный режим
-    const explorer = new TreeExplorer(path, excludePatterns, config)
+    const explorer = new TreeExplorer(path, allExclusions, config)
     await explorer.run()
   } catch (error) {
     console.error("🔥 Фатальная ошибка:", error instanceof Error ? error.message : String(error))

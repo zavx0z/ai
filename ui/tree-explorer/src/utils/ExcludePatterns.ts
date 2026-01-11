@@ -1,3 +1,4 @@
+import { dirname } from "node:path"
 import type { FileEntry } from "../types/types"
 
 export class ExcludePatterns {
@@ -32,19 +33,25 @@ export class ExcludePatterns {
   }
 
   isExcluded(path: string, currentPath?: string): boolean {
-    const fileName = this.getFileName(path)
-
-    for (const pattern of this.patterns) {
-      if (pattern.test(fileName) || pattern.test(path)) {
-        return true
+    // 1. Check relative path if available
+    if (currentPath) {
+      const relativePath = this.getRelativePath(path, currentPath)
+      for (const pattern of this.patterns) {
+        if (pattern.test(relativePath)) return true
       }
+    }
 
-      if (currentPath) {
-        const relativePath = this.getRelativePath(path, currentPath)
-        if (pattern.test(relativePath)) {
-          return true
-        }
+    // 2. Check path segments (for recursive exclusions like node_modules)
+    let checkPath = path
+    while (checkPath && checkPath !== "/" && checkPath !== ".") {
+      const name = this.getFileName(checkPath)
+      for (const pattern of this.patterns) {
+        if (pattern.test(name)) return true
       }
+      // Go up
+      const parent = dirname(checkPath)
+      if (parent === checkPath) break
+      checkPath = parent
     }
 
     return false

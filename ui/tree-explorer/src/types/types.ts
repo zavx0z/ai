@@ -17,9 +17,6 @@ export interface NavigationHistory {
 
 export interface RenderOptions {
   showHidden: boolean
-  filter: string
-  inFilterMode: boolean
-  filterBuffer: string
   excludePatterns: RegExp[]
 }
 
@@ -43,4 +40,5 @@ export interface KeyMapping {
 
 export interface AppConfig {
   outputFile?: string
+  excludePatterns?: string[]
 }

@@ -25,9 +25,6 @@ export class TreeExplorer {
   private entries: FileEntry[] = []
   private cursorPosition = 0
   private showHidden = false
-  private filter = ""
-  private filterBuffer = ""
-  private inFilterMode = false
   private isRunning = true
 
   constructor(startPath: string = process.cwd(), excludePatterns: string[] = [], config?: AppConfig) {
@@ -92,11 +89,6 @@ export class TreeExplorer {
           return false
         }
 
-        // Фильтр по имени
-        if (this.filter && !entry.name.toLowerCase().includes(this.filter.toLowerCase())) {
-          return false
-        }
-
         // Исключения
         if (this.excludePatterns.isExcluded(entry.path, this.currentPath)) {
           return false
@@ -134,21 +126,15 @@ export class TreeExplorer {
   private render(): void {
     const options: RenderOptions = {
       showHidden: this.showHidden,
-      filter: this.filter,
-      inFilterMode: this.inFilterMode,
-      filterBuffer: this.filterBuffer,
       excludePatterns: this.excludePatterns.getPatterns(),
     }
-
     const output = this.renderer.renderInterface(this.currentPath, this.entries, this.cursorPosition, options)
-
     process.stdout.write(output)
   }
 
   // Настройка обработчиков ввода
   private setupInputHandlers(): void {
     this.inputHandler.onInput(this.handleNormalInput.bind(this))
-    this.inputHandler.onFilterInput(this.handleFilterInput.bind(this))
   }
 
   private handleNormalInput(key: string, normalizedKey: string): void {
@@ -181,8 +167,6 @@ export class TreeExplorer {
     else if (normalizedKey === ".") {
       // Toggle hidden (dotfiles)
       this.toggleHidden()
-    } else if (normalizedKey === "f") {
-      this.enterFilterMode()
     } else if (normalizedKey === "s") {
       this.showSelected()
     } else if (normalizedKey === "e") {
@@ -209,31 +193,6 @@ export class TreeExplorer {
       this.render()
     } catch (error) {
         console.error(`❌ Ошибка при выборе всего: ${error instanceof Error ? error.message : String(error)}`)
-    }
-  }
-  private handleFilterInput(key: string, normalizedKey: string): void {
-    if (key === "\r") {
-      // Enter
-      this.filter = this.filterBuffer
-      this.filterBuffer = ""
-      this.inputHandler.exitFilterMode()
-      this.inFilterMode = false
-      this.reloadAndRender()
-    } else if (key === "\u001b") {
-      // Esc
-      this.filterBuffer = ""
-      this.inputHandler.exitFilterMode()
-      this.inFilterMode = false
-      this.reloadAndRender()
-    } else if (key === "\x7f") {
-      // Backspace
-      if (this.filterBuffer.length > 0) {
-        this.filterBuffer = this.filterBuffer.slice(0, -1)
-        this.render()
-      }
-    } else if (key.length === 1 && key.match(/[a-zA-Z0-9 _\-\.а-яА-Я]/)) {
-      this.filterBuffer += key
-      this.render()
     }
   }
 
@@ -321,12 +280,6 @@ export class TreeExplorer {
     this.render()
   }
 
-  private enterFilterMode(): void {
-    this.inFilterMode = true
-    this.filterBuffer = this.filter
-    this.inputHandler.enterFilterMode()
-    this.render()
-  }
 
   // Специальные экраны
   private showSelected(): void {
