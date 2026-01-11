@@ -5,8 +5,11 @@ import { Theme } from "../ui/theme"
 import { ensureConfigFile } from "../core/config"
 import { select } from "../ui/select"
 
-export async function runTool(task: TaskDefinition, context: TargetContext) {
+export async function runTool(task: TaskDefinition, context: TargetContext, taskIndex = 0) {
   await ensureConfigFile(context.path)
+  
+  // Мапа для сохранения индексов действий по taskIndex
+  const actionIndices = new Map<number, number>()
   
   while (true) {
     let actionId: string | undefined
@@ -14,6 +17,7 @@ export async function runTool(task: TaskDefinition, context: TargetContext) {
     // Если есть действия (Actions), предлагаем выбор
     if (task.actions && task.actions.length > 0) {
       const maxActionNameLen = Math.max(...task.actions.map((a) => a.name.length))
+      const lastActionIndex = actionIndices.get(taskIndex) || 0
       const selectedAction = await select(
         `Действие: ${task.name}`,
         task.actions,
@@ -21,9 +25,17 @@ export async function runTool(task: TaskDefinition, context: TargetContext) {
           const padding = " ".repeat(maxActionNameLen - a.name.length)
           const desc = a.description ? ` ${Theme.gray}| ${a.description}${Theme.reset}` : ""
           return `${a.name}${padding} ${desc}`
-        }
+        },
+        lastActionIndex
       )
       if (!selectedAction) return
+      
+      // Сохраняем индекс выбранного действия
+      const actionIndex = task.actions.indexOf(selectedAction)
+      if (actionIndex !== -1) {
+        actionIndices.set(taskIndex, actionIndex)
+      }
+      
       actionId = selectedAction.id
     }
     

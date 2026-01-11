@@ -5,9 +5,10 @@ import { KeyMapper } from "tui-base"
 export async function select<T>(
   title: string, 
   items: T[], 
-  format: (item: T) => string
+  format: (item: T) => string,
+  initialIndex = 0
 ): Promise<T | null> {
-  let idx = 0
+  let idx = initialIndex
   let showHelp = false
 
   const render = () => {

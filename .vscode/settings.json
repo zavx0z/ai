@@ -9,7 +9,10 @@
         "**/*.crswap": true,
         "**/node_modules": true,
         "**/__pycache__": true,
-        ".venv": true
+        ".venv": true,
+        ".vscode": true
     },
-    "hide-files.files": []
+    "hide-files.files": [
+        ".vscode"
+    ]
 }

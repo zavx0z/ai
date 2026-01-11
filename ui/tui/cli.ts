@@ -24,6 +24,7 @@ async function main() {
     }
 
     if (!context) process.exit(0)
+    let lastTaskIndex = 0
     while (true) {
       const maxNameLen = Math.max(...TASKS.map((t) => t.name.length))
       const task = await select(
@@ -32,11 +33,17 @@ async function main() {
         (t) => {
           const padding = " ".repeat(maxNameLen - t.name.length)
           return `${t.name}${padding}  ${Theme.gray}| ${t.description}${Theme.reset}`
-        }
+        },
+        lastTaskIndex
       )
       
       if (!task) break
-      await runTool(task, context)
+      
+      // Сохраняем индекс выбранной задачи
+      lastTaskIndex = TASKS.indexOf(task)
+      if (lastTaskIndex === -1) lastTaskIndex = 0
+      
+      await runTool(task, context, lastTaskIndex)
     }
   }
 }
