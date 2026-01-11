@@ -100,13 +100,30 @@ export const task: TaskDefinition = {
         const initialClipboard = await $`pbpaste`.text()
         const success = await Window.waitForClipboardChange(initialClipboard)
 
-        if (success) {
-          console.log("✅ Буфер обновлен! Возвращаюсь...")
-          await Window.restoreApp(currentApp)
-        } else {
-          console.log("⚠️ Ожидание отменено.")
-          await Window.restoreApp(currentApp)
-        }
+          if (success) {
+            console.log("✅ Буфер обновлен! Возвращаюсь...")
+            await Window.restoreApp(currentApp)
+            
+            // Выполняем действия из commit-buf
+            const msg = await $`pbpaste`.text()
+            const confirm = await select(
+              `Подтвердите коммит:\n${Theme.gray}${msg.trim()}${Theme.reset}`,
+              ["✅ Отправить", "❌ Отмена"],
+              (o) => o
+            )
+
+            if (confirm !== "✅ Отправить") {
+              console.log("❌ Отменено")
+              return
+            }
+
+            await $`git add .`
+            await $`pbpaste | git commit -F -`
+            console.log("✅ Закоммичено!")
+          } else {
+            console.log("⚠️ Ожидание отменено.")
+            await Window.restoreApp(currentApp)
+          }
         return
 
       case "select-context":
