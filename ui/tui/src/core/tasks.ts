@@ -1,3 +1,4 @@
+import { $ } from "bun"
 import { Tool } from "./constants"
 import { join } from "path"
 import { input } from "../ui/input"
@@ -6,16 +7,19 @@ import { Theme } from "../ui/theme"
 import type { TaskDefinition } from "./tools"
 import {
   getFilesCmd,
-  getContextCmd,
-  getContextChain,
+  getExcludes,
+  getJoinCmd,
   PATH_LINT,
   PATH_EDIT,
   PATH_COMMIT,
   PATH_TREE,
-  getExcludes,
-  getJoinCmd,
   PATH_JOIN,
 } from "./tools"
+
+// Helper for raw commands from tools.ts
+async function runRaw(cmd: string) {
+  await $`${{ raw: cmd }}`
+}
 
 export const TASKS: TaskDefinition[] = [
   {
@@ -26,33 +30,35 @@ export const TASKS: TaskDefinition[] = [
       { id: "all", name: "🌍 Весь проект", description: "Все файлы (стандарт)" },
       { id: "select", name: "🎯 Выбрать файлы", description: "Интерактивный выбор" },
     ],
-    getCommand: async (ctx, actionId) => {
+    run: async (ctx, actionId) => {
       const taskDescription = await input("📝 Опишите задачу:")
-      if (taskDescription === null) return "echo '❌ Отменено'"
+      if (taskDescription === null) {
+        console.log("❌ Отменено")
+        return
+      }
 
-      const tmpDir = join(ctx.path, "tmp")
-      Bun.spawnSync(["mkdir", "-p", tmpDir])
+      const tmpDir = "tmp"
+      await $`mkdir -p ${tmpDir}`
       await Bun.write(join(tmpDir, "task.md"), `# Задача\n\n${taskDescription}\n\n`)
 
       const docBun = Tool("generator/bun/README.md")
       const docEdit = Tool("actions/edit/edit.md")
-      const cmdConcat = `cat tmp/task.md tmp/join.md ${docBun} ${docEdit} > tmp/edit.md`
-      const cmdCopy = `cat tmp/edit.md | pbcopy`
-      const cmdNotify = `echo "✅ Скопировано в буфер!"`
-
-      switch (actionId) {
-        case "select": {
-          const excludes = await getExcludes(ctx)
-          const cmdTree = `bun run ${PATH_TREE} ${excludes} -o tmp/files.json`
-          const cmdJoin = `bun run ${PATH_JOIN} --file tmp/files.json --output tmp/join.md`
-          const chain = `mkdir -p tmp && ${cmdTree} && ${cmdJoin}`
-          return `${chain} && ${cmdConcat} && ${cmdCopy} && ${cmdNotify}`
-        }
-        default: {
-          const chain = await getContextChain(ctx)
-          return `${chain} && ${cmdConcat} && ${cmdCopy} && ${cmdNotify}`
-        }
+      
+      // Setup Context
+      if (actionId === "select") {
+        const excludes = await getExcludes(ctx)
+        // Tool() returns quoted string, excludes is string args
+        await $`bun run ${{raw: PATH_TREE}} ${{raw: excludes}} -o tmp/files.json`
+        await $`bun run ${{raw: PATH_JOIN}} --file tmp/files.json --output tmp/join.md`
+      } else {
+        await runRaw(await getFilesCmd(ctx))
+        await runRaw(getJoinCmd())
       }
+
+      // Concat & Copy
+      await $`cat tmp/task.md tmp/join.md ${{raw: docBun}} ${{raw: docEdit}} > tmp/edit.md`
+      await $`cat tmp/edit.md | pbcopy`
+      console.log("✅ Скопировано в буфер!")
     },
   },
   {
@@ -63,41 +69,37 @@ export const TASKS: TaskDefinition[] = [
       { id: "clipboard", name: "📋 Из буфера", description: "pbpaste > edit.json" },
       { id: "file", name: "📄 Из файла", description: "tmp/edit.json" },
     ],
-    getCommand: async (ctx, actionId) => {
-      const runEdit = `bun run ${PATH_EDIT} tmp/edit.json`
-      const cmdNotify = `echo "✅ Изменения применены!"`
-
-      switch (actionId) {
-        case "clipboard":
-          return `pbpaste > tmp/edit.json && ${runEdit} && ${cmdNotify}`
-        default:
-          return `${runEdit} && ${cmdNotify}`
+    run: async (ctx, actionId) => {
+      if (actionId === "clipboard") {
+        await $`pbpaste > tmp/edit.json`
       }
+      await $`bun run ${{raw: PATH_EDIT}} tmp/edit.json`
+      console.log("✅ Изменения применены!")
     },
-  },
-  {
-    id: "files",
-    name: "📂 Файлы",
-    description: "Выбор файлов",
-    getCommand: async (ctx) => `mkdir -p tmp && ${await getFilesCmd(ctx)}`,
   },
   {
     id: "join",
     name: "📝 Данные",
     description: "Объединение файлов и структуры в один файл",
-    getCommand: async (ctx) => `mkdir -p tmp && ${await getContextCmd(ctx)}`,
+    run: async (ctx) => {
+      await $`mkdir -p tmp`
+      await runRaw(await getFilesCmd(ctx))
+      await runRaw(getJoinCmd())
+    },
   },
   {
     id: "lint",
     name: "🧹 Ошибки",
     description: "Сбор данных для исправления ошибок",
-    getCommand: async (ctx) => {
-      const chain = await getContextChain(ctx)
-      const cmdLint = `bun run ${PATH_LINT} . -o tmp/lint.md`
-      const cmdAppend = `cat tmp/join.md >> tmp/lint.md`
-      const cmdCopy = `cat tmp/lint.md | pbcopy`
-      const cmdNotify = `echo "✅ Скопировано в буфер!"`
-      return `${chain} && ${cmdLint} && ${cmdAppend} && ${cmdCopy} && ${cmdNotify}`
+    run: async (ctx) => {
+      await $`mkdir -p tmp`
+      await runRaw(await getFilesCmd(ctx))
+      await runRaw(getJoinCmd())
+
+      await $`bun run ${{raw: PATH_LINT}} . -o tmp/lint.md`
+      await $`cat tmp/join.md >> tmp/lint.md`
+      await $`cat tmp/lint.md | pbcopy`
+      console.log("✅ Скопировано в буфер!")
     },
   },
   {
@@ -114,52 +116,51 @@ export const TASKS: TaskDefinition[] = [
       { id: "commit-buf", name: "📝 Коммит", description: "Сделать коммит с сообщением из буфера" },
       { id: "push", name: "🚀 Push", description: "git push" },
     ],
-    getCommand: async (ctx, actionId) => {
-      const chain = await getContextChain(ctx)
-      switch (actionId) {
-        case "select-context": {
-          const cmdGitAdd = `git add .`
-          const cmdGitDiff = `git diff --staged > tmp/diff.patch`
+    run: async (ctx, actionId) => {
+      if (actionId === "push") {
+        await $`git push`
+        console.log("✅ Отправлено!")
+        return
+      }
 
-          const excludes = await getExcludes(ctx)
-          const cmdTree = `bun run ${PATH_TREE} ${excludes} -o tmp/files.json`
-          const cmdJoin = getJoinCmd()
+      if (actionId === "commit-buf") {
+        const msg = await $`pbpaste`.text()
+        const confirm = await select(
+          `Подтвердите коммит:\n${Theme.gray}${msg.trim()}${Theme.reset}`,
+          ["✅ Отправить", "❌ Отмена"],
+          (o) => o
+        )
+        if (confirm !== "✅ Отправить") {
+          console.log("❌ Отменено")
+          return
+        }
+        await $`git add .`
+        await $`pbpaste | git commit -F -`
+        console.log("✅ Закоммичено!")
+        return
+      }
 
-          const cmdCommitGen = `bun run ${PATH_COMMIT} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
-          const cmdCopy = `cat tmp/commit.md | pbcopy`
+      // Prepare Context
+      await $`mkdir -p tmp`
+      await $`git add .`
+      await $`git diff --staged > tmp/diff.patch`
 
-          const cmdNotify = `echo "✅ Контекст обновлен!"`
-          return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${cmdTree} && ${cmdJoin} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
-        }
-        case "push": {
-          return `git push && echo "✅ Отправлено!"`
-        }
-        case "commit-buf": {
-          const proc = Bun.spawn(["pbpaste"])
-          const msg = await new Response(proc.stdout).text()
-          const confirm = await select(
-            `Подтвердите коммит:\n${Theme.gray}${msg.trim()}${Theme.reset}`,
-            ["✅ Отправить", "❌ Отмена"],
-            (o) => o
-          )
-          if (confirm !== "✅ Отправить") return "echo '❌ Отменено'"
-          return `git add . && pbpaste | git commit -F - && echo "✅ Закоммичено!"`
-        }
-        case "ful-context": {
-          const cmdGitAdd = `git add .`
-          const cmdGitDiff = `git diff --staged > tmp/diff.patch`
-          const cmdCommitGen = `bun run ${PATH_COMMIT} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
-          const cmdCopy = `cat tmp/commit.md | pbcopy`
-          const cmdNotify = `echo "✅ Скопировано в буфер!"`
-          return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${chain} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
-        }
-        default:
-          const cmdGitAdd = `git add .`
-          const cmdGitDiff = `git diff --staged > tmp/diff.patch`
-          const cmdCommitGen = `bun run ${PATH_COMMIT} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
-          const cmdCopy = `cat tmp/commit.md | pbcopy`
-          const cmdNotify = `echo "✅ Скопировано в буфер!"`
-          return `mkdir -p tmp && ${cmdGitAdd} && ${cmdGitDiff} && ${chain} && ${cmdCommitGen} && ${cmdCopy} && ${cmdNotify}`
+      if (actionId === "select-context") {
+        const excludes = await getExcludes(ctx)
+        await $`bun run ${{raw: PATH_TREE}} ${{raw: excludes}} -o tmp/files.json`
+        await $`bun run ${{raw: PATH_JOIN}} --file tmp/files.json --output tmp/join.md`
+      } else {
+        await runRaw(await getFilesCmd(ctx))
+        await runRaw(getJoinCmd())
+      }
+
+      await $`bun run ${{raw: PATH_COMMIT}} tmp/diff.patch -c tmp/join.md -o tmp/commit.md`
+      await $`cat tmp/commit.md | pbcopy`
+
+      if (actionId === "select-context") {
+        console.log("✅ Контекст обновлен!")
+      } else {
+        console.log("✅ Скопировано в буфер!")
       }
     },
   },

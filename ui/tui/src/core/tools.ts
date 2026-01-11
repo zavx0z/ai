@@ -13,7 +13,7 @@ export interface TaskDefinition {
   name: string
   description: string
   actions?: TaskAction[]
-  getCommand: (ctx: TargetContext, actionId?: string) => Promise<string>
+  run: (ctx: TargetContext, actionId?: string) => Promise<void>
 }
 
 // --- Path Constants ---

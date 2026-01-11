@@ -27,19 +27,19 @@ export async function runTool(task: TaskDefinition, context: TargetContext) {
       actionId = selectedAction.id
     }
     
-    const shellCommand = await task.getCommand(context, actionId)
     console.log(`\n${Theme.green}🚀 Запуск: ${task.name}${Theme.reset}`)
-    console.log(`📂 Контекст: ${Theme.bold}${context.path}${Theme.reset}`)
-    
-    if (process.env.VERBOSE) {
-      console.log(`🛠  Команда: ${Theme.gray}${shellCommand}${Theme.reset}\n`)
+    console.log(`📂 Контекст: ${Theme.bold}${context.path}${Theme.reset}\n`)
+
+    const currentCwd = process.cwd()
+    process.chdir(context.path)
+
+    try {
+      await task.run(context, actionId)
+    } catch (e) {
+      console.error(`\n${Theme.red}❌ Ошибка: ${e}${Theme.reset}`)
+    } finally {
+      process.chdir(currentCwd)
     }
-    const proc = Bun.spawn(["sh", "-c", shellCommand], {
-      cwd: context.path,
-      stdio: ["inherit", "inherit", "inherit"],
-      env: { ...process.env, AI_ROOT: AI_ROOT },
-    })
-    await proc.exited
     console.log(`\n${Theme.gray}Нажмите любую клавишу...${Theme.reset}`)
     
     process.stdin.setRawMode(true)
