@@ -1,5 +1,5 @@
 import { $ } from "bun"
-import { input } from "../src/ui/input"
+import { editInEditor } from "../src/ui/editor"
 import { select } from "../src/ui/select"
 import { Theme } from "../src/ui/theme"
 import type { TaskDefinition, TaskAction } from "../src/core/tools"
@@ -27,13 +27,13 @@ export const task: TaskDefinition = {
     { id: "select", name: "🎯 Выбрать файлы", description: "Интерактивный выбор через tree-explorer" },
   ],
   run: async (ctx, actionId) => {
-    const taskDescription = await input("📝 Опишите задачу:")
-    if (taskDescription === null) {
-      console.log("❌ Отменено")
+    await $`mkdir -p ${TMP_DIR}`
+    const taskDescription = await editInEditor()
+
+    if (!taskDescription) {
+      console.log("❌ Отменено (пустое описание)")
       return
     }
-
-    await $`mkdir -p ${TMP_DIR}`
     await Bun.write(TASK_MD, `# Задача\n\n${taskDescription}\n\n`)
 
     const docBun = Tool("generator/bun/README.md")
