@@ -55,7 +55,7 @@ export async function waitForClipboardChange(initialClipboard: string): Promise<
   console.log("⏳ Ожидание ответа в буфере обмена... (Нажмите Enter для отмены)")
   
   let stopWaiting = false
-  let cleanupInput: (() => void) | null = null
+  const cleanup: { fn: (() => void) | null } = { fn: null }
 
   const checkClipboardLoop = async () => {
     while (!stopWaiting) {
@@ -69,14 +69,14 @@ export async function waitForClipboardChange(initialClipboard: string): Promise<
   const waitInput = new Promise<boolean>((resolve) => {
     const handler = () => resolve(false)
     process.stdin.once("data", handler)
-    cleanupInput = () => process.stdin.off("data", handler)
+    cleanup.fn = () => { process.stdin.off("data", handler) }
     process.stdin.resume()
   })
 
   const success = await Promise.race([checkClipboardLoop(), waitInput])
 
   stopWaiting = true
-  if (cleanupInput) cleanupInput()
+  if (cleanup.fn) cleanup.fn()
   process.stdin.pause()
 
   return success

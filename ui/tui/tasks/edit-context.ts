@@ -62,13 +62,16 @@ export const task: TaskDefinition = {
       return
     }
 
-    let targetId = windows[0]!.id
+    let targetId = windows[0]!.id!
 
     if (windows.length > 1) {
       const selectedId = await select(
         "🌍 Выберите окно Chrome:",
-        windows.map((w) => w.id),
-        (id) => windows.find((w) => w.id === id)?.title || "Без названия"
+        windows.map((w) => w.id!),
+        (id) => {
+          const window = windows.find((w) => w.id === id);
+          return window?.title ?? "Без названия";
+        }
       )
       if (selectedId) targetId = selectedId
     }
