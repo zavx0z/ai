@@ -15,7 +15,7 @@ import {
   PATH_EDIT,
   EDIT_JSON,
 } from "../src/core/tools"
-import * as Window from "../tools/window/index"
+import * as Window from "ai-window"
 import { Tool } from "../src/core/constants"
 
 export const task: TaskDefinition = {

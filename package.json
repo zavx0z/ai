@@ -16,7 +16,8 @@
     "./actions/*",
     "./tasks/*",
     "./generator/*",
-    "./ui/*"
+    "./ui/*",
+    "./tools/*"
   ],
   "scripts": {
     "ai": "bun index",

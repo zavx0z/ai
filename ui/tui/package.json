@@ -4,7 +4,8 @@
   "type": "module",
   "main": "cli.ts",
   "dependencies": {
-    "tui-base": "workspace:*"
+    "tui-base": "workspace:*",
+    "ai-window": "workspace:*"
   },
   "scripts": {
     "edit": "bun run ../../actions/edit/cli.ts tmp/edit.json"
