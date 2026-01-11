@@ -1,7 +1,7 @@
 import { $ } from "bun"
 import * as Window from "ai-window"
 import * as Keyboard from "ai-keyboard"
-import * as Deepseek from "ai-web-deepseek"
+import { Deepseek, pasteAndSend } from "ai-chat"
 import { resolve } from "node:path"
 import { select } from "../src/ui/select"
 import { Theme } from "../src/ui/theme"
@@ -146,7 +146,7 @@ export const task: TaskDefinition = {
         console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
         await Window.focusChromeWindow(targetId)
         await Deepseek.openNewChat()
-        await Deepseek.pasteAndSend()
+        await pasteAndSend()
         const initialClipboard = await $`pbpaste`.text()
         const success = await Window.waitForClipboardChange(initialClipboard)
 

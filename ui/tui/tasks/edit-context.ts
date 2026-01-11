@@ -16,7 +16,7 @@ import {
   EDIT_JSON,
 } from "../src/core/tools"
 import * as Window from "ai-window"
-import * as Deepseek from "ai-web-deepseek"
+import { Deepseek, pasteAndSend } from "ai-chat"
 import { Tool } from "../src/core/constants"
 
 export const task: TaskDefinition = {
@@ -67,17 +67,13 @@ export const task: TaskDefinition = {
     let isDeepseek = false
 
     if (windows.length > 1) {
-      const selected = await select(
-        "🌍 Выберите окно Chrome:",
-        windows,
-        (w) => w.title
-      )
+      const selected = await select("🌍 Выберите окно Chrome:", windows, (w) => w.title)
       if (selected) {
         targetId = selected.id!
-        isDeepseek = selected.title?.toLowerCase().includes('deepseek') || false
+        isDeepseek = selected.title?.toLowerCase().includes("deepseek") || false
       }
     } else {
-      isDeepseek = windows[0]!.title?.toLowerCase().includes('deepseek') || false
+      isDeepseek = windows[0]!.title?.toLowerCase().includes("deepseek") || false
     }
 
     console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
@@ -85,7 +81,7 @@ export const task: TaskDefinition = {
 
     if (isDeepseek) {
       await Deepseek.openNewChat()
-      await Deepseek.pasteAndSend()
+      await pasteAndSend()
     }
 
     const initialClipboard = await $`pbpaste`.text()
