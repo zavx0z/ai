@@ -53,24 +53,3 @@ export async function getExcludes(ctx: TargetContext): Promise<string> {
   } catch (e) {}
   return defaultExcludes.map((e) => `-e "${e}"`).join(" ")
 }
-
-export async function getFilesCmd(ctx: TargetContext) {
-  const excludes = await getExcludes(ctx)
-  return `bun run ${PATH_TREE} ${excludes} -p -o tmp/files.json`
-}
-
-export function getJoinCmd() {
-  return `bun run ${PATH_JOIN} --file tmp/files.json --output tmp/join.md`
-}
-
-export async function getContextCmd(ctx: TargetContext) {
-  const filesCmd = await getFilesCmd(ctx)
-  const joinCmd = `bun run ${PATH_JOIN} --file tmp/files.json --output tmp/join.md`
-  return `${filesCmd} && ${joinCmd}`
-}
-
-export async function getContextChain(ctx: TargetContext) {
-  const files = await getFilesCmd(ctx)
-  const join = getJoinCmd()
-  return `mkdir -p tmp && ${files} && ${join}`
-}

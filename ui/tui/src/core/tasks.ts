@@ -5,14 +5,17 @@ import { input } from "../ui/input"
 import { select } from "../ui/select"
 import { Theme } from "../ui/theme"
 import type { TaskDefinition } from "./tools"
-import {
-  getExcludes,
-  PATH_LINT,
-  PATH_EDIT,
-  PATH_COMMIT,
-  PATH_TREE,
-  PATH_JOIN,
-} from "./tools"
+import { getExcludes, PATH_LINT, PATH_EDIT, PATH_COMMIT, PATH_TREE, PATH_JOIN } from "./tools"
+
+const TMP_DIR = "tmp"
+const TASK_MD = join(TMP_DIR, "task.md")
+const FILES_JSON = join(TMP_DIR, "files.json")
+const JOIN_MD = join(TMP_DIR, "join.md")
+const EDIT_MD = join(TMP_DIR, "edit.md")
+const EDIT_JSON = join(TMP_DIR, "edit.json")
+const LINT_MD = join(TMP_DIR, "lint.md")
+const DIFF_PATCH = join(TMP_DIR, "diff.patch")
+const COMMIT_MD = join(TMP_DIR, "commit.md")
 
 export const TASKS: TaskDefinition[] = [
   {
@@ -30,26 +33,25 @@ export const TASKS: TaskDefinition[] = [
         return
       }
 
-      const tmpDir = "tmp"
-      await $`mkdir -p ${tmpDir}` // Создаем временную директорию
-      await Bun.write(join(tmpDir, "task.md"), `# Задача\n\n${taskDescription}\n\n`) // Записываем описание задачи
+      await $`mkdir -p ${TMP_DIR}`
+      await Bun.write(TASK_MD, `# Задача\n\n${taskDescription}\n\n`)
 
       const docBun = Tool("generator/bun/README.md")
       const docEdit = Tool("actions/edit/edit.md")
-      const excludes = await getExcludes(ctx) // Получаем список исключений
+      const excludes = await getExcludes(ctx)
 
-      // Setup Context
-      if (actionId === "select") {
-        await $`bun run ${{raw: PATH_TREE}} ${{raw: excludes}} -o tmp/files.json` // Интерактивный выбор файлов
-        await $`bun run ${{raw: PATH_JOIN}} --file tmp/files.json --output tmp/join.md` // Объединение выбранных файлов
-      } else {
-        await $`bun run ${{raw: PATH_TREE}} ${{raw: excludes}} -p -o tmp/files.json` // Автоматический сбор всех файлов (пайплайн)
-        await $`bun run ${{raw: PATH_JOIN}} --file tmp/files.json --output tmp/join.md` // Объединение всех файлов
+      switch (actionId) {
+        case "select":
+          await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -o ${FILES_JSON}`
+          break
+        default:
+          await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
+          break
       }
 
-      // Concat & Copy
-      await $`cat tmp/task.md tmp/join.md ${{raw: docBun}} ${{raw: docEdit}} > tmp/edit.md` // Сборка итогового промпта с инструкциями
-      await $`cat tmp/edit.md | pbcopy` // Копирование в буфер обмена
+      await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
+      await $`cat ${TASK_MD} ${JOIN_MD} ${{ raw: docBun }} ${{ raw: docEdit }} > ${EDIT_MD}`
+      await $`cat ${EDIT_MD} | pbcopy`
       console.log("✅ Скопировано в буфер!")
     },
   },
@@ -62,10 +64,12 @@ export const TASKS: TaskDefinition[] = [
       { id: "file", name: "📄 Из файла", description: "tmp/edit.json" },
     ],
     run: async (ctx, actionId) => {
-      if (actionId === "clipboard") {
-        await $`pbpaste > tmp/edit.json` // Сохранение JSON из буфера во временный файл
+      switch (actionId) {
+        case "clipboard":
+          await $`pbpaste > ${EDIT_JSON}`
+          break
       }
-      await $`bun run ${{raw: PATH_EDIT}} tmp/edit.json` // Запуск агента редактирования
+      await $`bun run ${{ raw: PATH_EDIT }} ${EDIT_JSON}`
       console.log("✅ Изменения применены!")
     },
   },
@@ -74,10 +78,10 @@ export const TASKS: TaskDefinition[] = [
     name: "📝 Данные",
     description: "Объединение файлов и структуры в один файл",
     run: async (ctx) => {
-      await $`mkdir -p tmp` // Создание временной директории
+      await $`mkdir -p ${TMP_DIR}`
       const excludes = await getExcludes(ctx)
-      await $`bun run ${{raw: PATH_TREE}} ${{raw: excludes}} -p -o tmp/files.json` // Сбор списка всех файлов
-      await $`bun run ${{raw: PATH_JOIN}} --file tmp/files.json --output tmp/join.md` // Генерация единого Markdown файла
+      await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
+      await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
     },
   },
   {
@@ -85,13 +89,13 @@ export const TASKS: TaskDefinition[] = [
     name: "🧹 Ошибки",
     description: "Сбор данных для исправления ошибок",
     run: async (ctx) => {
-      await $`mkdir -p tmp` // Создание временной директории
+      await $`mkdir -p ${TMP_DIR}`
       const excludes = await getExcludes(ctx)
-      await $`bun run ${{raw: PATH_TREE}} ${{raw: excludes}} -p -o tmp/files.json` // Сбор списка файлов
-      await $`bun run ${{raw: PATH_JOIN}} --file tmp/files.json --output tmp/join.md` // Объединение файлов для контекста
-      await $`bun run ${{raw: PATH_LINT}} . -o tmp/lint.md` // Запуск линтера и сохранение отчета
-      await $`cat tmp/join.md >> tmp/lint.md` // Добавление кода к отчету об ошибках
-      await $`cat tmp/lint.md | pbcopy` // Копирование результата в буфер
+      await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
+      await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
+      await $`bun run ${{ raw: PATH_LINT }} . -o ${LINT_MD}`
+      await $`cat ${JOIN_MD} >> ${LINT_MD}`
+      await $`cat ${LINT_MD} | pbcopy`
       console.log("✅ Скопировано в буфер!")
     },
   },
@@ -110,53 +114,53 @@ export const TASKS: TaskDefinition[] = [
       { id: "push", name: "🚀 Push", description: "git push" },
     ],
     run: async (ctx, actionId) => {
-      if (actionId === "push") {
-        await $`git push` // Отправка изменений в удаленный репозиторий
-        console.log("✅ Отправлено!")
-        return
-      }
-
-      if (actionId === "commit-buf") {
-        const msg = await $`pbpaste`.text() // Получение сообщения коммита из буфера
-        const confirm = await select(
-          `Подтвердите коммит:\n${Theme.gray}${msg.trim()}${Theme.reset}`,
-          ["✅ Отправить", "❌ Отмена"],
-          (o) => o
-        )
-
-        if (confirm !== "✅ Отправить") {
-          console.log("❌ Отменено")
+      switch (actionId) {
+        case "push":
+          await $`git push`
+          console.log("✅ Отправлено!")
           return
-        }
 
-        await $`git add .` // Добавление всех изменений в индекс
-        await $`pbpaste | git commit -F -` // Коммит с использованием сообщения из stdin
-        console.log("✅ Закоммичено!")
-        return
-      }
+        case "commit-buf":
+          const msg = await $`pbpaste`.text()
+          const confirm = await select(
+            `Подтвердите коммит:\n${Theme.gray}${msg.trim()}${Theme.reset}`,
+            ["✅ Отправить", "❌ Отмена"],
+            (o) => o
+          )
 
-      // Prepare Context
-      await $`mkdir -p tmp` // Создание временной директории
-      await $`git add .` // Добавление изменений в индекс
-      await $`git diff --staged > tmp/diff.patch` // Создание патча изменений
+          if (confirm !== "✅ Отправить") {
+            console.log("❌ Отменено")
+            return
+          }
 
-      const excludes = await getExcludes(ctx)
+          await $`git add .`
+          await $`pbpaste | git commit -F -`
+          console.log("✅ Закоммичено!")
+          return
 
-      if (actionId === "select-context") {
-        await $`bun run ${{raw: PATH_TREE}} ${{raw: excludes}} -o tmp/files.json` // Интерактивный выбор файлов контекста
-        await $`bun run ${{raw: PATH_JOIN}} --file tmp/files.json --output tmp/join.md` // Объединение выбранных файлов
-      } else {
-        await $`bun run ${{raw: PATH_TREE}} ${{raw: excludes}} -p -o tmp/files.json` // Автоматический сбор файлов контекста
-        await $`bun run ${{raw: PATH_JOIN}} --file tmp/files.json --output tmp/join.md` // Объединение файлов
-      }
+        case "select-context":
+          await $`mkdir -p ${TMP_DIR}`
+          await $`git add .`
+          await $`git diff --staged > ${DIFF_PATCH}`
+          const excludes = await getExcludes(ctx)
+          await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -o ${FILES_JSON}`
+          await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
+          await $`bun run ${{ raw: PATH_COMMIT }} ${DIFF_PATCH} -c ${JOIN_MD} -o ${COMMIT_MD}`
+          await $`cat ${COMMIT_MD} | pbcopy`
+          console.log("✅ Контекст обновлен!")
+          return
 
-      await $`bun run ${{raw: PATH_COMMIT}} tmp/diff.patch -c tmp/join.md -o tmp/commit.md` // Генерация сообщения коммита с учетом контекста
-      await $`cat tmp/commit.md | pbcopy` // Копирование результата в буфер
-
-      if (actionId === "select-context") {
-        console.log("✅ Контекст обновлен!")
-      } else {
-        console.log("✅ Скопировано в буфер!")
+        default:
+          await $`mkdir -p ${TMP_DIR}`
+          await $`git add .`
+          await $`git diff --staged > ${DIFF_PATCH}`
+          const excludes2 = await getExcludes(ctx)
+          await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes2 }} -p -o ${FILES_JSON}`
+          await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
+          await $`bun run ${{ raw: PATH_COMMIT }} ${DIFF_PATCH} -c ${JOIN_MD} -o ${COMMIT_MD}`
+          await $`cat ${COMMIT_MD} | pbcopy`
+          console.log("✅ Скопировано в буфер!")
+          return
       }
     },
   },
