@@ -13,10 +13,11 @@ export async function getCurrentApp() {
  * Получает список открытых окон Chrome
  */
 export async function getChromeWindows() {
+  // Используем string id 10 (newline) для безопасного разделения строк
   const rawWindows = await $`osascript -e 'tell application "Google Chrome"
       set outList to ""
       repeat with w in windows
-        set outList to outList & (id of w) & "|||" & (title of w) & "\\n"
+        set outList to outList & (id of w) & "|||" & (title of w) & string id 10
       end repeat
       return outList
     end tell'`.text()
@@ -27,7 +28,13 @@ export async function getChromeWindows() {
     .filter((l) => l.length > 0)
     .map((line) => {
       const [id, title] = line.split("|||")
-      return { id, title: title || "Без названия" }
+
+      // Оставляем только цифры, чтобы исключить любые проблемы с форматированием
+      const cleanId = id?.replace(/\D/g, "")
+      
+
+      
+      return { id: cleanId, title: title?.trim() || "Без названия" }
     })
 }
 
@@ -35,9 +42,21 @@ export async function getChromeWindows() {
  * Переключает фокус на указанное окно Chrome
  */
 export async function focusChromeWindow(targetId: string) {
+  // Находим окно по ID, поднимаем его индекс, разворачиваем если нужно и активируем Chrome
+  // Используем стратегию "Double-Tap": устанавливаем индекс до и после активации
   await $`osascript -e 'tell application "Google Chrome"
-      set index of window id ${targetId} to 1
+      set targetWindow to (first window whose id is ${{ raw: targetId }})
+      
+      -- 1. Предварительный подъем (если Chrome уже активен)
+      set index of targetWindow to 1
+      if (minimized of targetWindow) then set minimized of targetWindow to false
+      
+      -- 2. Активация (может сбить Z-order)
       activate
+      
+      -- 3. Пауза и повторный подъем (гарантия фокуса)
+      delay 0.2
+      set index of targetWindow to 1
     end tell'`
 }
 
@@ -69,7 +88,7 @@ export async function waitForClipboardChange(initialClipboard: string): Promise<
   const waitInput = new Promise<boolean>((resolve) => {
     const handler = () => resolve(false)
     process.stdin.once("data", handler)
-    cleanup.fn = () => { process.stdin.off("data", handler) }
+    cleanup.fn = () => process.stdin.off("data", handler)
     process.stdin.resume()
   })
 

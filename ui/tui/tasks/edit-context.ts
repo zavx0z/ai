@@ -70,7 +70,9 @@ export const task: TaskDefinition = {
         windows,
         (w) => w.title
       )
-      if (selected) targetId = selected.id!
+      if (selected) {
+        targetId = selected.id!
+      }
     }
 
     console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
