@@ -16,6 +16,7 @@ import {
   EDIT_JSON,
 } from "../src/core/tools"
 import * as Window from "ai-window"
+import * as Deepseek from "ai-web-deepseek"
 import { Tool } from "../src/core/constants"
 
 export const task: TaskDefinition = {
@@ -63,6 +64,7 @@ export const task: TaskDefinition = {
     }
 
     let targetId = windows[0]!.id!
+    let isDeepseek = false
 
     if (windows.length > 1) {
       const selected = await select(
@@ -72,11 +74,19 @@ export const task: TaskDefinition = {
       )
       if (selected) {
         targetId = selected.id!
+        isDeepseek = selected.title?.toLowerCase().includes('deepseek') || false
       }
+    } else {
+      isDeepseek = windows[0]!.title?.toLowerCase().includes('deepseek') || false
     }
 
     console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
     await Window.focusChromeWindow(targetId)
+
+    if (isDeepseek) {
+      await Deepseek.openNewChat()
+      await Deepseek.pasteAndSend()
+    }
 
     const initialClipboard = await $`pbpaste`.text()
     const success = await Window.waitForClipboardChange(initialClipboard)
