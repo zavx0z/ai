@@ -106,6 +106,22 @@ export const TASKS: TaskDefinition[] = [
         set index of window id ${targetId} to 1
         activate
       end tell'`
+
+      console.log("⏳ Ожидание ответа в буфере обмена...")
+
+      const initialClipboard = await $`pbpaste`.text()
+
+      // Ожидаем изменения буфера
+      while (true) {
+        await Bun.sleep(1000)
+        const currentClipboard = await $`pbpaste`.text()
+        if (currentClipboard !== initialClipboard) break
+      }
+
+      console.log("✅ Буфер обновлен! Возвращаюсь...")
+
+      // Возвращаем фокус
+      await $`osascript -e 'tell application "${currentApp}" to activate'`
     },
   },
   {
