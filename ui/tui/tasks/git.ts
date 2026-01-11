@@ -81,8 +81,16 @@ export const task: TaskDefinition = {
           return
         }
 
+        // Автоматически выбираем окно с 'Deepseek' в названии
         let targetId = windows[0]!.id!
-        if (windows.length > 1) {
+        const deepseekWindow = windows.find(w => 
+          w.title?.toLowerCase().includes('deepseek')
+        )
+        
+        if (deepseekWindow) {
+          targetId = deepseekWindow.id!
+          console.log(`✅ Найдено окно Deepseek: "${deepseekWindow.title}"`)
+        } else if (windows.length > 1) {
           const selectedId = await select(
             "🌍 Выберите окно Chrome:",
             windows.map((w) => w.id!),
