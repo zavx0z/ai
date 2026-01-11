@@ -152,50 +152,43 @@ export class TreeExplorer {
   }
 
   private handleNormalInput(key: string, normalizedKey: string): void {
-    // Навигация
-    if (key === "\u001b[A") {
-      // Стрелка вверх
+    // Vim navigation (hjkl) + Arrows
+    if (key === "\u001b[A" || normalizedKey === "k") {
+      // Up
       this.moveCursor(-1)
-    } else if (key === "\u001b[B") {
-      // Стрелка вниз
+    } else if (key === "\u001b[B" || normalizedKey === "j") {
+      // Down
       this.moveCursor(1)
-    } else if (key === "\u001b[C" || key === "\r") {
-      // Стрелка вправо или Enter
+    } else if (key === "\u001b[C" || key === "\r" || normalizedKey === "l") {
+      // Right / Enter
       this.enterDirectory()
-    } else if (key === "\u001b[D") {
-      // Стрелка влево
+    } else if (key === "\u001b[D" || normalizedKey === "h") {
+      // Left / Back
       this.goBack()
     }
-    // Выбор
+    // Selection
     else if (key === " ") {
-      // Пробел
       this.toggleSelection()
-    } else if (normalizedKey === "a" || normalizedKey === "ф") {
-      // ВЫБРАТЬ ВСЁ (РЕКУРСИВНО) - ИСПРАВЛЕННЫЙ ВАРИАНТ
+    } else if (normalizedKey === "a") {
       this.selectAllRecursively()
     } else if (normalizedKey === "A") {
-      // Выбрать всё (полностью)
       this.selectAllCompletely()
-    } else if (normalizedKey === "d" || normalizedKey === "в") {
-      // Снять выбор
+    } else if (normalizedKey === "d") {
       this.selection.deselectAll()
       this.render()
     }
-    // Настройки
-    else if (normalizedKey === "h" || normalizedKey === "р") {
-      // Скрытые файлы
+    // Tools
+    else if (normalizedKey === ".") {
+      // Toggle hidden (dotfiles)
       this.toggleHidden()
-    } else if (normalizedKey === "f" || normalizedKey === "а") {
-      // Фильтр
+    } else if (normalizedKey === "f") {
       this.enterFilterMode()
-    } else if (normalizedKey === "s" || normalizedKey === "ы") {
-      // Показать выбранное
+    } else if (normalizedKey === "s") {
       this.showSelected()
-    } else if (normalizedKey === "e" || normalizedKey === "у") {
-      // Исключения
+    } else if (normalizedKey === "e") {
       this.showExcludeInfo()
-    } else if (normalizedKey === "j" || normalizedKey === "о") {
-      // Сохранить выбранное в JSON
+    } else if (normalizedKey === "w") {
+      // Write to JSON
       this.saveSelectionToJson()
     }
   }
@@ -325,9 +318,9 @@ export class TreeExplorer {
     const output = this.renderer.renderSelectedFilesScreen(selectedFiles)
     process.stdout.write(output)
 
-    // Временный обработчик для возврата и сохранения
+      // Временный обработчик для возврата и сохранения
     const returnHandler = (key: string, normalizedKey: string) => {
-      if (normalizedKey === "j" || normalizedKey === "о") {
+      if (normalizedKey === "w") {
         // Сохраняем в JSON
         this.saveSelectionToJson(selectedFiles)
       } else {

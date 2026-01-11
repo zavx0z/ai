@@ -174,62 +174,51 @@ export class Renderer {
       "\n" +
       "  " +
       this.theme.cyan +
-      "↑/↓" +
+      "k/j" +
       this.theme.reset +
-      " - Навигация  " +
+      " - Вверх/Вниз  " +
       this.theme.cyan +
-      "→/Enter" +
+      "l" +
       this.theme.reset +
       " - Войти  " +
       this.theme.cyan +
-      "←" +
+      "h" +
       this.theme.reset +
       " - Назад  " +
       this.theme.cyan +
       "Пробел" +
       this.theme.reset +
-      " - Выбрать директорию (рекурсивно)\n" + // ← добавил "рекурсивно"
+      " - Выбрать\n" +
       "  " +
       this.theme.cyan +
       "a (ф)" +
       this.theme.reset +
-      " - Выбрать всё (рекурсивно)  " + // ← исправил описание
-      this.theme.cyan +
-      "A (Ф)" +
-      this.theme.reset +
-      " - Выбрать всё (полностью)\n" +
-      "  " +
+      " - Выбрать всё  " +
       this.theme.cyan +
       "d (в)" +
       this.theme.reset +
-      " - Снять выбор  " +
+      " - Сброс  " +
       this.theme.cyan +
-      "h (р)" +
+      ". (ю)" +
       this.theme.reset +
-      " - Скрытые файлы  " +
+      " - Скрытые  " +
       this.theme.cyan +
       "f (а)" +
       this.theme.reset +
       " - Фильтр\n" +
       "  " +
       this.theme.cyan +
-      "q (й)/Ctrl+C" +
+      "q (й)" +
       this.theme.reset +
       " - Выход  " +
       this.theme.cyan +
       "s (ы)" +
       this.theme.reset +
-      " - Показать выбранное\n" +
-      "  " +
+      " - Обзор  " +
       this.theme.cyan +
-      "e (у)" +
+      "w (ц)" +
       this.theme.reset +
-      " - Режим исключений  " +
-      this.theme.cyan +
-      "j (о)" +
-      this.theme.reset +
-      " - Сохранить в JSON\n"
-
+      " - Сохранить (JSON)\n"
     return footer
   }
 
@@ -291,7 +280,7 @@ export class Renderer {
 
     output += "\n" + this.theme.gray + "─".repeat(this.getTerminalWidth()) + this.theme.reset + "\n"
     output += this.theme.yellow + "Нажмите любую клавишу для возврата..." + this.theme.reset + "\n"
-    output += this.theme.cyan + "Нажмите 'j' для сохранения списка в JSON файл" + this.theme.reset
+    output += this.theme.cyan + "Нажмите 'w' для сохранения списка в JSON файл" + this.theme.reset
 
     return output
   }

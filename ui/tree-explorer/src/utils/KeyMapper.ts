@@ -1,37 +1,14 @@
 import type { KeyMapping } from "../types/types"
 
 export class KeyMapper {
+  // Standard Layout Mapping (QWERTY <-> ЙЦУКЕН)
   private static readonly RUSSIAN_TO_ENGLISH: KeyMapping = {
-    ф: "a",
-    и: "b",
-    с: "c",
-    в: "d",
-    у: "e",
-    а: "f",
-    п: "g",
-    р: "h",
-    ш: "i",
-    щ: "j",
-    к: "k",
-    ы: "l",
-    м: "m",
-    т: "n",
-    ь: "o",
-    б: "p",
-    ю: "q",
-    я: "r",
-    д: "s",
-    з: "t",
-    й: "u",
-    ц: "v",
-    ж: "w",
-    х: "x",
-    ч: "y",
-    э: "z",
-    н: "y",
-    г: "u",
-    е: "t",
-    о: "j",
+    // Row 1
+    "й": "q", "ц": "w", "у": "e", "к": "r", "е": "t", "н": "y", "г": "u", "ш": "i", "щ": "o", "з": "p", "х": "[", "ъ": "]",
+    // Row 2
+    "ф": "a", "ы": "s", "в": "d", "а": "f", "п": "g", "р": "h", "о": "j", "л": "k", "д": "l", "ж": ";", "э": "'",
+    // Row 3
+    "я": "z", "ч": "x", "с": "c", "м": "v", "и": "b", "т": "n", "ь": "m", "б": ",", "ю": ".", ".": "/"
   }
 
   static convertRussianKey(key: string): string {
@@ -44,13 +21,13 @@ export class KeyMapper {
 
   static isSpecialKey(key: string): boolean {
     const specialKeys = [
-      "\u001b[A", // Стрелка вверх
-      "\u001b[B", // Стрелка вниз
-      "\u001b[C", // Стрелка вправо
-      "\u001b[D", // Стрелка влево
+      "\u001b[A", // Up Arrow
+      "\u001b[B", // Down Arrow
+      "\u001b[C", // Right Arrow
+      "\u001b[D", // Left Arrow
       "\u0003", // Ctrl+C
       "\r", // Enter
-      " ", // Пробел
+      " ", // Space
       "\x7f", // Backspace
       "\u001b", // Escape
     ]
@@ -59,13 +36,13 @@ export class KeyMapper {
 
   static getKeyDescription(key: string): string {
     const descriptions: KeyMapping = {
-      "\u001b[A": "Стрелка вверх",
-      "\u001b[B": "Стрелка вниз",
-      "\u001b[C": "Стрелка вправо",
-      "\u001b[D": "Стрелка влево",
+      "\u001b[A": "Up",
+      "\u001b[B": "Down",
+      "\u001b[C": "Right",
+      "\u001b[D": "Left",
       "\u0003": "Ctrl+C",
       "\r": "Enter",
-      " ": "Пробел",
+      " ": "Space",
       "\x7f": "Backspace",
       "\u001b": "Escape",
     }
