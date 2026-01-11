@@ -266,6 +266,7 @@ export class Renderer {
     if (selectedFiles.length === 0) {
       output += this.theme.yellow + "Файлы не выбраны" + this.theme.reset + "\n"
     } else {
+      let displayedCount = 0
       selectedFiles.forEach((file) => {
         // Проверяем расширение или наличие точки в имени как простой признак файла
         const hasExtension = file.includes(".") && !file.endsWith("/")
@@ -274,8 +275,13 @@ export class Renderer {
 
         if (isLikelyFile) {
           output += `${file}\n`
+          displayedCount++
         }
       })
+      
+      if (displayedCount === 0 && selectedFiles.length > 0) {
+        output += this.theme.yellow + "Все выбранные файлы являются директориями или символическими ссылками" + this.theme.reset + "\n"
+      }
     }
 
     output += "\n" + this.theme.gray + "─".repeat(this.getTerminalWidth()) + this.theme.reset + "\n"

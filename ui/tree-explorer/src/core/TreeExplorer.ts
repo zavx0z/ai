@@ -294,8 +294,24 @@ export class TreeExplorer {
   }
 
   private async selectAllCompletely(): Promise<void> {
-    this.selection.selectAllIncludingExcluded(this.entries)
-    this.render()
+    // Выбираем всё, но с учётом исключений (как в selectAllRecursively)
+    try {
+      // Сначала выбираем всё что видно на экране
+      this.selection.selectAll(this.entries)
+
+      // Затем рекурсивно выбираем содержимое всех директорий
+      const directories = this.entries.filter(
+        (entry) => entry && entry.isDirectory && !this.excludePatterns.isExcluded(entry.path)
+      )
+
+      for (const dir of directories) {
+        await this.selection.selectDirectory(dir.path)
+      }
+
+      this.render()
+    } catch (error) {
+        console.error(`❌ Ошибка при выборе всего: ${error instanceof Error ? error.message : String(error)}`)
+    }
   }
 
   // Методы настройки
@@ -376,12 +392,12 @@ export class TreeExplorer {
       // Создаем новый формат JSON: только абсолютные пути к регулярным файлам (не директории и не симлинки)
       const { resolve } = await import("path")
 
-      // Отфильтруем только регулярные файлы
+      // Отфильтруем только регулярные файлы, которые не исключены
       const filePaths = []
       for (const file of files) {
         const absolutePath = resolve(file)
         const entry = await FileSystem.getFileEntry(absolutePath)
-        if (entry && !entry.isDirectory && !entry.isSymlink) {
+        if (entry && !entry.isDirectory && !entry.isSymlink && !this.excludePatterns.isExcluded(absolutePath)) {
           filePaths.push(absolutePath)
         }
       }
