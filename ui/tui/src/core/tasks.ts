@@ -178,6 +178,7 @@ export const TASKS: TaskDefinition[] = [
         name: "📦 Полный контекст",
         description: "Добавить все изменения в коммит и подготовить контекст",
       },
+      { id: "changed-context", name: "⚡ Изменения", description: "Контекст только измененных файлов" },
       { id: "select-context", name: "📂 Выбрать файлы", description: "Интерактивный выбор файлов для контекста" },
       { id: "commit-buf", name: "📝 Коммит", description: "Сделать коммит с сообщением из буфера" },
       { id: "push", name: "🚀 Push", description: "git push" },
@@ -206,6 +207,21 @@ export const TASKS: TaskDefinition[] = [
           await $`git add .` // Добавление всех изменений в индекс
           await $`pbpaste | git commit -F -` // Коммит с использованием сообщения из stdin
           console.log("✅ Закоммичено!")
+          return
+
+        case "changed-context":
+          await $`mkdir -p ${TMP_DIR}` // Создание временной директории
+          await $`git add .` // Добавление изменений в индекс
+          await $`git diff --staged > ${DIFF_PATCH}` // Создание патча изменений
+          const changedFiles = (await $`git diff --name-only --cached`.text())
+            .trim()
+            .split("\n")
+            .filter((l) => l.length > 0)
+          await Bun.write(FILES_JSON, JSON.stringify(changedFiles))
+          await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}` // Объединение выбранных файлов
+          await $`bun run ${{ raw: PATH_COMMIT }} ${DIFF_PATCH} -c ${JOIN_MD} -o ${COMMIT_MD}` // Генерация сообщения коммита с учетом контекста
+          await $`cat ${COMMIT_MD} | pbcopy` // Копирование результата в буфер
+          console.log("✅ Контекст изменений обновлен!")
           return
 
         case "select-context":
