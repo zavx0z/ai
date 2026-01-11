@@ -14,7 +14,7 @@ import {
 export const task: TaskDefinition = {
   id: "lint",
   name: "🧹 Ошибки",
-  description: "Сбор данных для исправления ошибок",
+  description: "Собрать TypeScript ошибки и контекст проекта в буфер",
   run: async (ctx) => {
     await $`mkdir -p ${TMP_DIR}`
     const excludes = await getExcludes(ctx)

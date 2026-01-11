@@ -21,10 +21,10 @@ import { Tool } from "../src/core/constants"
 export const task: TaskDefinition = {
   id: "edit-context",
   name: "🤖 Задача",
-  description: "Подготовка контекста (edit.md)",
+  description: "Подготовка контекста для AI (включает структуру проекта и документацию)",
   actions: [
-    { id: "all", name: "🌍 Весь проект", description: "Все файлы (стандарт)" },
-    { id: "select", name: "🎯 Выбрать файлы", description: "Интерактивный выбор" },
+    { id: "all", name: "🌍 Весь проект", description: "Все файлы (с фильтрацией исключений)" },
+    { id: "select", name: "🎯 Выбрать файлы", description: "Интерактивный выбор через tree-explorer" },
   ],
   run: async (ctx, actionId) => {
     const taskDescription = await input("📝 Опишите задачу:")

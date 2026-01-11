@@ -20,17 +20,17 @@ import {
 export const task: TaskDefinition = {
   id: "git",
   name: "📦 GIT",
-  description: "Git операции + Контекст",
+  description: "Git операции с AI-контекстом (коммит, пушинг, диффы)",
   actions: [
     {
       id: "ful-context",
       name: "📦 Полный контекст",
-      description: "Добавить все изменения в коммит и подготовить контекст",
+      description: "Контекст всего проекта + дифф + commit.md",
     },
-    { id: "changed-context", name: "⚡ Изменения", description: "Контекст только измененных файлов" },
-    { id: "select-context", name: "📂 Выбрать файлы", description: "Интерактивный выбор файлов для контекста" },
+    { id: "changed-context", name: "⚡ Изменения", description: "Контекст только измененных файлов + авто-коммит" },
+    { id: "select-context", name: "📂 Выбрать файлы", description: "Выбрать файлы для контекста через tree-explorer" },
     { id: "commit-buf", name: "📝 Коммит", description: "Сделать коммит с сообщением из буфера" },
-    { id: "push", name: "🚀 Push", description: "git push" },
+    { id: "push", name: "🚀 Push", description: "Отправить коммиты в удаленный репозиторий" },
   ],
   run: async (ctx, actionId) => {
     const excludes = await getExcludes(ctx)

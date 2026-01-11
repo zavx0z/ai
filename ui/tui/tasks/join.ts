@@ -12,7 +12,7 @@ import {
 export const task: TaskDefinition = {
   id: "join",
   name: "📝 Данные",
-  description: "Объединение файлов и структуры в один файл",
+  description: "Собрать структуру проекта и контент файлов в Markdown",
   run: async (ctx) => {
     await $`mkdir -p ${TMP_DIR}`
     const excludes = await getExcludes(ctx)
