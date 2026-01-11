@@ -13,6 +13,7 @@ import {
   JOIN_MD,
   EDIT_MD,
 } from "../src/core/tools"
+import * as Window from "../tools/window/index"
 import { Tool } from "../src/core/constants"
 
 export const task: TaskDefinition = {
@@ -51,26 +52,8 @@ export const task: TaskDefinition = {
     await $`cat ${EDIT_MD} | pbcopy`
     console.log("✅ Скопировано в буфер!")
 
-    const currentApp = (
-      await $`osascript -e 'tell application "System Events" to bundle identifier of first process whose frontmost is true'`.text()
-    ).trim()
-
-    const rawWindows = await $`osascript -e 'tell application "Google Chrome"
-        set outList to ""
-        repeat with w in windows
-          set outList to outList & (id of w) & "|||" & (title of w) & "\n"
-        end repeat
-        return outList
-      end tell'`.text()
-
-    const windows = rawWindows
-      .trim()
-      .split("\n")
-      .filter((l) => l.length > 0)
-      .map((line) => {
-        const [id, title] = line.split("|||")
-        return { id, title: title || "Без названия" }
-      })
+    const currentApp = await Window.getCurrentApp()
+    const windows = await Window.getChromeWindows()
 
     if (windows.length === 0) {
       console.log("❌ Chrome не запущен или нет открытых окон")
@@ -90,40 +73,10 @@ export const task: TaskDefinition = {
     }
 
     console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
-
-    await $`osascript -e 'tell application "Google Chrome"
-        set index of window id ${targetId} to 1
-        activate
-      end tell'`
-
-    console.log("⏳ Ожидание ответа в буфере обмена... (Нажмите Enter для отмены)")
+    await Window.focusChromeWindow(targetId)
 
     const initialClipboard = await $`pbpaste`.text()
-
-    let stopWaiting = false
-    let cleanupInput: (() => void) | null = null
-
-    const checkClipboardLoop = async () => {
-      while (!stopWaiting) {
-        const current = await $`pbpaste`.text()
-        if (current !== initialClipboard) return true
-        await Bun.sleep(500)
-      }
-      return false
-    }
-
-    const waitInput = new Promise<boolean>((resolve) => {
-      const handler = () => resolve(false)
-      process.stdin.once("data", handler)
-      cleanupInput = () => process.stdin.off("data", handler)
-      process.stdin.resume()
-    })
-
-    const success = await Promise.race([checkClipboardLoop(), waitInput])
-
-    stopWaiting = true
-    if (cleanupInput) cleanupInput()
-    process.stdin.pause()
+    const success = await Window.waitForClipboardChange(initialClipboard)
 
     if (success) {
       console.log("✅ Буфер обновлен! Возвращаюсь...")
@@ -131,6 +84,6 @@ export const task: TaskDefinition = {
       console.log("⚠️ Ожидание отменено.")
     }
 
-    await $`osascript -e 'tell application "System Events" to set frontmost of (first process whose bundle identifier is "${currentApp}") to true'`
+    await Window.restoreApp(currentApp)
   },
 }
