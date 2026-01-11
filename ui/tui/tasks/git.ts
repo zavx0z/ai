@@ -105,7 +105,7 @@ export const task: TaskDefinition = {
 
         console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
         await Window.focusChromeWindow(targetId)
-        await Keyboard.pressCmdJ()
+        await Keyboard.pasteAndSend()
 
         const initialClipboard = await $`pbpaste`.text()
         const success = await Window.waitForClipboardChange(initialClipboard)

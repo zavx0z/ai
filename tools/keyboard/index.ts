@@ -1,8 +1,14 @@
 import { $ } from "bun"
 
 /**
- * Эмулирует нажатие Cmd+J (например, для открытия загрузок)
+ * Эмулирует последовательность: Cmd+J (открыть), Cmd+V (вставить), Enter (отправить)
  */
-export async function pressCmdJ() {
-  await $`osascript -e 'tell application "System Events" to keystroke "j" using command down'`
+export async function pasteAndSend() {
+  await $`osascript -e 'tell application "System Events"
+      keystroke "j" using command down
+      delay 0.2
+      keystroke "v" using command down
+      delay 0.2
+      keystroke return
+    end tell'`
 }
