@@ -12,6 +12,8 @@ import {
   FILES_JSON,
   JOIN_MD,
   EDIT_MD,
+  PATH_EDIT,
+  EDIT_JSON,
 } from "../src/core/tools"
 import * as Window from "../tools/window/index"
 import { Tool } from "../src/core/constants"
@@ -63,13 +65,12 @@ export const task: TaskDefinition = {
     let targetId = windows[0]!.id
 
     if (windows.length > 1) {
-      const selectedTitle = await select(
+      const selectedId = await select(
         "🌍 Выберите окно Chrome:",
-        windows.map((w) => w.title),
-        (t) => t
+        windows.map((w) => w.id),
+        (id) => windows.find((w) => w.id === id)?.title || "Без названия"
       )
-      const found = windows.find((w) => w.title === selectedTitle)
-      if (found) targetId = found.id
+      if (selectedId) targetId = selectedId
     }
 
     console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
@@ -80,10 +81,13 @@ export const task: TaskDefinition = {
 
     if (success) {
       console.log("✅ Буфер обновлен! Возвращаюсь...")
+      await Window.restoreApp(currentApp)
+      await $`pbpaste > ${EDIT_JSON}`
+      await $`bun run ${{ raw: PATH_EDIT }} ${EDIT_JSON}`
+      console.log("✅ Изменения применены!")
     } else {
       console.log("⚠️ Ожидание отменено.")
+      await Window.restoreApp(currentApp)
     }
-
-    await Window.restoreApp(currentApp)
   },
 }
