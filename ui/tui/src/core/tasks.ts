@@ -61,7 +61,7 @@ export const TASKS: TaskDefinition[] = [
 
       // 1. Узнаем имя текущего приложения
       const currentApp = (
-        await $`osascript -e 'tell application "System Events" to name of first process whose frontmost is true'`.text()
+        await $`osascript -e 'tell application "System Events" to bundle identifier of first process whose frontmost is true'`.text()
       ).trim()
 
       // 2. Получаем список окон Chrome (ID ||| Title)
@@ -121,7 +121,7 @@ export const TASKS: TaskDefinition[] = [
       console.log("✅ Буфер обновлен! Возвращаюсь...")
 
       // Возвращаем фокус
-      await $`osascript -e 'tell application "${currentApp}" to activate'`
+      await $`osascript -e 'tell application id "${currentApp}" to activate'`
     },
   },
   {
