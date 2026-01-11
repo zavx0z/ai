@@ -65,15 +65,12 @@ export const task: TaskDefinition = {
     let targetId = windows[0]!.id!
 
     if (windows.length > 1) {
-      const selectedId = await select(
+      const selected = await select(
         "🌍 Выберите окно Chrome:",
-        windows.map((w) => w.id!),
-        (id) => {
-          const window = windows.find((w) => w.id === id);
-          return window?.title ?? "Без названия";
-        }
+        windows,
+        (w) => w.title
       )
-      if (selectedId) targetId = selectedId
+      if (selected) targetId = selected.id!
     }
 
     console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
