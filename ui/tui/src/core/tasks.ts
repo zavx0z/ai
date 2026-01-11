@@ -1,21 +1,26 @@
 import { $ } from "bun"
 import { Tool } from "./constants"
-import { join } from "path"
 import { input } from "../ui/input"
 import { select } from "../ui/select"
 import { Theme } from "../ui/theme"
 import type { TaskDefinition } from "./tools"
-import { getExcludes, PATH_LINT, PATH_EDIT, PATH_COMMIT, PATH_TREE, PATH_JOIN } from "./tools"
-
-const TMP_DIR = "tmp"
-const TASK_MD = join(TMP_DIR, "task.md")
-const FILES_JSON = join(TMP_DIR, "files.json")
-const JOIN_MD = join(TMP_DIR, "join.md")
-const EDIT_MD = join(TMP_DIR, "edit.md")
-const EDIT_JSON = join(TMP_DIR, "edit.json")
-const LINT_MD = join(TMP_DIR, "lint.md")
-const DIFF_PATCH = join(TMP_DIR, "diff.patch")
-const COMMIT_MD = join(TMP_DIR, "commit.md")
+import {
+  getExcludes,
+  PATH_LINT,
+  PATH_EDIT,
+  PATH_COMMIT,
+  PATH_TREE,
+  PATH_JOIN,
+  TMP_DIR,
+  TASK_MD,
+  FILES_JSON,
+  JOIN_MD,
+  EDIT_MD,
+  COMMIT_MD,
+  DIFF_PATCH,
+  EDIT_JSON,
+  LINT_MD,
+} from "./tools"
 
 export const TASKS: TaskDefinition[] = [
   {
@@ -114,6 +119,7 @@ export const TASKS: TaskDefinition[] = [
       { id: "push", name: "🚀 Push", description: "git push" },
     ],
     run: async (ctx, actionId) => {
+      const excludes = await getExcludes(ctx)
       switch (actionId) {
         case "push":
           await $`git push` // Отправка изменений в удаленный репозиторий
@@ -142,7 +148,6 @@ export const TASKS: TaskDefinition[] = [
           await $`mkdir -p ${TMP_DIR}` // Создание временной директории
           await $`git add .` // Добавление изменений в индекс
           await $`git diff --staged > ${DIFF_PATCH}` // Создание патча изменений
-          const excludes = await getExcludes(ctx)
           await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -o ${FILES_JSON}` // Интерактивный выбор файлов контекста
           await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}` // Объединение выбранных файлов
           await $`bun run ${{ raw: PATH_COMMIT }} ${DIFF_PATCH} -c ${JOIN_MD} -o ${COMMIT_MD}` // Генерация сообщения коммита с учетом контекста
@@ -154,8 +159,7 @@ export const TASKS: TaskDefinition[] = [
           await $`mkdir -p ${TMP_DIR}` // Создание временной директории
           await $`git add .` // Добавление изменений в индекс
           await $`git diff --staged > ${DIFF_PATCH}` // Создание патча изменений
-          const excludes2 = await getExcludes(ctx)
-          await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes2 }} -p -o ${FILES_JSON}` // Автоматический сбор файлов контекста
+          await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}` // Автоматический сбор файлов контекста
           await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}` // Объединение файлов
           await $`bun run ${{ raw: PATH_COMMIT }} ${DIFF_PATCH} -c ${JOIN_MD} -o ${COMMIT_MD}` // Генерация сообщения коммита с учетом контекста
           await $`cat ${COMMIT_MD} | pbcopy` // Копирование результата в буфер
