@@ -58,6 +58,54 @@ export const TASKS: TaskDefinition[] = [
       await $`cat ${TASK_MD} ${JOIN_MD} ${{ raw: docBun }} ${{ raw: docEdit }} > ${EDIT_MD}` // Сборка итогового промпта с инструкциями
       await $`cat ${EDIT_MD} | pbcopy` // Копирование в буфер обмена
       console.log("✅ Скопировано в буфер!")
+
+      // 1. Узнаем имя текущего приложения
+      const currentApp = (
+        await $`osascript -e 'tell application "System Events" to name of first process whose frontmost is true'`.text()
+      ).trim()
+
+      // 2. Получаем список окон Chrome (ID ||| Title)
+      const rawWindows = await $`osascript -e 'tell application "Google Chrome"
+        set outList to ""
+        repeat with w in windows
+          set outList to outList & (id of w) & "|||" & (title of w) & "\n"
+        end repeat
+        return outList
+      end tell'`.text()
+
+      const windows = rawWindows
+        .trim()
+        .split("\n")
+        .filter((l) => l.length > 0)
+        .map((line) => {
+          const [id, title] = line.split("|||")
+          return { id, title: title || "Без названия" }
+        })
+
+      if (windows.length === 0) {
+        console.log("❌ Chrome не запущен или нет открытых окон")
+        return
+      }
+
+      let targetId = windows[0]!.id
+
+      if (windows.length > 1) {
+        const selectedTitle = await select(
+          "🌍 Выберите окно Chrome:",
+          windows.map((w) => w.title),
+          (t) => t
+        )
+        const found = windows.find((w) => w.title === selectedTitle)
+        if (found) targetId = found.id
+      }
+
+      console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
+
+      // 3. Активируем конкретное окно
+      await $`osascript -e 'tell application "Google Chrome"
+        set index of window id ${targetId} to 1
+        activate
+      end tell'`
     },
   },
   {

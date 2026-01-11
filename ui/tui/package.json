@@ -5,5 +5,8 @@
   "main": "cli.ts",
   "dependencies": {
     "tui-base": "workspace:*"
+  },
+  "scripts": {
+    "edit": "bun run ../../actions/edit/cli.ts tmp/edit.json"
   }
 }
