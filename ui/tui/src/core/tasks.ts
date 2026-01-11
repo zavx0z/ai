@@ -11,21 +11,37 @@ export const TASKS: TaskDefinition[] = [
     id: "edit-context",
     name: "🤖 Задача",
     description: "Подготовка контекста (edit.md)",
-    getCommand: async (ctx) => {
+    actions: [
+      { id: "all", name: "🌍 Весь проект", description: "Все файлы (стандарт)" },
+      { id: "select", name: "🎯 Выбрать файлы", description: "Интерактивный выбор" },
+    ],
+    getCommand: async (ctx, actionId) => {
       const taskDescription = await input("📝 Опишите задачу:")
       if (taskDescription === null) return "echo '❌ Отменено'"
-
+      
       const tmpDir = join(ctx.path, "tmp")
       Bun.spawnSync(["mkdir", "-p", tmpDir])
       await Bun.write(join(tmpDir, "task.md"), `# Задача\n\n${taskDescription}\n\n`)
-
-      const chain = await getContextChain(ctx)
+      
       const docBun = Tool("generator/bun/README.md")
       const docEdit = Tool("actions/edit/edit.md")
       const cmdConcat = `cat tmp/task.md tmp/join.md ${docBun} ${docEdit} > tmp/edit.md`
       const cmdCopy = `cat tmp/edit.md | pbcopy`
       const cmdNotify = `echo "✅ Скопировано в буфер!"`
-      return `${chain} && ${cmdConcat} && ${cmdCopy} && ${cmdNotify}`
+
+      switch (actionId) {
+        case "select": {
+          const excludes = await getExcludes(ctx)
+          const cmdTree = `bun run ${PATH_TREE} ${excludes} -o tmp/files.json`
+          const cmdJoin = getJoinCmd()
+          const chain = `mkdir -p tmp && ${cmdTree} && ${cmdJoin}`
+          return `${chain} && ${cmdConcat} && ${cmdCopy} && ${cmdNotify}`
+        }
+        default: {
+          const chain = await getContextChain(ctx)
+          return `${chain} && ${cmdConcat} && ${cmdCopy} && ${cmdNotify}`
+        }
+      }
     },
   },
   {
@@ -39,11 +55,13 @@ export const TASKS: TaskDefinition[] = [
     getCommand: async (ctx, actionId) => {
       const runEdit = `bun run ${PATH_EDIT} tmp/edit.json`
       const cmdNotify = `echo "✅ Изменения применены!"`
-
-      if (actionId === "clipboard") {
-        return `pbpaste > tmp/edit.json && ${runEdit} && ${cmdNotify}`
+      
+      switch (actionId) {
+        case "clipboard":
+          return `pbpaste > tmp/edit.json && ${runEdit} && ${cmdNotify}`
+        default:
+          return `${runEdit} && ${cmdNotify}`
       }
-      return `${runEdit} && ${cmdNotify}`
     },
   },
   {
