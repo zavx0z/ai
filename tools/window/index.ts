@@ -93,10 +93,31 @@ export async function waitForClipboardChange(initialClipboard: string): Promise<
   })
 
   const success = await Promise.race([checkClipboardLoop(), waitInput])
-
   stopWaiting = true
   if (cleanup.fn) cleanup.fn()
   process.stdin.pause()
-
   return success
+}
+
+/**
+ * Получает границы (x, y, width, height) окна Chrome по ID
+ */
+export async function getChromeWindowBounds(windowId: string) {
+  const output = await $`osascript -e 'tell application "Google Chrome" to bounds of window id ${{ raw: windowId }}'`.text()
+
+  const [left, top, right, bottom] = output
+    .trim()
+    .split(",")
+    .map((s) => parseInt(s.trim()))
+
+  return { x: left, y: top, width: right - left, height: bottom - top }
+}
+
+/**
+ * Делает скриншот окна Chrome
+ */
+export async function captureChromeWindow(windowId: string, outputPath: string) {
+  const { x, y, width, height } = await getChromeWindowBounds(windowId)
+  // -x: без звука, -R: регион
+  await $`screencapture -x -R${x},${y},${width},${height} ${outputPath}`
 }
