@@ -43,7 +43,7 @@ export const task: TaskDefinition = {
 
     switch (actionId) {
       case "select":
-        await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -o ${FILES_JSON}`
+        await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} ${{ raw: (await Bun.file(FILES_JSON).exists()) ? `-i ${FILES_JSON}` : "" }} -o ${FILES_JSON}`
         break
       default:
         await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`

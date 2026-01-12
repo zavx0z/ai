@@ -180,7 +180,7 @@ export const task: TaskDefinition = {
         await $`mkdir -p ${TMP_DIR}`
         await $`git add .`
         await $`git diff --staged > ${DIFF_PATCH}`
-        await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -o ${FILES_JSON}`
+        await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} ${{ raw: (await Bun.file(FILES_JSON).exists()) ? `-i ${FILES_JSON}` : "" }} -o ${FILES_JSON}`
         await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
         await $`bun run ${{ raw: PATH_COMMIT }} ${DIFF_PATCH} -c ${JOIN_MD} -o ${COMMIT_MD}`
         await $`cat ${COMMIT_MD} | pbcopy`
