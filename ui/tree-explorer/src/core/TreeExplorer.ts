@@ -45,6 +45,11 @@ export class TreeExplorer {
     this.inputHandler = new InputHandler()
     this.config = config || {}
 
+    // Применение начального выбора
+    if (this.config.initialSelection) {
+      this.selection.importSelection(this.config.initialSelection)
+    }
+
     // Добавляем начальную точку в историю
     this.history.add(this.currentPath, 0)
 

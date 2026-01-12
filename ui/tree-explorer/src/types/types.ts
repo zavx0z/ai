@@ -41,4 +41,5 @@ export interface KeyMapping {
 export interface AppConfig {
   outputFile?: string
   excludePatterns?: string[]
+  initialSelection?: string[]
 }

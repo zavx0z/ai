@@ -94,7 +94,7 @@ async function main() {
     const config = await loadConfig()
     
     // Парсинг аргументов командной строки
-    const { path, excludePatterns, pipelineMode, outputFile } = parseArgs(process.argv)
+    const { path, excludePatterns, pipelineMode, outputFile, inputFile } = parseArgs(process.argv)
 
     // Объединяем исключения из конфига и аргументов
     const configExclusions = config.excludePatterns || []
@@ -103,6 +103,22 @@ async function main() {
     // Если передан аргумент -o, он имеет приоритет над конфигом
     if (outputFile) {
       config.outputFile = outputFile
+    }
+
+    // Загрузка начального выбора из файла
+    if (inputFile) {
+      const file = Bun.file(inputFile)
+      if (await file.exists()) {
+        try {
+          const selected = await file.json()
+          if (Array.isArray(selected)) {
+            config.initialSelection = selected
+            console.log(`📂 Загружено ${selected.length} файлов из ${inputFile}`)
+          }
+        } catch (e) {
+          console.error(`⚠️ Ошибка чтения файла выбора: ${e}`)
+        }
+      }
     }
 
     // Режим пайплайна: выбрать всё, сохранить и выйти

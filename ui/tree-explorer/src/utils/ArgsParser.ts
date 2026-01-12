@@ -6,6 +6,7 @@ export interface ParsedArgs {
   excludePatterns: string[]
   pipelineMode: boolean
   outputFile?: string
+  inputFile?: string
 }
 
 export function parseArgs(argv: string[]): ParsedArgs {
@@ -14,6 +15,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const excludePatterns: string[] = []
   let pipelineMode = false
   let outputFile: string | undefined
+  let inputFile: string | undefined
   let i = 0
 
   while (i < args.length) {
@@ -53,6 +55,15 @@ export function parseArgs(argv: string[]): ParsedArgs {
       outputFile = arg.substring(9)
     } else if (arg.startsWith("-o=")) {
       outputFile = arg.substring(3)
+    } else if (arg === "--input" || arg === "-i") {
+      i++
+      if (i < args.length) {
+        inputFile = args[i]
+      }
+    } else if (arg.startsWith("--input=")) {
+      inputFile = arg.substring(8)
+    } else if (arg.startsWith("-i=")) {
+      inputFile = arg.substring(3)
     } else if (arg === "--help" || arg === "-h") {
       showHelp()
       process.exit(0)
@@ -63,7 +74,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     i++
   }
 
-  return { path, excludePatterns, pipelineMode, outputFile }
+  return { path, excludePatterns, pipelineMode, outputFile, inputFile }
 }
 
 export async function validatePath(path: string): Promise<string> {
@@ -93,6 +104,7 @@ function showHelp(): void {
   console.log("  --exclude, -e PATTERN  Исключить файлы по паттерну")
   console.log("  --pipeline, -p         Режим пайплайна: выбрать всё, сохранить и выйти")
   console.log("  --output, -o FILE      Указать файл для сохранения результата")
+  console.log("  --input, -i FILE       Указать JSON файл с начальным выбором")
   console.log("  --help, -h             Показать эту справку\n")
   console.log("Примеры:")
   console.log("  bun index.ts /path/to/dir")
