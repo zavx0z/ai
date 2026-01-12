@@ -110,6 +110,10 @@ export async function getChromeWindowBounds(windowId: string) {
     .split(",")
     .map((s) => parseInt(s.trim()))
 
+  if (left === undefined || top === undefined || right === undefined || bottom === undefined) {
+    throw new Error(`Invalid window bounds: ${output}`)
+  }
+
   return { x: left, y: top, width: right - left, height: bottom - top }
 }
 
