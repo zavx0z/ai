@@ -64,24 +64,32 @@ export const task: TaskDefinition = {
     }
 
     let targetId = windows[0]!.id!
-    let isDeepseek = false
+    let title = windows[0]!.title?.toLowerCase() || ""
 
     if (windows.length > 1) {
       const selected = await select("🌍 Выберите окно Chrome:", windows, (w) => w.title)
       if (selected) {
         targetId = selected.id!
-        isDeepseek = selected.title?.toLowerCase().includes("deepseek") || false
+        title = selected.title?.toLowerCase() || ""
       }
-    } else {
-      isDeepseek = windows[0]!.title?.toLowerCase().includes("deepseek") || false
     }
 
     console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
+
     await Window.focusChromeWindow(targetId)
 
-    if (isDeepseek) {
-      await Deepseek.openNewChat()
-      await pasteAndSend()
+    const service = ["deepseek", "gemini", "alice", "qwen"].find((s) => title.includes(s))
+
+    switch (service) {
+      case "deepseek":
+        await Deepseek.openNewChat()
+        await pasteAndSend()
+        break
+      case "gemini":
+      case "alice":
+      case "qwen":
+        await pasteAndSend()
+        break
     }
 
     const initialClipboard = await $`pbpaste`.text()
