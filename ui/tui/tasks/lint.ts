@@ -67,7 +67,7 @@ export const task: TaskDefinition = {
     console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
     await Window.focusChromeWindow(targetId)
 
-    const service = ["deepseek", "gemini", "alice", "qwen"].find((s) => title.includes(s))
+    const service = ["deepseek", "gemini", "алиса", "qwen"].find((s) => title.includes(s))
 
     switch (service) {
       case "deepseek":
@@ -75,7 +75,7 @@ export const task: TaskDefinition = {
         await pasteAndSend()
         break
       case "gemini":
-      case "alice":
+      case "алиса":
       case "qwen":
         await pasteAndSend()
         break

@@ -76,7 +76,7 @@ export const task: TaskDefinition = {
       }
     }
 
-    const service = ["deepseek", "gemini", "alice", "qwen"].find((s) => title.includes(s))
+    const service = ["deepseek", "gemini", "алиса", "qwen"].find((s) => title.includes(s))
 
     const mode = await select(
       "🤖 Выберите режим:",
@@ -101,7 +101,7 @@ export const task: TaskDefinition = {
         case "gemini":
           await Gemini.openNewChat()
           break
-        case "alice":
+        case "алиса":
           await Alice.openNewChat()
           break
         case "qwen":

@@ -39,6 +39,13 @@
         "@types/bun": "latest",
       },
     },
+    "tools/vision": {
+      "name": "ai-vision",
+      "version": "1.0.0",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
     "tools/window": {
       "name": "ai-window",
       "version": "1.0.0",
@@ -92,6 +99,8 @@
     "ai-chat": ["ai-chat@workspace:web/chat"],
 
     "ai-keyboard": ["ai-keyboard@workspace:tools/keyboard"],
+
+    "ai-vision": ["ai-vision@workspace:tools/vision"],
 
     "ai-window": ["ai-window@workspace:tools/window"],
 
