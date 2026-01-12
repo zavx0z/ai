@@ -4,8 +4,36 @@ import { TASKS } from "./tasks"
 import { runTool } from "./src/runner/executor"
 import { select } from "./src/ui/select"
 import { Theme } from "./src/ui/theme"
+import { AI_ROOT } from "./src/core/constants"
+import * as Window from "ai-window"
+import { join } from "path"
 
 async function main() {
+  // 🔍 Калибровка окон AI сервисов при запуске
+  try {
+    const currentApp = await Window.getCurrentApp()
+    const windows = await Window.getChromeWindows()
+    const services = ["deepseek", "gemini", "alice", "qwen"]
+    const storageDir = join(AI_ROOT, "tmp/ai-chat")
+    let hasFocused = false
+
+    for (const service of services) {
+      const found = windows.find((w) => w.title?.toLowerCase().includes(service))
+      if (found && found.id) {
+        const screenshot = await Window.checkWindowSizeAndCapture(found.id, service, storageDir)
+        if (screenshot) {
+          console.log(`${Theme.green}📸 AI Window Calibrated: ${service}${Theme.reset}`)
+          hasFocused = true
+        }
+      }
+    }
+
+    if (hasFocused) {
+      await Window.restoreApp(currentApp)
+    }
+  } catch (e) {
+    // Silent fail if window tools not available
+  }
   while (true) {
     const contexts = await scanTargetProject()
 

@@ -125,3 +125,35 @@ export async function captureChromeWindow(windowId: string, outputPath: string) 
   // -x: без звука, -R: регион
   await $`screencapture -x -R${x},${y},${width},${height} ${outputPath}`
 }
+
+/**
+ * Проверяет размер окна и сохраняет скриншот при изменении
+ */
+export async function checkWindowSizeAndCapture(windowId: string, serviceName: string, storageDir: string) {
+  const dataPath = `${storageDir}/data.json`
+  const screenshotPath = `${storageDir}/${serviceName}.png`
+  await $`mkdir -p ${storageDir}`
+  const bounds = await getChromeWindowBounds(windowId)
+  let data: Record<string, any> = {}
+  const file = Bun.file(dataPath)
+  if (await file.exists()) {
+    try {
+      data = await file.json()
+    } catch (e) {}
+  }
+  const saved = data[serviceName]
+  // Проверяем только размеры (width, height)
+  const isSame = saved && saved.width === bounds.width && saved.height === bounds.height
+  if (!isSame) {
+    await focusChromeWindow(windowId)
+    await captureChromeWindow(windowId, screenshotPath)
+    data[serviceName] = {
+      ...bounds,
+      screenshot: screenshotPath,
+      updatedAt: new Date().toISOString()
+    }
+    await Bun.write(dataPath, JSON.stringify(data, null, 2))
+    return screenshotPath
+  }
+  return null
+}

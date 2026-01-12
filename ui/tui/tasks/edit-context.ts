@@ -43,7 +43,9 @@ export const task: TaskDefinition = {
 
     switch (actionId) {
       case "select":
-        await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} ${{ raw: (await Bun.file(FILES_JSON).exists()) ? `-i ${FILES_JSON}` : "" }} -o ${FILES_JSON}`
+        await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} ${{
+          raw: (await Bun.file(FILES_JSON).exists()) ? `-i ${FILES_JSON}` : "",
+        }} -o ${FILES_JSON}`
         break
       default:
         await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
@@ -74,10 +76,6 @@ export const task: TaskDefinition = {
       }
     }
 
-    console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
-
-    await Window.focusChromeWindow(targetId)
-
     const service = ["deepseek", "gemini", "alice", "qwen"].find((s) => title.includes(s))
 
     const mode = await select(
@@ -86,10 +84,14 @@ export const task: TaskDefinition = {
         { id: "new", name: "✨ В новом чате" },
         { id: "current", name: "💬 В текущем чате" },
       ],
-      (m) => m.name,
+      (m) => m.name
     )
 
     if (!mode) return
+
+    console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
+
+    await Window.focusChromeWindow(targetId)
 
     if (mode.id === "new") {
       switch (service) {
