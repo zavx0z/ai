@@ -10,7 +10,13 @@ export async function editInEditor(initialContent: string = ""): Promise<string 
 
   const editor = process.env.EDITOR || "vim"
 
-  const proc = Bun.spawn([editor, filepath], {
+  const args = [editor]
+  if (editor.includes("vim") || editor.includes("nvim")) {
+    args.push("+startinsert")
+  }
+  args.push(filepath)
+
+  const proc = Bun.spawn(args, {
     stdio: ["inherit", "inherit", "inherit"],
   })
 
