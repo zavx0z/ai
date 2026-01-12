@@ -16,7 +16,7 @@ import {
   EDIT_JSON,
 } from "../src/core/tools"
 import * as Window from "ai-window"
-import { Deepseek, pasteAndSend } from "ai-chat"
+import { Deepseek, Gemini, Alice, Qwen, pasteAndSend } from "ai-chat"
 import { Tool } from "../src/core/constants"
 
 export const task: TaskDefinition = {
@@ -80,17 +80,35 @@ export const task: TaskDefinition = {
 
     const service = ["deepseek", "gemini", "alice", "qwen"].find((s) => title.includes(s))
 
-    switch (service) {
-      case "deepseek":
-        await Deepseek.openNewChat()
-        await pasteAndSend()
-        break
-      case "gemini":
-      case "alice":
-      case "qwen":
-        await pasteAndSend()
-        break
+    const mode = await select(
+      "🤖 Выберите режим:",
+      [
+        { id: "new", name: "✨ В новом чате" },
+        { id: "current", name: "💬 В текущем чате" },
+      ],
+      (m) => m.name,
+    )
+
+    if (!mode) return
+
+    if (mode.id === "new") {
+      switch (service) {
+        case "deepseek":
+          await Deepseek.openNewChat()
+          break
+        case "gemini":
+          await Gemini.openNewChat()
+          break
+        case "alice":
+          await Alice.openNewChat()
+          break
+        case "qwen":
+          await Qwen.openNewChat()
+          break
+      }
     }
+
+    await pasteAndSend()
 
     const initialClipboard = await $`pbpaste`.text()
     const success = await Window.waitForClipboardChange(initialClipboard)
