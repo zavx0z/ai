@@ -70,6 +70,16 @@ export async function pressKeyWithModifier(modifier: 'command' | 'control' | 'op
 }
 
 /**
+ * Нажать комбинацию клавиш с несколькими модификаторами
+ */
+export async function pressKeyWithModifiers(modifiers: ('command' | 'control' | 'option' | 'shift')[], key: string) {
+  const mods = modifiers.map(m => `${m} down`).join(', ')
+  await $`osascript -e 'tell application "System Events"
+      keystroke "${key}" using {${mods}}
+    end tell'`
+}
+
+/**
  * Нажать клавишу
  */
 export async function pressKey(key: string) {
