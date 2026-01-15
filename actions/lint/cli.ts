@@ -313,7 +313,11 @@ export async function runCLI() {
         console.log(`⚠️ ${colorize("Не удалось прочитать сохраненный результат:", "yellow")} ${error}`)
       }
 
-      await saveOutput(outputFile,"Исправь ошибки \n" + formattedResults + "\n" + rules + "\n")
+      if (results.summary.totalErrors === 0) {
+        await saveOutput(outputFile, "")
+      } else {
+        await saveOutput(outputFile, "Исправь ошибки \n" + formattedResults + "\n" + rules + "\n")
+      }
       if (verbose) {
         console.log(`\n✅ ${colorize("Результат сохранён:", "green")} ${colorize(outputFile, "cyan")}`)
       }

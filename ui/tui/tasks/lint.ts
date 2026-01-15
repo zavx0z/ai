@@ -2,13 +2,8 @@ import { $ } from "bun"
 import { select } from "../src/ui/select"
 import type { TaskDefinition } from "../src/core/tools"
 import {
-  getExcludes,
-  PATH_TREE,
-  PATH_JOIN,
   PATH_LINT,
   TMP_DIR,
-  FILES_JSON,
-  JOIN_MD,
   LINT_MD,
   PATH_EDIT,
   EDIT_JSON,
@@ -34,13 +29,8 @@ export const task: TaskDefinition = {
       return
     }
 
-    console.log(`⚠️ Найдено ошибок. Подготовка контекста...`)
+    console.log(`⚠️ Найдено ошибок. Копирование в буфер...`)
 
-    // 3. Сбор контекста (если есть ошибки)
-    const excludes = await getExcludes(ctx)
-    await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
-    await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
-    await $`cat ${JOIN_MD} >> ${LINT_MD}`
     await $`cat ${LINT_MD} | pbcopy`
     console.log("✅ Скопировано в буфер!")
 
