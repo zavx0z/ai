@@ -2,7 +2,7 @@ import rules from "../edit/edit.md" with {type: "text"}
 
 import fs from "fs"
 import path from "path"
-// console.log(rules)
+
 const APP_NAME = "TS-Linter"
 
 function help() {
@@ -299,7 +299,7 @@ export async function runCLI() {
         // Подсчет статистики по файлам
         const fileStats: Record<string, number> = {}
         diagnostics.forEach((diag: any) => {
-          const file = diag.resource
+          const file = diag.file
           fileStats[file] = (fileStats[file] || 0) + 1
         })
         
@@ -313,7 +313,7 @@ export async function runCLI() {
         console.log(`⚠️ ${colorize("Не удалось прочитать сохраненный результат:", "yellow")} ${error}`)
       }
 
-      await saveOutput(outputFile, rules + formattedResults)
+      await saveOutput(outputFile,"Исправь ошибки \n" + formattedResults + "\n" + rules + "\n")
       if (verbose) {
         console.log(`\n✅ ${colorize("Результат сохранён:", "green")} ${colorize(outputFile, "cyan")}`)
       }

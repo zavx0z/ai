@@ -40,7 +40,7 @@ export const task: TaskDefinition = {
     const excludes = await getExcludes(ctx)
     await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
     await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
-    await $`cat ${JOIN_MD} > ${LINT_MD}`
+    await $`cat ${JOIN_MD} >> ${LINT_MD}`
     await $`cat ${LINT_MD} | pbcopy`
     console.log("✅ Скопировано в буфер!")
 

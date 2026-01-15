@@ -222,6 +222,12 @@ export async function parseTypeScriptFile(
     const startPosition = diagnostic.file.getLineAndCharacterOfPosition(start)
     const endPosition = diagnostic.file.getLineAndCharacterOfPosition(end)
 
+    // Извлекаем строку с ошибкой для контекста
+    const lineStart = diagnostic.file.getPositionOfLineAndCharacter(startPosition.line, 0)
+    let lineEnd = diagnostic.file.text.indexOf("\n", lineStart)
+    if (lineEnd === -1) lineEnd = diagnostic.file.text.length
+    const context = diagnostic.file.text.substring(lineStart, lineEnd).trim()
+
     // Фильтруем ошибки из node_modules
     const fileName = diagnostic.file.fileName
     if (fileName.includes("/node_modules/") || fileName.includes("\\node_modules\\")) {
@@ -247,6 +253,7 @@ export async function parseTypeScriptFile(
       endColumn: endPosition.character + 1,
       message: ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"),
       code: diagnostic.code.toString(),
+      context,
       severity: severityMap[diagnostic.category] || 8,
       source: "ts",
       owner: "typescript",

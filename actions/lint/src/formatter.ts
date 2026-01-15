@@ -1,45 +1,28 @@
 import type { LintResult, LinterOptions } from "./types"
 
-interface VSCodeDiagnostic {
-  resource: string
-  owner: string
+interface AgentDiagnostic {
+  file: string
   code: string
-  severity: number
   message: string
-  source: string
-  startLineNumber: number
-  startColumn: number
-  endLineNumber: number
-  endColumn: number
-  origin: string
+  context: string
 }
 
 export function formatLintResults(results: LintResult, options: LinterOptions = {}): string {
-  // Преобразуем ошибки в формат VSCode
-  const vsCodeDiagnostics: VSCodeDiagnostic[] = results.errors.map((error) => ({
-    resource: error.file,
-    owner: error.owner || "typescript",
-    code: error.code,
-    severity: error.severity || 8,
-    message: error.message,
-    source: error.source || "ts",
-    startLineNumber: error.line,
-    startColumn: error.column,
-    endLineNumber: error.endLine || error.line,
-    endColumn: error.endColumn || error.column + 1,
-    origin: error.origin || "extHost5",
-  }))
-
-  // Сортируем по файлу, затем по строке, затем по колонке
-  vsCodeDiagnostics.sort((a, b) => {
-    if (a.resource !== b.resource) {
-      return a.resource.localeCompare(b.resource)
+  // Сортируем исходные ошибки по файлу и строке перед преобразованием
+  const sortedErrors = [...results.errors].sort((a, b) => {
+    if (a.file !== b.file) {
+      return a.file.localeCompare(b.file)
     }
-    if (a.startLineNumber !== b.startLineNumber) {
-      return a.startLineNumber - b.startLineNumber
-    }
-    return a.startColumn - b.startColumn
+    return a.line - b.line
   })
+
+  // Преобразуем ошибки в лаконичный формат для агента без номеров строк
+  const agentDiagnostics: AgentDiagnostic[] = sortedErrors.map((error) => ({
+    file: error.file,
+    code: `TS${error.code}`,
+    message: error.message,
+    context: error.context,
+  }))
 
   // Выводим статистику в verbose режиме (в stderr, чтобы не мешать JSON)
   if (options.verbose) {
@@ -58,6 +41,6 @@ export function formatLintResults(results: LintResult, options: LinterOptions = 
     }
   }
 
-  // Возвращаем чистый JSON в формате VSCode
-  return JSON.stringify(vsCodeDiagnostics, null, 2)
+  // Возвращаем чистый JSON в формате для агента
+  return JSON.stringify(agentDiagnostics, null, 2)
 }

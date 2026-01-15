@@ -4,6 +4,7 @@ export interface LintError {
   column: number
   message: string
   code: string
+  context: string
   // Дополнительные поля для VSCode формата
   endLine?: number
   endColumn?: number
