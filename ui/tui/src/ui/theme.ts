@@ -19,5 +19,21 @@ export const Theme = {
   
   clearScreen: () => {
     Ansi.clear()
+  },
+
+  getTextWidth: (str: string): number => {
+    const clean = str.replace(/\u001b\[[0-9;]*m/g, "");
+    let width = 0;
+    for (const char of clean) {
+      const code = char.codePointAt(0) || 0;
+      // Эмодзи и широкие символы обычно занимают 2 колонки.
+      // Сюда входят суррогатные пары (>0xffff) и иконки типа ⚡ (0x26A1)
+      if (code > 0xffff || (code >= 0x2600 && code <= 0x27bf)) {
+        width += 2;
+      } else {
+        width += 1;
+      }
+    }
+    return width;
   }
 }

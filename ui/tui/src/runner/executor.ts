@@ -16,15 +16,15 @@ export async function runTool(task: TaskDefinition, context: TargetContext, task
 
     // Если есть действия (Actions), предлагаем выбор
     if (task.actions && task.actions.length > 0) {
-      const maxActionNameLen = Math.max(...task.actions.map((a) => a.name.length))
+      const maxActionNameWidth = Math.max(...task.actions.map((a) => Theme.getTextWidth(a.name)))
       const lastActionIndex = actionIndices.get(taskIndex) || 0
       const selectedAction = await select(
         `Действие: ${task.name}`,
         task.actions,
         (a) => {
-          const padding = " ".repeat(maxActionNameLen - a.name.length)
-          const desc = a.description ? ` ${Theme.gray}| ${a.description}${Theme.reset}` : ""
-          return `${a.name}${padding} ${desc}`
+          const padding = " ".repeat(maxActionNameWidth - Theme.getTextWidth(a.name))
+          const desc = a.description ? `  ${Theme.gray}| ${a.description}${Theme.reset}` : ""
+          return `${a.name}${padding}${desc}`
         },
         lastActionIndex
       )

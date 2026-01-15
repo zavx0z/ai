@@ -50,12 +50,12 @@ async function main() {
     if (!context) process.exit(0)
     let lastTaskIndex = 0
     while (true) {
-      const maxNameLen = Math.max(...TASKS.map((t) => t.name.length))
+      const maxNameWidth = Math.max(...TASKS.map((t) => Theme.getTextWidth(t.name)))
       const task = await select(
         `Контекст: ${context.name}`,
         TASKS,
         (t) => {
-          const padding = " ".repeat(maxNameLen - t.name.length)
+          const padding = " ".repeat(maxNameWidth - Theme.getTextWidth(t.name))
           return `${t.name}${padding}  ${Theme.gray}| ${t.description}${Theme.reset}`
         },
         lastTaskIndex

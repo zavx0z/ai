@@ -24,7 +24,7 @@ export const task: TaskDefinition = {
   description: "Git операции с AI-контекстом (коммит, пушинг, диффы)",
   actions: [
     {
-      id: "ful-context",
+      id: "full-context",
       name: "📦 Полный контекст",
       description: "Контекст всего проекта + дифф + commit.md",
     },
