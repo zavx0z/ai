@@ -1,8 +1,16 @@
 import { pressKeyWithModifiers, ensureEnglish, restoreLayout } from "ai-keyboard"
+import { focusWindow } from "./common"
 
 /**
  * Открывает новый чат
  */
+/**
+ * Переключает фокус на чат
+ */
+export async function focus() {
+  await focusWindow("Gemini")
+}
+
 export async function openNewChat() {
   const prevLayout = await ensureEnglish()
   // cmd+shift+o

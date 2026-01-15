@@ -1,0 +1,77 @@
+{
+  "description": "Универсальный список элементов для распознавания интерфейсов AI-чатов (DeepSeek, Qwen, Gemini, Alice)",
+  "targets": [
+    {
+      "key": "chat_input",
+      "description": "Основное поле ввода текста (chat input, message field, search box)",
+      "alternatives": [
+        "message input",
+        "prompt area",
+        "text field"
+      ]
+    },
+    {
+      "key": "submit_button",
+      "description": "Кнопка отправки сообщения (стрелка, самолетик, 'Send', Enter)",
+      "alternatives": [
+        "send icon",
+        "submit",
+        "paper plane"
+      ]
+    },
+    {
+      "key": "attach_button",
+      "description": "Кнопка прикрепления файлов (скрепка, плюс, иконка изображения)",
+      "alternatives": [
+        "upload file",
+        "add attachment",
+        "clip icon"
+      ]
+    },
+    {
+      "key": "voice_input",
+      "description": "Кнопка голосового ввода (микрофон, волны)",
+      "alternatives": [
+        "mic button",
+        "audio input",
+        "dictation"
+      ]
+    },
+    {
+      "key": "reasoning_toggle",
+      "description": "Переключатель режима мышления (Deep Thinking, Reasoning, Chain of Thought, R1)",
+      "alternatives": [
+        "think mode",
+        "deep think",
+        "r1 mode"
+      ]
+    },
+    {
+      "key": "search_toggle",
+      "description": "Переключатель веб-поиска (Search, Internet, Globe icon)",
+      "alternatives": [
+        "web search",
+        "browse mode",
+        "online toggle"
+      ]
+    },
+    {
+      "key": "new_chat_button",
+      "description": "Кнопка создания нового диалога (New Chat, +, Reset)",
+      "alternatives": [
+        "start new",
+        "clear context",
+        "plus icon"
+      ]
+    },
+    {
+      "key": "sidebar_toggle",
+      "description": "Кнопка открытия/закрытия бокового меню (гамбургер, панель)",
+      "alternatives": [
+        "menu toggle",
+        "sidebar icon",
+        "nav drawer"
+      ]
+    }
+  ]
+}

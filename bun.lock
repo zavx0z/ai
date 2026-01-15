@@ -85,6 +85,7 @@
       "version": "1.0.0",
       "dependencies": {
         "ai-keyboard": "workspace:*",
+        "ai-window": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "latest",

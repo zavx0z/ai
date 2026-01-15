@@ -4,9 +4,13 @@
   "type": "module",
   "main": "index.ts",
   "dependencies": {
-    "ai-keyboard": "workspace:*"
+    "ai-keyboard": "workspace:*",
+    "ai-window": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest"
+  },
+  "scripts": {
+    "qwen:test": "bun test qwen.spec.ts"
   }
 }

@@ -31,9 +31,6 @@ export async function getChromeWindows() {
 
       // Оставляем только цифры, чтобы исключить любые проблемы с форматированием
       const cleanId = id?.replace(/\D/g, "")
-      
-
-      
       return { id: cleanId, title: title?.trim() || "Без названия" }
     })
 }
