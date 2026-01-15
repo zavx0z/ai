@@ -15,16 +15,16 @@ export function getUniversalChatSelectors() {
  */
 export async function getElementCoordinates(analysisResult: any, screenshotPath: string) {
   // Используем нативную утилиту macOS sips для получения размеров
-  const output = await $`sips -g pixelWidth -g pixelHeight ${screenshotPath}`.text();
+  const output = await $`sips -g pixelWidth -g pixelHeight ${screenshotPath ? String(screenshotPath) : 'unknown'}`.text();
   
   const widthMatch = output.match(/pixelWidth:\s*(\d+)/);
   const heightMatch = output.match(/pixelHeight:\s*(\d+)/);
   
-  const width = widthMatch ? parseInt(widthMatch[1]) : 0;
-  const height = heightMatch ? parseInt(heightMatch[1]) : 0;
+  const width = widthMatch ? parseInt(widthMatch[1] || '0') : 0;
+  const height = heightMatch ? parseInt(heightMatch[1] || '0') : 0;
 
   if (!width || !height) {
-    throw new Error(`Не удалось получить размеры изображения: ${screenshotPath}`);
+    throw new Error(`Не удалось получить размеры изображения: ${String(screenshotPath ?? 'unknown path')}`);
   }
 
   // Поддержка обоих форматов (Targeted Search и General Analysis)
