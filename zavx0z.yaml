@@ -8,3 +8,4 @@ exclude:
   - .idea
   - .cursor
   - tmp
+  - bun.lock

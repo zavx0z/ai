@@ -1,7 +1,7 @@
 import { $ } from "bun"
 import * as Window from "ai-window"
 import * as Keyboard from "ai-keyboard"
-import { Deepseek, pasteAndSend } from "ai-chat"
+import { Deepseek, Gemini, Alice, Qwen, pasteAndSend } from "ai-chat"
 import { resolve } from "node:path"
 import { select } from "../src/ui/select"
 import { Theme } from "../src/ui/theme"
@@ -114,39 +114,60 @@ export const task: TaskDefinition = {
         await $`cat ${COMMIT_MD} | pbcopy`
         console.log("✅ Контекст изменений обновлен!")
 
-        const currentApp = await Window.getCurrentApp()
-        const windows = await Window.getChromeWindows()
+const currentApp = await Window.getCurrentApp()
+const windows = await Window.getChromeWindows()
 
-        if (windows.length === 0) {
-          console.log("❌ Chrome не запущен или нет открытых окон")
-          return
-        }
+if (windows.length === 0) {
+  console.log("❌ Chrome не запущен или нет открытых окон")
+  return
+}
 
-        // Автоматически выбираем окно с 'Deepseek' в названии
-        let targetId = windows[0]!.id!
-        const deepseekWindow = windows.find(w => 
-          w.title?.toLowerCase().includes('deepseek')
-        )
-        
-        if (deepseekWindow) {
-          targetId = deepseekWindow.id!
-          console.log(`✅ Найдено окно Deepseek: "${deepseekWindow.title}"`)
-        } else if (windows.length > 1) {
-          const selectedId = await select(
-            "🌍 Выберите окно Chrome:",
-            windows.map((w) => w.id!),
-            (id) => {
-              const window = windows.find((w) => w.id === id);
-              return window?.title ?? "Без названия";
-            }
-          )
-          if (selectedId) targetId = selectedId
-        }
+let targetId = windows[0]!.id!
+let title = windows[0]!.title?.toLowerCase() || ""
 
-        console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
-        await Window.focusChromeWindow(targetId)
-        await Deepseek.openNewChat()
-        await pasteAndSend()
+if (windows.length > 1) {
+  const selected = await select("🌍 Выберите окно Chrome:", windows, (w) => w.title)
+  if (selected) {
+    targetId = selected.id!
+    title = selected.title?.toLowerCase() || ""
+  }
+}
+
+const service = ["deepseek", "gemini", "алиса", "qwen"].find((s) => title.includes(s))
+
+const mode = await select(
+  "🤖 Выберите режим:",
+  [
+    { id: "new", name: "✨ В новом чате" },
+    { id: "current", name: "💬 В текущем чате" },
+  ],
+  (m) => m.name
+)
+
+if (!mode) return
+
+console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
+
+await Window.focusChromeWindow(targetId)
+
+if (mode.id === "new") {
+  switch (service) {
+    case "deepseek":
+      await Deepseek.openNewChat()
+      break
+    case "gemini":
+      await Gemini.openNewChat()
+      break
+    case "алиса":
+      await Alice.openNewChat()
+      break
+    case "qwen":
+      await Qwen.openNewChat()
+      break
+  }
+}
+
+await pasteAndSend()
         const initialClipboard = await $`pbpaste`.text()
         const success = await Window.waitForClipboardChange(initialClipboard)
 
