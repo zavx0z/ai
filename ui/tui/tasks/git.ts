@@ -8,6 +8,7 @@ import { Theme } from "../src/ui/theme"
 import type { TaskDefinition } from "../src/core/tools"
 import {
   getExcludes,
+  getExcludePatterns,
   PATH_TREE,
   PATH_JOIN,
   PATH_COMMIT,
@@ -81,10 +82,33 @@ export const task: TaskDefinition = {
         }
 
         const gitRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
+        const excludePatterns = await getExcludePatterns(ctx)
         const changedFiles = (await $`git diff --name-only --cached`.text())
           .trim()
           .split("\n")
           .filter((l) => l.length > 0)
+          .filter((file) => {
+            // Проверяем, не содержит ли файл исключенных паттернов
+            const filePath = resolve(gitRoot, file)
+            const relativePath = filePath.replace(gitRoot + '/', '')
+            
+            return !excludePatterns.some((pattern) => {
+              // Проверяем полное совпадение пути или части пути
+              if (pattern.includes('*')) {
+                // Простая glob-поддержка: заменяем * на .* для regex
+                const regexPattern = pattern.replace(/\*/g, '.*')
+                const regex = new RegExp(`^${regexPattern}$`)
+                return regex.test(relativePath) || regex.test(file)
+              }
+              
+              // Проверяем точное совпадение или вхождение в путь
+              return relativePath === pattern || 
+                     relativePath.startsWith(pattern + '/') ||
+                     file === pattern ||
+                     file.includes('/' + pattern + '/') ||
+                     file.endsWith('/' + pattern)
+            })
+          })
           .map((f) => resolve(gitRoot, f))
 
         console.log(`🔎 Найдено измененных файлов: ${changedFiles.length}`)

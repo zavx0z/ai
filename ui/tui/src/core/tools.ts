@@ -57,9 +57,39 @@ export async function getExcludes(ctx: TargetContext): Promise<string> {
       const yaml = Bun.YAML.parse(text) as { exclude?: string[] }
 
       if (yaml && Array.isArray(yaml.exclude)) {
-        return yaml.exclude.map((e: string) => `-e "${e}"`).join(" ")
+        return yaml.exclude.map((e: string) => `-e \"${e}\"`).join(" ")
       }
     }
   } catch (e) {}
-  return defaultExcludes.map((e) => `-e "${e}"`).join(" ")
+  return defaultExcludes.map((e) => `-e \"${e}\"`).join(" ")
+}
+
+export async function getExcludePatterns(ctx: TargetContext): Promise<string[]> {
+  const defaultExcludes = [
+    "node_modules",
+    "tmp",
+    ".git",
+    ".vscode",
+    "dist",
+    ".idea",
+    ".idx",
+    "bun.lock",
+    "package-lock.json",
+    ".cursor",
+    "zavx0z.yaml",
+  ]
+  try {
+    const configPath = join(ctx.path, "zavx0z.yaml")
+    const file = Bun.file(configPath)
+
+    if (await file.exists()) {
+      const text = await file.text()
+      const yaml = Bun.YAML.parse(text) as { exclude?: string[] }
+
+      if (yaml && Array.isArray(yaml.exclude)) {
+        return yaml.exclude
+      }
+    }
+  } catch (e) {}
+  return defaultExcludes
 }
