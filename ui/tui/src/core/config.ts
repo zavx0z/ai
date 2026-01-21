@@ -12,6 +12,8 @@ exclude:
   - .idea
   - .cursor
   - tmp
+  - .gitignore
+  - bun.lock
 `
 
 export async function ensureConfigFile(dirPath: string) {

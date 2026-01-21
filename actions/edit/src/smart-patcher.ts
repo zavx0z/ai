@@ -13,7 +13,8 @@ const normalizeAggressive = (str: string) => {
  * Также заменяет табуляции и другие пробельные символы на одиночные пробелы.
  */
 const normalizeSoft = (str: string) => {
-  return str.trim().replace(/[\t\r\f\v ]+/g, " ")
+  // Удаляем все пробельные символы (пробелы, табы, переносы) для максимальной гибкости поиска
+  return str.replace(/\s+/g, "")
 }
 
 export function applySmartPatch(content: string, op: FileOperation): string {
