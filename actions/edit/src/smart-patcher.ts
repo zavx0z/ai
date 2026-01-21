@@ -10,9 +10,10 @@ const normalizeAggressive = (str: string) => {
 /**
  * Мягкая нормализация.
  * Теперь еще и вырезает \r для совместимости с Windows.
+ * Также заменяет табуляции и другие пробельные символы на одиночные пробелы.
  */
 const normalizeSoft = (str: string) => {
-  return str.trim().replace(/\s+/g, " ")
+  return str.trim().replace(/[\t\r\f\v ]+/g, " ")
 }
 
 export function applySmartPatch(content: string, op: FileOperation): string {
