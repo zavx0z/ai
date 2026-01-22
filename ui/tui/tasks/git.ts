@@ -83,7 +83,7 @@ export const task: TaskDefinition = {
 
         const gitRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
         const excludePatterns = await getExcludePatterns(ctx)
-        const changedFiles = (await $`git diff --name-only --cached`.text())
+        const changedFiles = (await $`git diff --name-only --cached --diff-filter=d`.text())
           .trim()
           .split("\n")
           .filter((l) => l.length > 0)
