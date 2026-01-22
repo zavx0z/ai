@@ -7,9 +7,11 @@ import {
   TMP_DIR,
   PATH_EDIT,
   EDIT_JSON,
+  getExcludePatterns,
+  PATH_JOIN,
 } from "../src/core/tools"
 import { AI_ROOT } from "../src/core/constants"
-import { join } from "path"
+import { join, resolve } from "path"
 import * as Window from "ai-window"
 import { pasteAndSend } from "ai-chat"
 
@@ -43,8 +45,8 @@ export const task: TaskDefinition = {
     }
 
     // 3. Получение diff
-    // Берем diff от предка до текущего момента
-    const diff = await $`git diff ${ancestor}`.text()
+    // Берем diff от предка до конца истории выбранной ветки
+    const diff = await $`git diff ${ancestor} ${targetBranch}`.text()
     
     if (!diff.trim()) {
       console.log("✨ Изменений нет")
@@ -53,7 +55,7 @@ export const task: TaskDefinition = {
 
     // 3.1. Получение списка измененных файлов из diff
     console.log("📊 Получение списка измененных файлов...")
-    const changedFiles = (await $`git diff --name-only ${ancestor}`.text())
+    const changedFiles = (await $`git diff --name-only ${ancestor} ${targetBranch}`.text())
       .trim()
       .split("\n")
       .filter((l) => l.length > 0)
@@ -93,7 +95,7 @@ export const task: TaskDefinition = {
       console.log(`📄 Добавлено ${filteredFiles.length} файлов в контекст`)
     }
 
-    // 4. Комментарии пользователя
+    // 4. Комментарии пользователя (Пожелания)
     const comments = await editInEditor(`
 # Ревью изменений
 
@@ -111,21 +113,24 @@ AI учтет это при генерации JSON-патча.
         return
     }
 
+    // Сохраняем пожелания в tmp файл
+    const REVIEW_COMMENTS_MD = join(TMP_DIR, "review-comments.md")
+    await Bun.write(REVIEW_COMMENTS_MD, comments)
+    console.log(`📝 Пожелания сохранены в ${REVIEW_COMMENTS_MD}`)
+
     // 5. Формирование промпта
     const editDocPath = join(AI_ROOT, "actions/edit/edit.md")
     const editDoc = await Bun.file(editDocPath).text().catch(() => "")
     
     const prompt = `
-# Задача: Code Review и Правки
+# Основная задача
 
-Ты — старший разработчик. Твоя задача — проанализировать изменения в коде и предложить правки в формате JSON для утилиты редактирования.
-
-## Контекст
-Мы сравниваем текущую ветку с базовой (${targetBranch}).
-Общий предок: ${ancestor}
-
-## Инструкции пользователя (Code Review)
 ${comments}
+
+# Контекст ревью
+
+Мы анализируем изменения ветки ${targetBranch} относительно общего предка.
+Общий предок: ${ancestor}
 
 ## Правила формирования ответа (Edit Format)
 ${editDoc}
@@ -141,6 +146,11 @@ ${changedFilesContent}
 
 Сгенерируй валидный JSON (EditRequest) для применения необходимых правок.
 `
+
+    // Сохраняем промпт в файл
+    const REVIEW_REQUEST_MD = join(TMP_DIR, "review-request.md")
+    await Bun.write(REVIEW_REQUEST_MD, prompt)
+    console.log(`📝 Промпт сохранен в ${REVIEW_REQUEST_MD}`)
 
     await $`echo ${prompt} | pbcopy`
     console.log("✅ Промпт скопирован в буфер обмена!")
