@@ -7,7 +7,6 @@ import {
   getExcludes,
   PATH_TREE,
   PATH_JOIN,
-  PATH_CLEAN_COMMENTS,
   TMP_DIR,
   TASK_MD,
   FILES_JSON,
@@ -20,6 +19,40 @@ import * as Window from "ai-window"
 import { Deepseek, Gemini, Alice, Qwen, pasteAndSend } from "ai-chat"
 import { join } from "path"
 import { AI_ROOT } from "../src/core/constants"
+
+// Временная функция для очистки комментариев
+async function cleanCommentsInFiles(filesJson: string, outputMd: string) {
+  const files: string[] = JSON.parse(await Bun.file(filesJson).text())
+  let result = ""
+  
+  for (const file of files) {
+    try {
+      let content = await Bun.file(file).text()
+      
+      // Удаление TypeDoc комментариев (/** ... */)
+      content = content.replace(/\/\*\*[\s\S]*?\*\//g, '')
+      
+      // Удаление многострочных комментариев (/* ... */)
+      content = content.replace(/\/\*[\s\S]*?\*\//g, '')
+      
+      // Удаление однострочных комментариев (// ...)
+      content = content.replace(/\/\/.*$/gm, '')
+      
+      // Удаление пустых строк после очистки
+      content = content.split('\n')
+        .filter(line => line.trim() !== '')
+        .join('\n')
+        
+      if (content.trim()) {
+        result += `\n## ${file}\n\`\`\`${file.split('.').pop()}\n${content}\n\`\`\`\n`
+      }
+    } catch (e) {
+      console.log(`⚠️ Не удалось прочитать файл: ${file}`)
+    }
+  }
+  
+  await Bun.write(outputMd, result)
+}
 
 export const task: TaskDefinition = {
   id: "edit-context",
@@ -56,11 +89,13 @@ export const task: TaskDefinition = {
         await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} ${{
           raw: (await Bun.file(FILES_JSON).exists()) ? `-i ${FILES_JSON}` : "",
         }} -o ${FILES_JSON}`
-        await $`bun run ${{ raw: PATH_CLEAN_COMMENTS }} ${FILES_JSON} --output ${JOIN_MD}`
+        // Используем локальную функцию вместо PATH_CLEAN_COMMENTS
+        await cleanCommentsInFiles(FILES_JSON, JOIN_MD)
         break
       case "all-clean":
         await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
-        await $`bun run ${{ raw: PATH_CLEAN_COMMENTS }} ${FILES_JSON} --output ${JOIN_MD}`
+        // Используем локальную функцию вместо PATH_CLEAN_COMMENTS
+        await cleanCommentsInFiles(FILES_JSON, JOIN_MD)
         break
       default:
         await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
