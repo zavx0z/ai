@@ -1,1 +1,0 @@
-// Moved to tools/window (package: ai-window)
