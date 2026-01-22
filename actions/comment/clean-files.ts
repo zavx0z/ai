@@ -77,7 +77,7 @@ async function main() {
       const result = await CommentRemover.cleanCode(sourceCode, filePath, {
         includeShebang: true,
         preserveNewlines: true,
-        removeOnly: ['single-line', 'multi-line'] // Удаляем только однострочные и многострочные комментарии, но не JSDoc
+        removeOnly: ['single-line', 'multi-line', 'jsdoc'] // Удаляем все типы комментариев
       })
 
       // Сжимаем множественные пустые строки: 2+ пустых строк -> 1 пустая строка
@@ -89,12 +89,7 @@ async function main() {
         const trimmed = line.trim()
         const isEmpty = trimmed === ''
         
-        // Пропускаем строки, которые содержат только JSDoc (/** */) но оставляем код после них
-        if (trimmed.startsWith('/**')) {
-          // Не пропускаем JSDoc - оставляем их как часть документации
-          newLines.push(line)
-          continue
-        }
+
         
         if (isEmpty && previousLineWasEmpty) {
           continue // Пропускаем дополнительные пустые строки
@@ -104,13 +99,7 @@ async function main() {
         previousLineWasEmpty = isEmpty
       }
       
-      // Убираем пустые строки в начале и конце
-      while (newLines.length > 0 && newLines[0]!.trim() === '') {
-        newLines.shift()
-      }
-      while (newLines.length > 0 && newLines[newLines.length - 1]!.trim() === '') {
-        newLines.pop()
-      }
+
       
       const finalCode = newLines.join('\n')
       

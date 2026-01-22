@@ -104,16 +104,40 @@ export class CommentRemover {
    * Удаляет комментарии, оставляя пустые строки
    */
   private static removeCommentsPreserveNewlines(sourceCode: string, metadata: CommentMetadata[]): string {
-    // Сортируем комментарии по убыванию позиции начала для безопасного удаления
-    const sortedMetadata = [...metadata].sort((a, b) => b.start - a.start)
-    let result = sourceCode
+    const lines = sourceCode.split("\n")
+    const lineComments = new Map<number, string[]>()
 
-    for (const comment of sortedMetadata) {
-      // Удаляем комментарий по точным позициям
-      result = result.slice(0, comment.start) + result.slice(comment.end)
+    // Группируем комментарии по строкам
+    for (const comment of metadata) {
+      const lineIndex = comment.line - 1
+      if (!lineComments.has(lineIndex)) {
+        lineComments.set(lineIndex, [])
+      }
+      lineComments.get(lineIndex)!.push(comment.text)
     }
 
-    return result
+    // Обрабатываем каждую строку
+    const processedLines = lines.map((line, lineIndex) => {
+      if (!lineComments.has(lineIndex)) {
+        return line
+      }
+
+      const comments = lineComments.get(lineIndex)!
+      let result = line
+
+      // Удаляем комментарии с конца строки к началу
+      for (const commentText of comments.sort((a, b) => b.length - a.length)) {
+        const commentIndex = result.indexOf(commentText)
+        if (commentIndex !== -1) {
+          result = result.substring(0, commentIndex) + result.substring(commentIndex + commentText.length)
+        }
+      }
+
+      // Если строка стала пустой или содержит только пробелы, оставляем пустую строку
+      return result.trim().length === 0 ? "" : result
+    })
+
+    return processedLines.join("\n")
   }
 
   /**
