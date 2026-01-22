@@ -7,6 +7,7 @@ import {
   getExcludes,
   PATH_TREE,
   PATH_JOIN,
+  PATH_CLEAN_COMMENTS,
   TMP_DIR,
   TASK_MD,
   FILES_JSON,
@@ -55,11 +56,11 @@ export const task: TaskDefinition = {
         await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} ${{
           raw: (await Bun.file(FILES_JSON).exists()) ? `-i ${FILES_JSON}` : "",
         }} -o ${FILES_JSON}`
-        await $`bun run ${PATH_CLEAN_COMMENTS} ${FILES_JSON} --output ${JOIN_MD}`
+        await $`bun run ${{ raw: PATH_CLEAN_COMMENTS }} ${FILES_JSON} --output ${JOIN_MD}`
         break
       case "all-clean":
         await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
-        await $`bun run ${PATH_CLEAN_COMMENTS} ${FILES_JSON} --output ${JOIN_MD}`
+        await $`bun run ${{ raw: PATH_CLEAN_COMMENTS }} ${FILES_JSON} --output ${JOIN_MD}`
         break
       default:
         await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`

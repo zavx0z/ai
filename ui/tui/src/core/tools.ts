@@ -22,7 +22,8 @@ export const PATH_JOIN = Tool("actions/join/cli.ts")
 export const PATH_LINT = Tool("actions/lint/cli.ts")
 export const PATH_EDIT = Tool("actions/edit/cli.ts")
 export const PATH_COMMIT = Tool("actions/commit/cli.ts")
-export const PATH_CLEAN_COMMENTS = join(AI_ROOT, "actions/comment/clean-files.ts")
+export const PATH_CLEAN_COMMENTS = Tool("actions/comment/clean-files.ts")
+
 
 export const TMP_DIR = "tmp"
 export const TASK_MD = join(TMP_DIR, "task.md")
