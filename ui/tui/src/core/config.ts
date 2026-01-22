@@ -14,6 +14,11 @@ exclude:
   - tmp
   - .gitignore
   - bun.lock
+  - .DS_Store
+  - .firebase
+  - .firebaserc
+  - bunfig.toml
+  - .github
 `
 
 export async function ensureConfigFile(dirPath: string) {
