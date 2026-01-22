@@ -17,7 +17,8 @@ import {
 } from "../src/core/tools"
 import * as Window from "ai-window"
 import { Deepseek, Gemini, Alice, Qwen, pasteAndSend } from "ai-chat"
-import { Tool } from "../src/core/constants"
+import { join } from "path"
+import { AI_ROOT } from "../src/core/constants"
 
 export const task: TaskDefinition = {
   id: "edit-context",
@@ -25,7 +26,9 @@ export const task: TaskDefinition = {
   description: "Подготовка контекста для AI (включает структуру проекта и документацию)",
   actions: [
     { id: "all", name: "🌍 Весь проект", description: "Все файлы (с фильтрацией исключений)" },
+    { id: "all-clean", name: "🧹 Весь проект (очищенный)", description: "Все файлы без комментариев (Typedoc и обычные)" },
     { id: "select", name: "🎯 Выбрать файлы", description: "Интерактивный выбор через tree-explorer" },
+    { id: "select-clean", name: "🧹 Выбрать файлы (очищенные)", description: "Интерактивный выбор с очисткой комментариев" },
   ],
   run: async (ctx, actionId) => {
     await $`mkdir -p ${TMP_DIR}`
@@ -37,8 +40,8 @@ export const task: TaskDefinition = {
     }
     await Bun.write(TASK_MD, `# Задача\n\n${taskDescription}\n\n`)
 
-    const docBun = Tool("generator/bun/README.md")
-    const docEdit = Tool("actions/edit/edit.md")
+    const docBun = join(AI_ROOT, "generator/bun/README.md")
+    const docEdit = join(AI_ROOT, "actions/edit/edit.md")
     const excludes = await getExcludes(ctx)
 
     switch (actionId) {
@@ -46,14 +49,42 @@ export const task: TaskDefinition = {
         await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} ${{
           raw: (await Bun.file(FILES_JSON).exists()) ? `-i ${FILES_JSON}` : "",
         }} -o ${FILES_JSON}`
+        await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
+        break
+      case "select-clean":
+        await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} ${{
+          raw: (await Bun.file(FILES_JSON).exists()) ? `-i ${FILES_JSON}` : "",
+        }} -o ${FILES_JSON}`
+        await $`bun run ${PATH_CLEAN_COMMENTS} ${FILES_JSON} --output ${JOIN_MD}`
+        break
+      case "all-clean":
+        await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
+        await $`bun run ${PATH_CLEAN_COMMENTS} ${FILES_JSON} --output ${JOIN_MD}`
         break
       default:
         await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
+        await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
         break
     }
 
-    await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
-    await $`cat ${TASK_MD} ${JOIN_MD} ${{ raw: docBun }} ${{ raw: docEdit }} > ${EDIT_MD}`
+    // Создаем начальный файл с задачей
+    await $`cat ${TASK_MD} ${JOIN_MD} > ${EDIT_MD}`
+    
+    // Добавляем документацию, если файлы существуют
+    const docBunFile = Bun.file(docBun)
+    const docEditFile = Bun.file(docEdit)
+    
+    if (await docBunFile.exists()) {
+      await $`cat ${docBun} >> ${EDIT_MD}`
+    } else {
+      console.log(`⚠️ Файл документации не найден: ${docBun}`)
+    }
+    
+    if (await docEditFile.exists()) {
+      await $`cat ${docEdit} >> ${EDIT_MD}`
+    } else {
+      console.log(`⚠️ Файл документации не найден: ${docEdit}`)
+    }
     await $`cat ${EDIT_MD} | pbcopy`
     console.log("✅ Скопировано в буфер!")
 

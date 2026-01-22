@@ -1,6 +1,6 @@
 import { extname } from "node:path"
 import { readFileList, checkFilesExist, readJsonFileList } from "./src/file"
-import { createFileTree } from "./src/tree"
+import { createFileTree } from "../tree/index"
 
 // Языки для блоков кода
 const LANGUAGES: Record<string, string> = {
