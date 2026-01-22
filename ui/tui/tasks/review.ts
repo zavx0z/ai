@@ -169,6 +169,7 @@ ${changedFilesContent}
       console.log("✅ Буфер обновлён! Возвращаюсь...")
       await Window.restoreApp(currentApp)
       await $`pbpaste > ${EDIT_JSON}`
+      console.log("✅ JSON patch сохранен в tmp/edit.json")
       console.log("🔨 Применяю правки...")
       try {
         await $`bun run ${{ raw: PATH_EDIT }} ${EDIT_JSON}`

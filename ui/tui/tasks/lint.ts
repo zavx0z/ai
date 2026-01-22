@@ -78,6 +78,7 @@ export const task: TaskDefinition = {
       console.log("✅ Буфер обновлен! Возвращаюсь...")
       await Window.restoreApp(currentApp)
       await $`pbpaste > ${EDIT_JSON}`
+      console.log("✅ JSON patch сохранен в tmp/edit.json")
       await $`bun run ${{ raw: PATH_EDIT }} ${EDIT_JSON}`
       console.log("✅ Изменения применены!")
     } else {

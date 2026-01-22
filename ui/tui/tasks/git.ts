@@ -38,7 +38,19 @@ export const task: TaskDefinition = {
     const excludes = await getExcludes(ctx)
     switch (actionId) {
       case "push":
+      try {
         await $`git push`
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        if (errorMsg.includes("no upstream branch")) {
+          console.log("⚠️  Ветка не имеет upstream. Устанавливаю...")
+          const branchName = (await $`git branch --show-current`.text()).trim()
+          await $`git push --set-upstream origin ${branchName}`
+        } else {
+          throw error
+        }
+      }
+      console.log("✅ Отправлено!")
         console.log("✅ Отправлено!")
         return
 
