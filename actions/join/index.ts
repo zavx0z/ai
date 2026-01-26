@@ -107,10 +107,10 @@ export async function createContextFromFileList(options: { fileListPath: string 
         content = await file.text()
       }
 
-      const fileExt = extname(filePath).toLowerCase() // Переименовано
+      const fileExt = extname(filePath).toLowerCase() 
       const language = LANGUAGES[fileExt] || "text"
-
-      sections.push(`\`\`\`${language} ${filePath}`)
+      sections.push(`\`\`\`${language}`)
+      sections.push(filePath)
       sections.push(content)
       sections.push(`\`\`\``)
       sections.push("")
