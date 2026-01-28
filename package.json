@@ -19,7 +19,7 @@
     "./ui/*",
     "./tools/*",
     "./web/*",
-    "./meta/"
+    "./meta/**"
   ],
   "scripts": {
     "dev": "bun run server --hot",
