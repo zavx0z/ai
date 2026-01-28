@@ -1,0 +1,20 @@
+{
+  "name": "meta",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@metafor/atom": "^0.4.5",
+    "@metafor/inspect": "^0.4.0",
+    "@metafor/meta": "^0.4.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "dev": "bun run index",
+    "upd": "bun run clear && bun run link:local",
+    "link:local": "bun link  @metafor/meta @metafor/atom @metafor/inspect @metafor/virtual",
+    "clear": "rm -rf node_modules"
+  }
+}

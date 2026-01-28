@@ -18,7 +18,8 @@
     "./generator/*",
     "./ui/*",
     "./tools/*",
-    "./web/*"
+    "./web/*",
+    "./meta/"
   ],
   "scripts": {
     "ai": "bun index",

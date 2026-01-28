@@ -26,11 +26,23 @@
     "actions/lint": {
       "name": "fix",
     },
+    "actions/tree": {
+      "name": "tree",
+    },
     "generator/bun": {
       "name": "bun",
     },
     "generator/cli": {
       "name": "cli",
+    },
+    "meta": {
+      "name": "meta",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
     },
     "tools/keyboard": {
       "name": "ai-keyboard",
@@ -121,6 +133,10 @@
 
     "join": ["join@workspace:actions/join"],
 
+    "meta": ["meta@workspace:meta"],
+
+    "tree": ["tree@workspace:actions/tree"],
+
     "tree-explorer": ["tree-explorer@workspace:ui/tree-explorer"],
 
     "tui": ["tui@workspace:ui/tui"],
@@ -130,5 +146,9 @@
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
+
+    "meta/@types/bun": ["@types/bun@1.3.7", "", { "dependencies": { "bun-types": "1.3.7" } }, "sha512-lmNuMda+Z9b7tmhA0tohwy8ZWFSnmQm1UDWXtH5r9F7wZCfkeO3Jx7wKQ1EOiKq43yHts7ky6r8SDJQWRNupkA=="],
+
+    "meta/@types/bun/bun-types": ["bun-types@1.3.7", "", { "dependencies": { "@types/node": "*" } }, "sha512-qyschsA03Qz+gou+apt6HNl6HnI+sJJLL4wLDke4iugsE6584CMupOtTY1n+2YC9nGVrEKUlTs99jjRLKgWnjQ=="],
   }
 }
