@@ -28,6 +28,9 @@
     "lint": "bun run join && bun run actions/lint/cli.ts . -o tmp/lint.md && cat tmp/join.md >> tmp/lint.md",
     "edit-context": "bun run join && cat tmp/join.md generator/bun/README.md actions/edit/edit.md > tmp/edit.md",
     "edit": "bun run actions/edit/cli.ts tmp/edit.json",
-    "commit": "git add . && git diff --staged > tmp/diff.patch && bun run join && bun run actions/commit/cli.ts tmp/diff.patch -c tmp/join.md -o tmp/commit.md"
+    "commit": "git add . && git diff --staged > tmp/diff.patch && bun run join && bun run actions/commit/cli.ts tmp/diff.patch -c tmp/join.md -o tmp/commit.md",
+    "upd": "bun run clear && bun run link:local",
+    "clear": "rm -rf node_modules",
+    "link:local": "bun link @metafor/space"
   }
 }

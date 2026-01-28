@@ -4,17 +4,10 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@metafor/atom": "^0.4.5",
-    "@metafor/inspect": "^0.4.0",
-    "@metafor/meta": "^0.4.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
+    "@types/bun": "latest",
+    "@metafor/space": "link:@metafor/space"
   },
   "scripts": {
-    "dev": "bun run server --hot",
-    "upd": "bun run clear && bun run link:local",
-    "link:local": "bun link  @metafor/meta @metafor/atom @metafor/inspect @metafor/virtual",
-    "clear": "rm -rf node_modules"
+    "dev": "bun run server --hot"
   }
 }
