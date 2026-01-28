@@ -22,6 +22,7 @@
     "./meta/"
   ],
   "scripts": {
+    "dev": "bun run server --hot",
     "ai": "bun index",
     "files": "bun run tasks/tree-explorer/index.ts -e node_modules -e tmp -e .git -e .vscode -p -o tmp/files.json",
     "join": "bun run actions/join/cli.ts --file tmp/files.json --output tmp/join.md",

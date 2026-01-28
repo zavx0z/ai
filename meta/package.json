@@ -8,6 +8,5 @@
     "@metafor/space": "link:@metafor/space"
   },
   "scripts": {
-    "dev": "bun run server --hot"
   }
 }
