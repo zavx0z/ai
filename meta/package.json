@@ -12,7 +12,7 @@
     "typescript": "^5"
   },
   "scripts": {
-    "dev": "bun run index",
+    "dev": "bun run server --hot",
     "upd": "bun run clear && bun run link:local",
     "link:local": "bun link  @metafor/meta @metafor/atom @metafor/inspect @metafor/virtual",
     "clear": "rm -rf node_modules"
