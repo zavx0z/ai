@@ -1,10 +1,13 @@
+import "@metafor/meta"
+
 const meta = MetaFor("json-patch-manager")
   .context((t) => ({
-    src: t.string.required("./tmp/edit.json", { label: "JSON-patch путь" }),
+    src: t.string.required("../tmp/edit.json", { label: "JSON-patch путь" }),
+    patches: t.array.required<number>([], { label: "разделенные патчи" }),
   }))
   .states({
     "патчи разделены": {
-      завершено: { src: "" },
+      завершено: { patches: { isEmpty: true } },
     },
     завершено: null,
   })
@@ -12,12 +15,10 @@ const meta = MetaFor("json-patch-manager")
   .processes((process, destroy) => ({
     "патчи разделены": process()
       .action(({ context }) => {
-        // console.log("src: ", context.src)
         return {} // FIXME: если не возвращать объект, то нее вызывается success
       })
       .success(({ update }) => {
-        // console.log("success")
-        update({ src: "" })
+        update({ src: "", patches: [] })
       }),
     завершено: destroy(),
   }))

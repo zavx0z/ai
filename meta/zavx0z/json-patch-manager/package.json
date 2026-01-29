@@ -12,6 +12,8 @@
     "typescript": "^5"
   },
   "scripts": {
-    "build:schema": "bun -e 'import \"@metafor/meta\"; const m = await import(\"./meta.ts\"); await Bun.write(\"schema.json\", JSON.stringify(m.default, null, 2))'"
+    "dev:meta": "bun build.ts",
+    "build": "bun build.ts",
+    "build:watch": "bun build.ts --watch"
   }
 }

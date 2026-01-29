@@ -3,7 +3,9 @@
   "states": {
     "патчи разделены": {
       "завершено": {
-        "src": ""
+        "patches": {
+          "isEmpty": true
+        }
       }
     },
     "завершено": null
@@ -12,8 +14,14 @@
     "src": {
       "type": "string",
       "required": true,
-      "default": "./tmp/edit.json",
+      "default": "../tmp/edit.json",
       "label": "JSON-patch путь"
+    },
+    "patches": {
+      "type": "array",
+      "required": true,
+      "default": [],
+      "label": "разделенные патчи"
     }
   },
   "core": {},
@@ -24,9 +32,10 @@
         "src": "({ context }) => {\n    return {};\n  }"
       },
       "success": {
-        "src": "({ update }) => {\n    update({ src: \"\" }, \"s\");\n  }",
+        "src": "({ update }) => {\n    update({ src: \"\", patches: [] }, \"s\");\n  }",
         "write": [
-          "src"
+          "src",
+          "patches"
         ]
       }
     },
