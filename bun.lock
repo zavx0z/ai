@@ -5,6 +5,9 @@
     "": {
       "name": "ai",
       "devDependencies": {
+        "@metafor/atom": "link:@metafor/atom",
+        "@metafor/inspect": "link:@metafor/inspect",
+        "@metafor/meta": "link:@metafor/meta",
         "@types/bun": "latest",
       },
       "peerDependencies": {
@@ -107,6 +110,10 @@
     },
   },
   "packages": {
+    "@metafor/atom": ["@metafor/atom@link:@metafor/atom", {}],
+
+    "@metafor/inspect": ["@metafor/inspect@link:@metafor/inspect", {}],
+
     "@metafor/meta": ["@metafor/meta@link:@metafor/meta", {}],
 
     "@metafor/space": ["@metafor/space@link:@metafor/space", {}],

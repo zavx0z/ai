@@ -14,7 +14,7 @@
     "src": {
       "type": "string",
       "required": true,
-      "default": "../tmp/edit.json",
+      "default": "./tmp/edit.json",
       "label": "JSON-patch путь"
     },
     "patches": {

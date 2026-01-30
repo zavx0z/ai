@@ -4,7 +4,10 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@metafor/meta": "link:@metafor/meta",
+    "@metafor/atom": "link:@metafor/atom",
+    "@metafor/inspect": "link:@metafor/inspect"
   },
   "bin": {
     "ai": "ui/tui/ai.ts"
@@ -22,7 +25,7 @@
     "./meta/**"
   ],
   "scripts": {
-    "dev": "bun run server --hot",
+    "dev": "bun --hot server",
     "ai": "bun index",
     "files": "bun run tasks/tree-explorer/index.ts -e node_modules -e tmp -e .git -e .vscode -p -o tmp/files.json",
     "join": "bun run actions/join/cli.ts --file tmp/files.json --output tmp/join.md",

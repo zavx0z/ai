@@ -2,7 +2,7 @@ import "@metafor/meta"
 
 const meta = MetaFor("json-patch-manager")
   .context((t) => ({
-    src: t.string.required("../tmp/edit.json", { label: "JSON-patch путь" }),
+    src: t.string.required("./tmp/edit.json", { label: "JSON-patch путь" }),
     patches: t.array.required<number>([], { label: "разделенные патчи" }),
   }))
   .states({
@@ -15,7 +15,8 @@ const meta = MetaFor("json-patch-manager")
   .processes((process, destroy) => ({
     "патчи разделены": process()
       .action(({ context }) => {
-        return {} // FIXME: если не возвращать объект, то нее вызывается success
+        // console.log(context.src)
+        return {} // FIXME: если не возвращать объект, то не вызывается success
       })
       .success(({ update }) => {
         update({ src: "", patches: [] })
