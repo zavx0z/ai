@@ -1,3 +1,4 @@
+
 exclude:
   - node_modules
   - dist
@@ -8,4 +9,10 @@ exclude:
   - .idea
   - .cursor
   - tmp
+  - .gitignore
   - bun.lock
+  - .DS_Store
+  - .firebase
+  - .firebaserc
+  - bunfig.toml
+  - .github
