@@ -1,3 +1,5 @@
+import { Atom } from "@metafor/atom"
+
 const window = MetaFor("window")
   .context((t) => ({
     activeTabIndex: t.number.required(1, { label: "Активная вкладка" }),
@@ -13,15 +15,24 @@ const window = MetaFor("window")
     "получение адреса": process().action(() => ({})),
   }))
 
-const tab = MetaFor("tab")
+const tabNoumenon = MetaFor("tab")
   .context((t) => ({
     title: t.string.required("", { label: "Заголовок" }),
     url: t.string.required("", { label: "URL" }),
     index: t.number.required(0, { label: "Индекс" }),
     active: t.boolean.required(false, { label: "Активная" }),
   }))
-  .states({})
+  .states({
+    активна: {
+      "не активна": {},
+    },
+    "не активна": {},
+  })
   .core({})
   .processes((process) => ({
-    "получение адреса": process().action(() => ({})),
+    активна: process().action(() => ({})),
   }))
+  .reactions()
+  .view()
+
+const atom = Atom.fromSchema({ meta: tabNoumenon })

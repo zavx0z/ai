@@ -50,6 +50,8 @@ export const task: TaskDefinition = {
   actions: [
     { id: "all", name: "🌍 Весь проект", description: "Все файлы (с фильтрацией исключений)" },
     { id: "all-clean", name: "🧹 Весь проект (очищенный)", description: "Все файлы без комментариев (Typedoc и обычные)" },
+    { id: "select", name: "🎯 Выбрать файлы", description: "Интерактивный выбор через tree-explorer" },
+    { id: "select-clean", name: "🧹 Выбрать файлы (очищенные)", description: "Интерактивный выбор с очисткой комментариев" },
   ],
   run: async (ctx, actionId) => {
     await $`mkdir -p ${TMP_DIR}`
@@ -57,6 +59,15 @@ export const task: TaskDefinition = {
     await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} -p -o ${FILES_JSON}`
     
     switch (actionId) {
+      case "select":
+        await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} ${{raw: (await Bun.file(FILES_JSON).exists()) ? `-i ${FILES_JSON}` : "",}} -o ${FILES_JSON}`
+        await $`bun run ${{ raw: PATH_JOIN }} --file ${FILES_JSON} --output ${JOIN_MD}`
+        break
+      case "select-clean":
+        await $`bun run ${{ raw: PATH_TREE }} ${{ raw: excludes }} ${{raw: (await Bun.file(FILES_JSON).exists()) ? `-i ${FILES_JSON}` : "",}} -o ${FILES_JSON}`
+        // Используем локальную функцию вместо PATH_CLEAN_COMMENTS
+        await cleanCommentsInFiles(FILES_JSON, JOIN_MD)
+        break
       case "all-clean":
         // Используем локальную функцию вместо PATH_CLEAN_COMMENTS
         await cleanCommentsInFiles(FILES_JSON, JOIN_MD)
