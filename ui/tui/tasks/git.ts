@@ -51,7 +51,6 @@ export const task: TaskDefinition = {
         }
       }
       console.log("✅ Отправлено!")
-        console.log("✅ Отправлено!")
         return
 
       case "commit-buf":
