@@ -222,11 +222,17 @@ export async function parseTypeScriptFile(
     const startPosition = diagnostic.file.getLineAndCharacterOfPosition(start)
     const endPosition = diagnostic.file.getLineAndCharacterOfPosition(end)
 
-    // Извлекаем строку с ошибкой для контекста
+    // Извлекаем строку с ошибкой и соседние строки для уникального контекста
     const lineStart = diagnostic.file.getPositionOfLineAndCharacter(startPosition.line, 0)
     let lineEnd = diagnostic.file.text.indexOf("\n", lineStart)
     if (lineEnd === -1) lineEnd = diagnostic.file.text.length
-    const context = diagnostic.file.text.substring(lineStart, lineEnd).trim()
+    
+    // Берем 5 строк для уникальности: 2 выше, текущая, 2 ниже
+    const lines = diagnostic.file.text.split(/\r?\n/)
+    const lineIndex = startPosition.line
+    const startLine = Math.max(0, lineIndex - 2)
+    const endLine = Math.min(lines.length - 1, lineIndex + 2)
+    const context = lines.slice(startLine, endLine + 1).join('\n')
 
     // Фильтруем ошибки из node_modules
     const fileName = diagnostic.file.fileName

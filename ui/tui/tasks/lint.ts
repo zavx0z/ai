@@ -29,10 +29,79 @@ export const task: TaskDefinition = {
       return
     }
 
-    console.log(`⚠️ Найдено ошибок. Копирование в буфер...`)
+    console.log(`⚠️ Найдено ошибок. Собираю контекст...`)
 
-    await $`cat ${LINT_MD} | pbcopy`
-    console.log("✅ Скопировано в буфер!")
+    // 1. Извлекаем чистый JSON из отчета
+    let jsonStr = lintContent
+    
+    // Удаляем префикс "Исправь ошибки \n" если он есть
+    const prefix = "Исправь ошибки \n"
+    if (jsonStr.startsWith(prefix)) {
+      jsonStr = jsonStr.substring(prefix.length)
+    }
+    
+    // Удаляем суффикс с правилами если он есть
+    const suffixIndex = jsonStr.indexOf("\n# Инструкция для генерации изменений кода (AI Patcher)")
+    if (suffixIndex !== -1) {
+      jsonStr = jsonStr.substring(0, suffixIndex)
+    }
+    
+    // Парсим JSON
+    let diagnostics: Array<{file: string, code: string, message: string, context: string}> = []
+    try {
+      diagnostics = JSON.parse(jsonStr.trim())
+    } catch (error) {
+      console.error("❌ Не удалось распарсить JSON с ошибками:", error)
+      // Если не получается, копируем как есть
+      await $`echo ${lintContent} | pbcopy`
+      console.log("✅ Скопировано в буфер (сырые данные)")
+      return
+    }
+
+    // 2. Собираем уникальные файлы с ошибками
+    const filesWithErrors = [...new Set(diagnostics.map(d => d.file))]
+    
+    // 3. Собираем исходный код файлов с ошибками
+    let sourceCodeContent = "\n\n## 📁 Исходный код файлов с ошибками:\n\n"
+    
+    for (const filePath of filesWithErrors) {
+      try {
+        const file = Bun.file(filePath)
+        if (await file.exists()) {
+          const fileContent = await file.text()
+          // Находим ошибки для этого файла
+          const fileErrors = diagnostics.filter(d => d.file === filePath)
+          
+          sourceCodeContent += `### 📄 ${filePath}\n`
+          sourceCodeContent += `**Ошибок в файле:** ${fileErrors.length}\n\n`
+          
+          // Добавляем контекст ошибок
+          fileErrors.forEach((error, index) => {
+            sourceCodeContent += `**Ошибка ${index + 1} (${error.code}):** ${error.message}\n`
+            sourceCodeContent += `\`\`\`typescript
+${error.context}\n\`\`\`\n\n`
+          })
+          
+          // Добавляем полный исходный код
+          sourceCodeContent += `**Полный исходный код:**\n\n\`\`\`typescript
+${fileContent}\n\`\`\`\n\n---\n\n`
+        } else {
+          sourceCodeContent += `### ${filePath}\n⚠️ Файл не найден\n\n---\n\n`
+        }
+      } catch (error) {
+        sourceCodeContent += `### ${filePath}\n⚠️ Ошибка чтения файла: ${error}\n\n---\n\n`
+      }
+    }
+
+    // 4. Объединяем ошибки и исходный код
+    const finalContent = lintContent + sourceCodeContent
+    
+    // 5. Сохраняем и копируем в буфер
+    await Bun.write(`${TMP_DIR}/lint_with_sources.md`, finalContent)
+    await $`cat ${TMP_DIR}/lint_with_sources.md | pbcopy`
+    console.log("✅ Скопировано в буфер с исходным кодом!")
+    console.log(`📊 Найдено файлов с ошибками: ${filesWithErrors.length}`)
+    console.log(`📊 Всего ошибок: ${diagnostics.length}`)
 
     // 4. AI Patcher Logic (применение исправлений)
     const currentApp = await Window.getCurrentApp()

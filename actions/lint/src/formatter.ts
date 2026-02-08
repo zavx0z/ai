@@ -16,7 +16,7 @@ export function formatLintResults(results: LintResult, options: LinterOptions = 
     return a.line - b.line
   })
 
-  // Преобразуем ошибки в лаконичный формат для агента без номеров строк
+  // Преобразуем ошибки в лаконичный формат для агента
   const agentDiagnostics: AgentDiagnostic[] = sortedErrors.map((error) => ({
     file: error.file,
     code: `TS${error.code}`,
