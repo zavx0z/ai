@@ -42,7 +42,8 @@ async function main() {
       // 1. Create
       if (op.action === "create") {
         if (exists) throw new Error("Файл уже существует")
-        if (!checkOnly) await Bun.write(op.file, op.replace || "")
+        const content = op.replace || op.content || ""
+        if (!checkOnly) await Bun.write(op.file, content)
         console.log(`✨ Создан: ${op.file}`)
         continue
       }

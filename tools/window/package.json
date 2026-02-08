@@ -5,5 +5,8 @@
   "main": "index.ts",
   "devDependencies": {
     "@types/bun": "latest"
+  },
+  "scripts": {
+    "main": "bun main.ts"
   }
 }

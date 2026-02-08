@@ -19,6 +19,12 @@ exclude:
   - .firebaserc
   - bunfig.toml
   - .github
+  - .png
+  - .jpg
+  - .jpeg
+  - .gif
+  - .webp
+  - .ico
 `
 
 export async function ensureConfigFile(dirPath: string) {

@@ -6,6 +6,7 @@ export interface FileOperation {
   search?: string // Точный фрагмент кода (для replace/delete)
   replace?: string // Новый код (для replace/create/overwrite)
   newPath?: string // Новый путь (для rename)
+  content?: string // Альтернативное поле для содержимого (для обратной совместимости)
 }
 
 export interface EditRequest {
