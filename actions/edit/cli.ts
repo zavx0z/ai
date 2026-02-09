@@ -61,25 +61,32 @@ async function main() {
         continue
       }
 
-      // 3. Edit / Delete / Overwrite
-      if (!exists) throw new Error(`Файл не найден: ${op.file}`)
+          // 3. Edit / Delete / Overwrite
+          if (!exists) throw new Error(`Файл не найден: ${op.file}`)
 
-      const content = await file.text()
+          // Если действие - delete и нет search, то удаляем файл
+          if (op.action === "delete" && !op.search) {
+            if (!checkOnly) await file.delete()
+            console.log(`🗑️ Удален файл: ${op.file}`)
+            continue
+          }
 
-      // Применяем патч в памяти
-      const newContent = applySmartPatch(content, op)
+          const content = await file.text()
 
-      if (content !== newContent) {
-        if (!checkOnly) await Bun.write(op.file, newContent)
+          // Применяем патч в памяти
+          const newContent = applySmartPatch(content, op)
 
-        let icon = "✅"
-        if (op.action === "delete") icon = "🗑️"
-        if (op.action === "overwrite") icon = "🔥"
+          if (content !== newContent) {
+            if (!checkOnly) await Bun.write(op.file, newContent)
 
-        console.log(`${icon} ${op.action === "overwrite" ? "Перезаписан" : "Изменен"}: ${op.file}`)
-      } else {
-        console.log(`ℹ️ Нет изменений: ${op.file}`)
-      }
+            let icon = "✅"
+            if (op.action === "delete") icon = "🗑️"
+            if (op.action === "overwrite") icon = "🔥"
+
+            console.log(`${icon} ${op.action === "overwrite" ? "Перезаписан" : "Изменен"}: ${op.file}`)
+          } else {
+            console.log(`ℹ️ Нет изменений: ${op.file}`)
+          }
     } catch (error) {
       console.error(`💥 Ошибка в файле ${op.file}:`)
       console.error(error instanceof Error ? error.message : String(error))
