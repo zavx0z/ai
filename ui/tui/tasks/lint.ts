@@ -9,7 +9,7 @@ import {
   EDIT_JSON,
 } from "../src/core/tools"
 import * as Window from "ai-window"
-import { Deepseek, pasteAndSend } from "ai-chat"
+import { Deepseek, Gemini, Alice, Qwen, pasteAndSend } from "ai-chat"
 
 export const task: TaskDefinition = {
   id: "lint",
@@ -123,22 +123,41 @@ ${fileContent}\n\`\`\`\n\n---\n\n`
       }
     }
 
-    console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
-    await Window.focusChromeWindow(targetId)
-
     const service = ["deepseek", "gemini", "алиса", "qwen"].find((s) => title.includes(s))
 
-    switch (service) {
-      case "deepseek":
-        await Deepseek.openNewChat()
-        await pasteAndSend()
-        break
-      case "gemini":
-      case "алиса":
-      case "qwen":
-        await pasteAndSend()
-        break
+    const mode = await select(
+      "🤖 Выберите режим:",
+      [
+        { id: "new", name: "✨ В новом чате" },
+        { id: "current", name: "💬 В текущем чате" },
+      ],
+      (m) => m.name
+    )
+
+    if (!mode) return
+
+    console.log(`Текущее приложение: "${currentApp}". Переключаюсь на Chrome...`)
+
+    await Window.focusChromeWindow(targetId)
+
+    if (mode.id === "new") {
+      switch (service) {
+        case "deepseek":
+          await Deepseek.openNewChat()
+          break
+        case "gemini":
+          await Gemini.openNewChat()
+          break
+        case "алиса":
+          await Alice.openNewChat()
+          break
+        case "qwen":
+          await Qwen.openNewChat()
+          break
+      }
     }
+
+    await pasteAndSend()
 
     const initialClipboard = await $`pbpaste`.text()
     const success = await Window.waitForClipboardChange(initialClipboard)
