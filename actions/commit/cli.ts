@@ -1,4 +1,4 @@
-import rules from "./rules.md" with {type: "text"}
+import rules from "./commit.md" with {type: "text"}
 
 const APP_NAME = "Commit Context Generator"
 
