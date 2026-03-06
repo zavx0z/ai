@@ -8,6 +8,7 @@ import * as Alice from "./alice";
 import * as Gpt from "./gpt";
 
 export { Deepseek, Gemini, Qwen, Alice, Gpt };
+export { getCleanClipboard } from "./common";
 
 /**
  * Переключает фокус на указанный чат

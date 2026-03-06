@@ -1,8 +1,7 @@
 import { $ } from "bun";
 import * as Window from "ai-window";
 import * as Keyboard from "ai-keyboard";
-import { Deepseek, Gemini, Alice, Qwen, pasteAndSend } from "ai-chat";
-import { stripMarkdownWrapper } from "ai-chat/utils";
+import { Deepseek, Gemini, Alice, Qwen, pasteAndSend, getCleanClipboard, stripMarkdownWrapper } from "ai-chat";
 import { resolve } from "node:path";
 import { select } from "../src/ui/select";
 import { Theme } from "../src/ui/theme";
@@ -74,8 +73,7 @@ export const task: TaskDefinition = {
         return;
 
       case "commit-buf":
-        const msg = await $`pbpaste`.text();
-        const cleanedMsg = stripMarkdownWrapper(msg);
+        const cleanedMsg = await getCleanClipboard();
         const confirm = await select(
           `Подтвердите коммит:\n${Theme.gray}${cleanedMsg.trim()}${Theme.reset}`,
           ["✅ Отправить", "❌ Отмена"],
@@ -88,7 +86,7 @@ export const task: TaskDefinition = {
         }
 
         await $`git add .`;
-        await $`pbpaste | git commit -F -`;
+        await $`echo ${cleanedMsg} | git commit -F -`;
         console.log("✅ Закоммичено!");
         return;
 
@@ -246,8 +244,7 @@ export const task: TaskDefinition = {
           await Window.restoreApp(currentApp);
 
           // Выполняем действия из commit-buf
-          const msg = await $`pbpaste`.text();
-          const cleanedMsg = stripMarkdownWrapper(msg);
+          const cleanedMsg = await getCleanClipboard();
           const confirm = await select(
             `Подтвердите коммит:\n${Theme.gray}${cleanedMsg.trim()}${Theme.reset}`,
             ["✅ Отправить", "❌ Отмена"],
@@ -260,7 +257,7 @@ export const task: TaskDefinition = {
           }
 
           await $`git add .`;
-          await $`pbpaste | git commit -F -`;
+          await $`echo ${cleanedMsg} | git commit -F -`;
           console.log("✅ Закоммичено!");
         } else {
           console.log("⚠️ Ожидание отменено.");

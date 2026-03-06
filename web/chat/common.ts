@@ -1,3 +1,4 @@
+import { $ } from "bun";
 import {
   pressKeyWithModifier,
   pressSpecialKey,
@@ -6,6 +7,14 @@ import {
 } from "ai-keyboard";
 import { getChromeWindows, focusChromeWindow } from "ai-window";
 import { stripMarkdownWrapper } from "./utils";
+
+/**
+ * Получает очищенное содержимое буфера обмена
+ */
+export async function getCleanClipboard(): Promise<string> {
+  const content = await $`pbpaste`.text();
+  return stripMarkdownWrapper(content);
+}
 
 /**
  * Вставляет и отправляет сообщение
