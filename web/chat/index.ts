@@ -1,12 +1,13 @@
-export * from "./common"
+export * from "./common";
+export { stripMarkdownWrapper } from "./utils";
 
-import * as Deepseek from "./deepseek"
-import * as Gemini from "./gemini"
-import * as Qwen from "./qwen"
-import * as Alice from "./alice"
-import * as Gpt from "./gpt"
+import * as Deepseek from "./deepseek";
+import * as Gemini from "./gemini";
+import * as Qwen from "./qwen";
+import * as Alice from "./alice";
+import * as Gpt from "./gpt";
 
-export { Deepseek, Gemini, Qwen, Alice, Gpt }
+export { Deepseek, Gemini, Qwen, Alice, Gpt };
 
 /**
  * Переключает фокус на указанный чат
@@ -18,10 +19,10 @@ export async function focusChat(name: string) {
     gemini: Gemini,
     gpt: Gpt,
     qwen: Qwen,
-  }
-  
-  const module = map[name.toLowerCase()]
+  };
+
+  const module = map[name.toLowerCase()];
   if (module) {
-    await module.focus()
+    await module.focus();
   }
 }
