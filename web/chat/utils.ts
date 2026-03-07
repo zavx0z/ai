@@ -8,7 +8,7 @@ export function stripMarkdownWrapper(message: string): string {
   const markdownBlockRegex = /^```markdown\s*([\s\S]*?)\s*```$/
   const match = trimmed.match(markdownBlockRegex)
 
-  if (match) {
+  if (match?.[1]) {
     return match[1].trim()
   }
 
@@ -16,7 +16,7 @@ export function stripMarkdownWrapper(message: string): string {
   const genericBlockRegex = /^```\s*([\s\S]*?)\s*```$/
   const genericMatch = trimmed.match(genericBlockRegex)
 
-  if (genericMatch) {
+  if (genericMatch?.[1]) {
     return genericMatch[1].trim()
   }
 

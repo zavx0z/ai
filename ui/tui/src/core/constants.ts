@@ -7,3 +7,6 @@ const __filename = fileURLToPath(import.meta.url)
 export const AI_ROOT = resolve(dirname(__filename), "../../../..")
 
 export const Tool = (path: string) => `"${join(AI_ROOT, path)}"`
+
+// --- Настройки временных файлов ---
+export const TMP_DIR = ".ai"

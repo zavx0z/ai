@@ -25,7 +25,7 @@ export async function pasteAndSend(message?: string) {
   // Если передано сообщение, обрабатываем его и копируем в буфер
   if (message) {
     const cleaned = stripMarkdownWrapper(message);
-    await Bun.write($`pbcopy`, cleaned);
+    await $`echo ${cleaned} | pbcopy`;
   }
 
   await pressKeyWithModifier("command", "v");

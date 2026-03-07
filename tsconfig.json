@@ -31,12 +31,13 @@
     "paths": {
       "nodes": [
         "./nodes"
-      ],
+      ]
     }
   },
   "exclude": [
     "node_modules/**/*",
     "metafor/**/*",
-    "tmp/**/*"
-  ],
+    "tmp/**/*",
+    "**/.ai"
+  ]
 }

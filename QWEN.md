@@ -79,8 +79,8 @@ bun install
 |---------|----------|
 | `bun run dev` | Запуск сервера в режиме hot-reload (порт 9999) |
 | `bun run ai` | Запуск основного AI-интерфейса |
-| `bun run files` | Генерация дерева файлов в `tmp/files.json` |
-| `bun run join` | Сбор файлов проекта в `tmp/join.md` |
+| `bun run files` | Генерация дерева файлов в `.ai/files.json` |
+| `bun run join` | Сбор файлов проекта в `.ai/join.md` |
 | `bun run lint` | Запуск линтера с генерацией отчёта |
 | `bun run edit-context` | Подготовка контекста для редактирования |
 | `bun run commit` | Генерация сообщения коммита |
@@ -167,7 +167,7 @@ exclude:
   - dist
   - .git
   - .vscode
-  - tmp
+  - .ai
   - bun.lock
   - .DS_Store
   - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.ico

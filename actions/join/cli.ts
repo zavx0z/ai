@@ -108,8 +108,8 @@ export async function runCLI(): Promise<void> {
     const result = await createContextFromFileList({
       fileListPath: options.fileListPath,
     })
-    await Bun.write(options.outputFile || "./tmp/output.md", result)
-    console.log(`✅ Результат успешно записан в файл ${options.outputFile || "./tmp/output.md"}`)
+    await Bun.write(options.outputFile || "./.ai/output.md", result)
+    console.log(`✅ Результат успешно записан в файл ${options.outputFile || "./.ai/output.md"}`)
   } catch (error) {
     console.error(`❌ Ошибка: ${error instanceof Error ? error.message : String(error)}`)
     process.exit(1)

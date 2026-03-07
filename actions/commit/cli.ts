@@ -9,13 +9,13 @@ function help() {
 
 ⚙️ Опции:
   -c, --code <файл>    📄 Файл с исходным кодом до изменений (необязательный)
-  -o, --output <путь>  📁 Выходной файл (по умолчанию: ./tmp/output.md)
+  -o, --output <путь>  📁 Выходной файл (по умолчанию: ./.ai/output.md)
   -h, --help           ❓ Справка
 
 📝 Примеры:
   bun run cli.ts diff.patch
   bun run cli.ts diff.patch --code before.ts
-  bun run cli.ts diff.patch -o ./tmp/output.md
+  bun run cli.ts diff.patch -o ./.ai/output.md
 `)
 }
 
@@ -39,7 +39,7 @@ export async function runCLI() {
   }
 
   // Парсинг флагов
-  let outputPath = "./tmp/output.md"
+  let outputPath = "./.ai/output.md"
   let codeFile: string | undefined = undefined
 
   // Парсим флаг --output

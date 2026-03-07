@@ -8,7 +8,7 @@ export const task: TaskDefinition = {
   description: "Применить изменения из AI (конвертирует JSON-патч в правки файлов)",
   actions: [
     { id: "clipboard", name: "📋 Из буфера", description: "pbpaste > edit.json" },
-    { id: "file", name: "📄 Из файла", description: "tmp/edit.json" },
+    { id: "file", name: "📄 Из файла", description: ".ai/edit.json" },
   ],
   run: async (ctx, actionId) => {
     switch (actionId) {

@@ -14,7 +14,7 @@ async function main() {
     const currentApp = await Window.getCurrentApp()
     const windows = await Window.getChromeWindows()
     const services = ["deepseek", "gemini", "алиса", "qwen"]
-    const storageDir = join(AI_ROOT, "tmp/ai-chat")
+    const storageDir = join(AI_ROOT, ".ai/ai-chat")
     let hasFocused = false
 
     for (const service of services) {

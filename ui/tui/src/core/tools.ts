@@ -1,6 +1,8 @@
-import { AI_ROOT, Tool } from "./constants"
+import { AI_ROOT, TMP_DIR, Tool } from "./constants"
 import { join } from "path"
 import type { TargetContext } from "./scanner"
+
+export { TMP_DIR }
 
 export interface TaskAction {
   id: string
@@ -24,8 +26,6 @@ export const PATH_EDIT = Tool("actions/edit/cli.ts")
 export const PATH_COMMIT = Tool("actions/commit/cli.ts")
 export const PATH_CLEAN_COMMENTS = Tool("actions/comment/clean-files.ts")
 
-
-export const TMP_DIR = "tmp"
 export const TASK_MD = join(TMP_DIR, "task.md")
 export const FILES_JSON = join(TMP_DIR, "files.json")
 export const JOIN_MD = join(TMP_DIR, "join.md")
@@ -39,6 +39,8 @@ export const COMMIT_MD = join(TMP_DIR, "commit.md")
 export async function getExcludes(ctx: TargetContext): Promise<string> {
   const defaultExcludes = [
     "node_modules",
+    TMP_DIR,
+    ".ai",
     "tmp",
     ".git",
     ".vscode",
@@ -48,18 +50,23 @@ export async function getExcludes(ctx: TargetContext): Promise<string> {
     "bun.lock",
     "package-lock.json",
     ".cursor",
-    "zavx0z.yaml",
   ]
   try {
-    const configPath = join(ctx.path, "zavx0z.yaml")
-    const file = Bun.file(configPath)
+    // Ищем zavx0z.yaml сначала в .ai/, потом в корне проекта
+    const configPaths = [
+      join(ctx.path, ".ai/zavx0z.yaml"),
+      join(ctx.path, "zavx0z.yaml"),
+    ]
 
-    if (await file.exists()) {
-      const text = await file.text()
-      const yaml = Bun.YAML.parse(text) as { exclude?: string[] }
+    for (const configPath of configPaths) {
+      const file = Bun.file(configPath)
+      if (await file.exists()) {
+        const text = await file.text()
+        const yaml = Bun.YAML.parse(text) as { exclude?: string[] }
 
-      if (yaml && Array.isArray(yaml.exclude)) {
-        return yaml.exclude.map((e: string) => `-e \"${e}\"`).join(" ")
+        if (yaml && Array.isArray(yaml.exclude)) {
+          return yaml.exclude.map((e: string) => `-e \"${e}\"`).join(" ")
+        }
       }
     }
   } catch (e) {}
@@ -69,6 +76,8 @@ export async function getExcludes(ctx: TargetContext): Promise<string> {
 export async function getExcludePatterns(ctx: TargetContext): Promise<string[]> {
   const defaultExcludes = [
     "node_modules",
+    TMP_DIR,
+    ".ai",
     "tmp",
     ".git",
     ".vscode",
@@ -78,18 +87,23 @@ export async function getExcludePatterns(ctx: TargetContext): Promise<string[]> 
     "bun.lock",
     "package-lock.json",
     ".cursor",
-    "zavx0z.yaml",
   ]
   try {
-    const configPath = join(ctx.path, "zavx0z.yaml")
-    const file = Bun.file(configPath)
+    // Ищем zavx0z.yaml сначала в .ai/, потом в корне проекта
+    const configPaths = [
+      join(ctx.path, ".ai/zavx0z.yaml"),
+      join(ctx.path, "zavx0z.yaml"),
+    ]
 
-    if (await file.exists()) {
-      const text = await file.text()
-      const yaml = Bun.YAML.parse(text) as { exclude?: string[] }
+    for (const configPath of configPaths) {
+      const file = Bun.file(configPath)
+      if (await file.exists()) {
+        const text = await file.text()
+        const yaml = Bun.YAML.parse(text) as { exclude?: string[] }
 
-      if (yaml && Array.isArray(yaml.exclude)) {
-        return yaml.exclude
+        if (yaml && Array.isArray(yaml.exclude)) {
+          return yaml.exclude
+        }
       }
     }
   } catch (e) {}
