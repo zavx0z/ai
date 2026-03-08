@@ -4,6 +4,7 @@ import { task as joinTask } from "./join"
 import { task as lintTask } from "./lint"
 import { task as gitTask } from "./git"
 import { task as reviewTask } from "./review"
+import { task as translateTask } from "./translate"
 import type { TaskDefinition } from "../src/core/tools"
 
 export const TASKS: TaskDefinition[] = [
@@ -13,4 +14,5 @@ export const TASKS: TaskDefinition[] = [
   joinTask,
   lintTask,
   gitTask,
+  translateTask,
 ]

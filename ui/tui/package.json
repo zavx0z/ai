@@ -7,7 +7,8 @@
     "tui-base": "workspace:*",
     "ai-window": "workspace:*",
     "ai-keyboard": "workspace:*",
-    "ai-chat": "workspace:*"
+    "ai-chat": "workspace:*",
+    "translate": "workspace:*"
   },
   "scripts": {
     "edit": "bun run ../../actions/edit/cli.ts tmp/edit.json"
