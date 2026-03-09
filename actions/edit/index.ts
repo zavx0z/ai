@@ -1,2 +1,6 @@
 export * from "./src/types"
 export * from "./src/smart-patcher"
+export * from "./src/unified-diff"
+export * from "./src/file-format"
+export * from "./src/json-patch"
+export * from "./src/format-detector"

@@ -5,7 +5,7 @@ import { PATH_EDIT, EDIT_JSON } from "../src/core/tools"
 export const task: TaskDefinition = {
   id: "edit",
   name: "🔨 Редактирование",
-  description: "Применить изменения из AI (конвертирует JSON-патч в правки файлов)",
+  description: "Применить изменения из AI (unified diff, FILE:, JSON Patch)",
   actions: [
     { id: "clipboard", name: "📋 Из буфера", description: "pbpaste > edit.json" },
     { id: "file", name: "📄 Из файла", description: ".ai/edit.json" },

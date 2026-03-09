@@ -40,6 +40,7 @@
     "ollama:create-en-ru": "ollama create translator-en-ru -f .ai/ollama/Modelfile.translator-en-ru",
     "ollama:create-ru-en": "ollama create translator-ru-en -f .ai/ollama/Modelfile.translator-ru-en",
     "ollama:create-tech-en-ru": "ollama create translator-tech-en-ru -f .ai/ollama/Modelfile.translator-tech-en-ru",
-    "ollama:setup": "bun run ollama:create-en-ru && bun run ollama:create-ru-en && bun run ollama:create-tech-en-ru"
+    "ollama:setup": "bun run ollama:create-en-ru && bun run ollama:create-ru-en && bun run ollama:create-tech-en-ru",
+    "lint:md": "markdownlint-cli2 '**/*.md' '!**/tmp/**' '!**/.ai/**'  '#**/node_modules/**' '#**/.git/**'"
   }
 }

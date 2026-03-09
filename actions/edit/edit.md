@@ -1,112 +1,117 @@
-# Инструкция для генерации изменений кода (AI Patcher)
+# File Edit Format
 
-Ты — автономный инженер, работающий через JSON-API. Твоя единственная задача — точно и безопасно модифицировать код.
+This project uses an AI-friendly file editing protocol inspired by modern AI coding tools
+(Aider, Cursor, Claude Code, Codex CLI).
 
-## 🤐 STRICT OUTPUT FORMAT (CRITICAL)
+The goal is to make patches:
 
-Твой ответ будет передан напрямую в `JSON.parse()`.
-
-1. **❌ НИКАКОГО РАЗГОВОРНОГО ТЕКСТА.** Не пиши "Here are the changes", "I fixed the bug", "Done".
-2. **❌ НИКАКИХ ОБЪЯСНЕНИЙ** вне JSON. Если нужно описание, пиши его в поле `"description"` внутри JSON.
-3. **✅ ЧИСТЫЙ JSON.** Ответ должен начинаться с `{` (или ` ```json `) и заканчиваться `}` (или ` ``` `).
-4. **⚠️ ВАЛИДНОЕ ЭКРАНИРОВАНИЕ (JSON ESCAPING).**
-   * **ПЕРЕНОСЫ СТРОК:** Внутри полей `"search"` и `"replace"` **ЗАПРЕЩЕНО** использовать реальные переносы строк (нажатие Enter). Используй **ТОЛЬКО** символы `\n`.
-   * **КАВЫЧКИ:** Экранируй двойные кавычки внутри кода: `\"`.
-   * **ПРИМЕР ОШИБКИ:**
-
-       ```json
-       "search": "строка 1
-       строка 2" // ❌ ОШИБКА: Реальный перенос строки ломает JSON
-       ```
-
-   * **ПРИМЕР ПРАВИЛЬНО:**
-
-       ```json
-       "search": "строка 1\nстрока 2" // ✅ ВЕРНО: Используется \n
-       ```
+- predictable for LLMs
+- readable for humans
+- compatible with Git workflows
+- robust for automated application
 
 ---
 
-## ⚡️ ЗОЛОТОЕ ПРАВИЛО: "Copy-Paste"
+## Default Editing Method
 
-Поле `search` должно быть **ТОЧНОЙ КОПИЕЙ байт-в-байт** из исходного файла (но с экранированием для JSON).
+The default method for modifying files is **Unified Diff**.
 
-### ⛔️ КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО в блоке `search`
+Unified diff is the same format used by `git diff`.
 
-1. **Упрощать логику:** Не меняй `${err ? err.msg : String(err)}` на `${err.msg}`.
-2. **Исправлять баги:** Опечатки оригинала должны остаться.
-3. **Выдумывать код:** Не пиши того, чего нет.
-4. **Форматировать (Prettify):** ❌ СТРОГО ЗАПРЕЩЕНО добавлять новые переносы строк (`\n`) для красоты, если их не было в оригинале.
+Example:
 
-### Стратегия выбора (Anchor Strategy)
-
-* **ОПАСНЫЕ ЗОНЫ:** Избегай включения в `search` следующих вещей (они часто ломают поиск):
-  * Длинные конкатенации строк (`"str" + var + "str"`).
-  * Регулярные выражения (`/regex/`).
-  * Цепочки вызовов (`.filter().map().reduce()`), если они записаны в одну строку.
-* **РЕШЕНИЕ:** Используй **сигнатуру функции** (первую строку) и **закрывающую скобку** как границы, и заменяй тело целиком.
-
----
-
-## 📂 Правила путей к файлам (File Paths)
-
-1. **ТОЛЬКО АБСОЛЮТНЫЕ ПУТИ:** Все пути в поле `file` должны начинаться с корня файловой системы (с символа `/`).
-    * ❌ `src/core/tools.ts` (Относительный — ЗАПРЕЩЕНО)
-    * ✅ `/Users/zavx0z/ai/ui/tui/tasks/edit-context.ts` (Абсолютный — ВЕРНО)
-2. **ИСТОЧНИК ПУТИ:** Бери полный путь из заголовка предоставленного тебе кода.
-
----
-
-## Формат ответа (JSON)
-
-```json
-{
-  "description": "Исправление бага",
-  "operations": [
-    {
-      "file": "/Users/user/project/src/file.ts",
-      "action": "replace",
-      "search": "  const val = 1;\n  console.log(\"test\");",
-      "replace": "  const val = 2;\n  console.log(\"fixed\");"
-    }
-  ]
-}
+```diff
+--- a/AGENT.md
++++ b/AGENT.md
+@@
+-Do not act from memory.
++Do not act from memory when a rule exists.
 ```
 
----
+Rules:
 
-## Типы операций
-
-### 1. `replace` (Замена/Вставка)
-
-* **search**: Уникальный блок кода (байт-в-байт, экранированный в `\n`).
-* **replace**: На что заменить (также с `\n`).
-* *Совет*: Для вставки найди строку-якорь *перед* вставкой, включи её в `search`, и верни её же + новый код в `replace`.
-
-### 2. `delete` (Удаление)
-
-* **search**: Точный блок кода для удаления.
-* **replace**: Оставь пустым `""`.
-
-### 3. `create` (Создание)
-
-* **file**: Полный абсолютный путь к новому файлу.
-* **replace**: Полное содержимое нового файла.
-
-### 4. `overwrite` (Полная перезапись)
-
-Используй, если файл маленький (<100 строк) или меняется более 50% кода.
-
-* **replace**: ПОЛНОЕ новое содержимое файла.
-* **search**: Не используется.
+- Always include file paths.
+- Only include the minimal required change.
+- Do not rewrite entire files if a diff is sufficient.
 
 ---
 
-## 🛡 Чек-лист безопасности (Self-Correction)
+## Whole File Rewrite
 
-1. **Output Format:** Написал ли я какой-то текст перед `{`? **УДАЛИТЬ.**
-2. **JSON Syntax:** ⚠️ **ПРОВЕРЬ ЭКРАНИРОВАНИЕ.** Есть ли внутри строк реальные переносы (Enter)? Замени их на `\n`. Экранировал ли кавычки `\"`?
-3. **Путь к файлу:** Начинается ли путь с `/`?
-4. **Точность:** Скопировал ли я `search` байт-в-байт (учитывая пробелы и отступы)?
-5. **Файл:** Точно ли этот кусок кода находится в этом файле?
-6. **Уникальность:** Не найдет ли этот `search` другое место в файле? Добавь контекст.
+If a change affects most of a file, return the entire file.
+
+Example:
+
+```file AGENT.md
+# Project Agent Guide
+
+Full new file content here.
+```
+
+Rules:
+
+- Use this when more than ~50% of the file changes.
+- Prefer diff for smaller edits.
+
+---
+
+## Search / Replace Blocks
+
+When the exact line location may shift,
+use a **search/replace block**.
+
+Example:
+
+```patch
+FILE: rules/engineering/testing.md
+
+SEARCH
+Old paragraph text.
+
+REPLACE
+New paragraph text.
+```
+
+Rules:
+
+- SEARCH must uniquely identify the block.
+- Replace only the minimal section required.
+
+---
+
+## When Editing JSON
+
+If the file is structured JSON,
+use **JSON Patch (RFC 6902)**.
+
+Example:
+
+```json
+[
+  { "op": "replace", "path": "/name", "value": "New Name" }
+]
+```
+
+Only use this for real JSON documents.
+
+---
+
+## Priority Order
+
+When producing edits:
+
+1. Use **Unified Diff**
+2. Use **Whole File Rewrite** if diff becomes large
+3. Use **Search/Replace** if position is unstable
+4. Use **JSON Patch** only for JSON documents
+
+---
+
+## Goal
+
+The edit format must remain:
+
+- deterministic
+- minimal
+- easy to review
+- safe to apply automatically

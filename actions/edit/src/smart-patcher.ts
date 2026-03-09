@@ -1,6 +1,182 @@
 import type { FileOperation } from "./types"
+import { applyUnifiedDiff, parseUnifiedDiff } from "./unified-diff"
+import { parseFileFormat, fileEditToOperation } from "./file-format"
+import { parseJsonPatch, applyJsonPatchToJsonFile } from "./json-patch"
+import { detectFormat, type PatchFormat } from "./format-detector"
 
 const normalize = (str: string) => str.replace(/\s+/g, '')
+
+function stripMarkdownCode(content: string): string {
+  const trimmed = content.trim()
+  
+  if (trimmed.startsWith("```json") || trimmed.startsWith("```")) {
+    const jsonStart = trimmed.indexOf("{")
+    const arrayStart = trimmed.indexOf("[")
+    
+    if (jsonStart === -1 && arrayStart === -1) {
+      return trimmed
+    }
+    
+    const startIndex = jsonStart === -1 ? arrayStart! : arrayStart === -1 ? jsonStart! : Math.min(jsonStart, arrayStart)
+    return trimmed.slice(startIndex)
+  }
+  
+  return trimmed
+}
+
+/**
+ * Главный интерфейс для применения патчей в любом формате
+ */
+export interface PatchInput {
+  content: string      // Исходное содержимое файла патча
+  filePath?: string    // Путь к файлу (для JSON patch)
+}
+
+export interface PatchOutput {
+  results: Array<{
+    file: string
+    newContent: string
+    created: boolean
+  }>
+  errors: Array<{
+    file: string
+    error: string
+  }>
+}
+
+/**
+ * Применяет патч к файлам
+ * @param patchContent Содержимое патч-файла
+ * @param readFile Функция для чтения файлов
+ * @returns Результат применения патча
+ */
+export async function applyPatch(
+  patchContent: string,
+  readFile: (path: string) => Promise<string>,
+  writeFile: (path: string, content: string) => Promise<void>
+): Promise<PatchOutput> {
+  const format = detectFormat(patchContent)
+  const results: PatchOutput["results"] = []
+  const errors: PatchOutput["errors"] = []
+  
+  switch (format) {
+    case "unified-diff": {
+      const fileDiffs = parseUnifiedDiff(patchContent)
+      
+      for (const fileDiff of fileDiffs) {
+        try {
+          const targetPath = fileDiff.newPath !== "/dev/null" ? fileDiff.newPath : fileDiff.oldPath
+          
+          let content = ""
+          let created = false
+          
+          if (fileDiff.oldPath !== "/dev/null") {
+            content = await readFile(fileDiff.oldPath)
+          } else {
+            created = true
+          }
+          
+          const newContent = applyUnifiedDiff(content, fileDiff)
+          results.push({ file: targetPath, newContent, created })
+        } catch (error) {
+          errors.push({
+            file: fileDiff.newPath || fileDiff.oldPath,
+            error: error instanceof Error ? error.message : String(error),
+          })
+        }
+      }
+      break
+    }
+    
+    case "file-format": {
+      const edits = parseFileFormat(patchContent)
+      
+      for (const edit of edits) {
+        try {
+          const op = fileEditToOperation(edit)
+          let content = ""
+          let created = false
+          
+          if (edit.mode === "rewrite") {
+            created = true
+            content = edit.content || ""
+          } else {
+            content = await readFile(edit.path)
+            content = applySmartPatch(content, op)
+          }
+          
+          results.push({ file: edit.path, newContent: content, created })
+        } catch (error) {
+          errors.push({
+            file: edit.path,
+            error: error instanceof Error ? error.message : String(error),
+          })
+        }
+      }
+      break
+    }
+    
+    case "json-patch": {
+      throw new Error("JSON patch требует указания пути к файлу")
+    }
+
+    case "ai-edit": {
+      const parsed = JSON.parse(patchContent)
+      
+      // Массив операций {op, path, value}
+      if (Array.isArray(parsed)) {
+        for (const item of parsed) {
+          try {
+            const opType = item.op as string
+            const filePath = item.path as string
+            
+            if (opType === "replace" || opType === "add") {
+              const content = item.value as string
+              results.push({ file: filePath, newContent: content, created: opType === "add" })
+            } else {
+              errors.push({
+                file: filePath,
+                error: `Неподдерживаемая операция: ${opType}`,
+              })
+            }
+          } catch (error) {
+            errors.push({
+              file: item.path || "unknown",
+              error: error instanceof Error ? error.message : String(error),
+            })
+          }
+        }
+      }
+      // Объект {description, operations}
+      else if (typeof parsed === "object" && parsed.operations) {
+        for (const op of parsed.operations as FileOperation[]) {
+          try {
+            let content = ""
+            let created = false
+
+            if (op.action === "create" || op.action === "overwrite") {
+              created = true
+              content = op.replace || op.content || ""
+            } else {
+              content = await readFile(op.file)
+              content = applySmartPatch(content, op)
+            }
+
+            results.push({ file: op.file, newContent: content, created })
+          } catch (error) {
+            errors.push({
+              file: op.file,
+              error: error instanceof Error ? error.message : String(error),
+            })
+          }
+        }
+      }
+      break
+    }
+  }
+
+  return { results, errors }
+}
 
 export function applySmartPatch(content: string, op: FileOperation): string {
   // 1. Простые операции

@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
-import { applySmartPatch } from "./src/smart-patcher"
-import type { EditRequest } from "./src/types"
+import { applyPatch, applySmartPatch } from "./src/smart-patcher"
+import { detectFormat } from "./src/format-detector"
+import type { EditRequest, FileOperation } from "./src/types"
 
 async function main() {
   const args = Bun.argv.slice(2)
@@ -11,87 +12,105 @@ async function main() {
 
   if (fileArgs.length === 0) {
     console.log(`
-📝 AI File Editor
-Использование: bun run cli.ts <changes.json> [flags]
+📝 AI File Editor (Multi-Format)
+Использование: bun run cli.ts <patch-file> [flags]
+
+Поддерживаемые форматы:
+  • Unified Diff (--- a/file.ts)
+  • FILE: формат (FILE: path/to/file.ts)
+  • JSON Patch ([{"op": "replace", "path": "/foo"}])
+  • AI Edit ([{"op": "replace", "path": "file.md", "value": "..."}])
+
 Флаги:
   --check, -c   Проверка без внесения изменений (Dry Run)
 `)
     process.exit(1)
   }
 
-  const rulesPath = fileArgs[0]
-  console.log(`🚀 Чтение правил: ${rulesPath}`)
+  const patchPath = fileArgs[0]
+  console.log(`🚀 Чтение патча: ${patchPath}`)
 
-  let rules: EditRequest
+  let patchContent: string
   try {
-    const text = await Bun.file(rulesPath!).text()
-    rules = JSON.parse(text)
+    patchContent = await Bun.file(patchPath!).text()
   } catch (e) {
-    console.error("❌ Ошибка парсинга JSON:", e)
+    console.error("❌ Ошибка чтения файла:", e)
     process.exit(1)
   }
 
-  console.log(`📋 Задача: ${rules.description}`)
+  // Определяем формат
+  let format: string
+  try {
+    format = detectFormat(patchContent)
+    console.log(`📋 Формат: ${format}`)
+  } catch (e) {
+    console.error("❌ Ошибка определения формата:", e)
+    process.exit(1)
+  }
+
   if (checkOnly) console.log("🔍 РЕЖИМ ПРОВЕРКИ (Файлы не будут изменены)")
 
-  for (const op of rules.operations) {
-    try {
-      const file = Bun.file(op.file)
-      const exists = await file.exists()
+  const modified: string[] = []
+  const created: string[] = []
+  const failed: Array<{ file: string; error: string }> = []
 
-      // 1. Create
-      if (op.action === "create") {
-        if (exists) throw new Error("Файл уже существует")
-        const content = op.replace || op.content || ""
-        if (!checkOnly) await Bun.write(op.file, content)
-        console.log(`✨ Создан: ${op.file}`)
-        continue
-      }
-
-      // 2. Rename
-      if (op.action === "rename") {
-        if (!exists) throw new Error("Файл не найден")
-        if (!op.newPath) throw new Error("Нет newPath")
-        if (!checkOnly) {
-          const content = await file.text()
-          await Bun.write(op.newPath, content)
-          await file.delete()
+  try {
+    // Применяем патч
+    const { results, errors } = await applyPatch(
+      patchContent,
+      async (path: string) => {
+        const file = Bun.file(path)
+        const exists = await file.exists()
+        if (!exists) {
+          throw new Error(`Файл не найден: ${path}`)
         }
-        console.log(`🚚 Переименован: ${op.file} -> ${op.newPath}`)
-        continue
+        return await file.text()
+      },
+      async (path: string, content: string) => {
+        if (!checkOnly) {
+          await Bun.write(path, content)
+        }
       }
+    )
 
-          // 3. Edit / Delete / Overwrite
-          if (!exists) throw new Error(`Файл не найден: ${op.file}`)
-
-          // Если действие - delete и нет search, то удаляем файл
-          if (op.action === "delete" && !op.search) {
-            if (!checkOnly) await file.delete()
-            console.log(`🗑️ Удален файл: ${op.file}`)
-            continue
-          }
-
-          const content = await file.text()
-
-          // Применяем патч в памяти
-          const newContent = applySmartPatch(content, op)
-
-          if (content !== newContent) {
-            if (!checkOnly) await Bun.write(op.file, newContent)
-
-            let icon = "✅"
-            if (op.action === "delete") icon = "🗑️"
-            if (op.action === "overwrite") icon = "🔥"
-
-            console.log(`${icon} ${op.action === "overwrite" ? "Перезаписан" : "Изменен"}: ${op.file}`)
-          } else {
-            console.log(`ℹ️ Нет изменений: ${op.file}`)
-          }
-    } catch (error) {
-      console.error(`💥 Ошибка в файле ${op.file}:`)
-      console.error(error instanceof Error ? error.message : String(error))
-      process.exit(1)
+    // Выводим результаты
+    for (const result of results) {
+      if (!checkOnly) {
+        await Bun.write(result.file, result.newContent)
+      }
+      
+      if (result.created) {
+        created.push(result.file)
+        console.log(`✨ Создан: ${result.file}`)
+      } else {
+        modified.push(result.file)
+        console.log(`✅ Изменен: ${result.file}`)
+      }
     }
+
+    for (const error of errors) {
+      failed.push(error)
+      console.error(`💥 Ошибка в файле ${error.file}:`)
+      console.error(`   ${error.error}`)
+    }
+  } catch (e) {
+    console.error("❌ Критическая ошибка:", e)
+    process.exit(1)
+  }
+
+  // Итоговый отчёт
+  console.log("\n" + "=".repeat(50))
+  console.log(`📊 Итоги:`)
+  console.log(`   Создано файлов: ${created.length}`)
+  console.log(`   Изменено файлов: ${modified.length}`)
+  console.log(`   Ошибок: ${failed.length}`)
+  
+  if (failed.length > 0) {
+    console.log("\n⚠️ Не удалось применить:")
+    for (const f of failed) {
+      console.log(`   • ${f.file}: ${f.error}`)
+    }
+    process.exit(1)
   }
 
   console.log(checkOnly ? "\n🔍 Проверка завершена успешно!" : "\n🎉 Готово!")

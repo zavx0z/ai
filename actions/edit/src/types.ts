@@ -13,3 +13,12 @@ export interface EditRequest {
   description: string
   operations: FileOperation[]
 }
+
+/**
+ * Результат применения патча
+ */
+export interface PatchResult {
+  modified: string[]    // Изменённые файлы
+  created: string[]     // Созданные файлы
+  failed: Array<{ file: string; error: string }> // Ошибки
+}

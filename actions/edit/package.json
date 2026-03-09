@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "test": "bun test",
     "start": "bun run cli.ts",
     "files": "bun run ../../tasks/tree-explorer/index.ts -e node_modules -e tmp -p -o tmp/files.json",
     "join": "bun run files && bun run ../../actions/join/cli.ts --file tmp/files.json --output tmp/join.md",
