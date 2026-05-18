@@ -1,117 +1,175 @@
-# File Edit Format
+## Главный безопасный формат
 
-This project uses an AI-friendly file editing protocol inspired by modern AI coding tools
-(Aider, Cursor, Claude Code, Codex CLI).
+Для JSON-патчей используй объект с `description` и `operations`:
 
-The goal is to make patches:
-
-- predictable for LLMs
-- readable for humans
-- compatible with Git workflows
-- robust for automated application
-
----
-
-## Default Editing Method
-
-The default method for modifying files is **Unified Diff**.
-
-Unified diff is the same format used by `git diff`.
-
-Example:
-
-```diff
---- a/AGENT.md
-+++ b/AGENT.md
-@@
--Do not act from memory.
-+Do not act from memory when a rule exists.
+```json
+{
+  "description": "Создать или изменить файлы проекта",
+  "operations": [
+    {
+      "file": "/Users/vladimirfilipenko/session-story/src/cli.ts",
+      "action": "create",
+      "replace": "содержимое файла"
+    }
+  ]
+}
 ```
 
-Rules:
+Именно такой формат текущий `format-detector` уверенно определяет как `ai-edit`.
 
-- Always include file paths.
-- Only include the minimal required change.
-- Do not rewrite entire files if a diff is sufficient.
+## Не использовать голый массив `{file, action}`
 
----
-
-## Whole File Rewrite
-
-If a change affects most of a file, return the entire file.
-
-Example:
-
-```file AGENT.md
-# Project Agent Guide
-
-Full new file content here.
-```
-
-Rules:
-
-- Use this when more than ~50% of the file changes.
-- Prefer diff for smaller edits.
-
----
-
-## Search / Replace Blocks
-
-When the exact line location may shift,
-use a **search/replace block**.
-
-Example:
-
-```patch
-FILE: rules/engineering/testing.md
-
-SEARCH
-Old paragraph text.
-
-REPLACE
-New paragraph text.
-```
-
-Rules:
-
-- SEARCH must uniquely identify the block.
-- Replace only the minimal section required.
-
----
-
-## When Editing JSON
-
-If the file is structured JSON,
-use **JSON Patch (RFC 6902)**.
-
-Example:
+Не делай так:
 
 ```json
 [
-  { "op": "replace", "path": "/name", "value": "New Name" }
+  {
+    "file": "src/cli.ts",
+    "action": "create",
+    "replace": "..."
+  }
 ]
 ```
 
-Only use this for real JSON documents.
+Такой массив может не определиться как поддерживаемый формат.
 
----
+## Абсолютные пути предпочтительнее
 
-## Priority Order
+Для текущего workflow лучше использовать абсолютные пути.
 
-When producing edits:
+Пример:
 
-1. Use **Unified Diff**
-2. Use **Whole File Rewrite** if diff becomes large
-3. Use **Search/Replace** if position is unstable
-4. Use **JSON Patch** only for JSON documents
+```json
+{
+  "file": "/Users/vladimirfilipenko/session-story/src/cli.ts",
+  "action": "create",
+  "replace": "..."
+}
+```
 
----
+Почему:
 
-## Goal
+- edit-инструмент может быть запущен из другой директории;
+- абсолютный путь убирает неоднозначность;
+- локальная автоматизация становится предсказуемее;
+- меньше риска записать файл не туда.
 
-The edit format must remain:
+## Перед генерацией патча нужно знать корень проекта
 
-- deterministic
-- minimal
-- easy to review
-- safe to apply automatically
+Перед созданием JSON-патча всегда запроси или подтверди абсолютный путь к проекту.
+
+Пример:
+
+```text
+/Users/vladimirfilipenko/session-story
+```
+
+После этого все пути в JSON нужно строить от этого корня.
+
+#
+## Поддерживаемые действия
+
+```ts
+type ActionType = "replace" | "create" | "delete" | "rename" | "overwrite"
+```
+
+## Создание файла
+
+```json
+{
+  "file": "/absolute/path/file.ts",
+  "action": "create",
+  "replace": "новое содержимое"
+}
+```
+
+## Полная перезапись файла
+
+```json
+{
+  "file": "/absolute/path/file.ts",
+  "action": "overwrite",
+  "replace": "новое содержимое"
+}
+```
+
+## Замена блока
+
+```json
+{
+  "file": "/absolute/path/file.ts",
+  "action": "replace",
+  "search": "старый блок",
+  "replace": "новый блок"
+}
+```
+
+## Удаление блока
+
+```json
+{
+  "file": "/absolute/path/file.ts",
+  "action": "delete",
+  "search": "блок для удаления"
+}
+```
+
+## Правила для `search`
+
+`search` должен быть минимальным, но уникальным.
+
+Плохо:
+
+```json
+{
+  "search": "const value = 1"
+}
+```
+
+если такая строка встречается много раз.
+
+Хорошо:
+
+```json
+{
+  "search": "export function buildTimeline() {\n  const value = 1\n}"
+}
+```
+
+## Как работает fuzzy matching
+
+Текущий `applySmartPatch` сначала ищет точное совпадение.
+
+Если точного совпадения нет, он пробует fuzzy-поиск:
+
+- игнорирует лишние пробелы;
+- может пропускать пустые строки в файле;
+- ищет якорь по первой строке search-блока;
+- дальше сравнивает нормализованные строки.
+
+Это полезно, но не надо на него полностью полагаться.
+
+Лучше давать точный `search`.
+
+## Большие изменения
+
+Если меняется больше половины файла — используй `overwrite`.
+
+Если создаётся новый файл — используй `create`.
+
+Если меняется маленький кусок — используй `replace`.
+
+## Что проверять перед применением
+
+```bash
+python3 -m json.tool .ai/edit.json >/dev/null && echo "valid json"
+head -20 .ai/edit.json
+```
+
+В начале должно быть:
+
+```json
+{
+  "description": "...",
+  "operations": [
+```

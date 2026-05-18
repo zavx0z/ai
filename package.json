@@ -4,10 +4,7 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest",
-    "@metafor/meta": "link:@metafor/meta",
-    "@metafor/atom": "link:@metafor/atom",
-    "@metafor/inspect": "link:@metafor/inspect"
+    "@types/bun": "latest"
   },
   "bin": {
     "ai": "ui/tui/ai.ts"
