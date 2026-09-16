@@ -1,9 +1,0 @@
-{
-  "name": "ai-vision",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "index.ts",
-  "devDependencies": {
-    "@types/bun": "latest"
-  }
-}

@@ -1,43 +1,25 @@
 {
-  "name": "ai",
-  "module": "index.ts",
-  "type": "module",
+  "name": "@zavx0z/ai",
+  "label": "AI Tools",
   "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "bin": {
-    "ai": "ui/tui/ai.ts"
-  },
-  "peerDependencies": {
-    "typescript": "^5.9.3"
-  },
+  "type": "module",
   "workspaces": [
-    "./actions/*",
-    "./tasks/*",
-    "./generator/*",
-    "./ui/*",
-    "./tools/*",
-    "./web/*",
-    "./meta/**"
+    "filesystem",
+    "git",
+    "server"
   ],
   "scripts": {
-    "dev": "bun --hot server",
-    "ai": "bun index",
-    "files": "bun run tasks/tree-explorer/index.ts -e node_modules -e .ai -e .git -e .vscode -p -o .ai/files.json",
-    "join": "bun run actions/join/cli.ts --file .ai/files.json --output .ai/join.md",
-    "lint": "bun run join && bun run actions/lint/cli.ts . -o .ai/lint.md && cat .ai/join.md >> .ai/lint.md",
-    "edit-context": "bun run join && cat .ai/join.md generator/bun/README.md actions/edit/edit.md > .ai/edit.md",
-    "edit": "bun run actions/edit/cli.ts .ai/edit.json",
-    "commit": "git add . && git diff --staged > .ai/diff.patch && bun run join && bun run actions/commit/cli.ts .ai/diff.patch -c .ai/join.md -o .ai/commit.md",
-    "upd": "bun run clear && bun run link:local",
-    "clear": "rm -rf node_modules",
-    "link:local": "bun link @metafor/space",
-    "translate": "bun run actions/translate/cli.ts",
-    "ollama:create-en-ru": "ollama create translator-en-ru -f .ai/ollama/Modelfile.translator-en-ru",
-    "ollama:create-ru-en": "ollama create translator-ru-en -f .ai/ollama/Modelfile.translator-ru-en",
-    "ollama:create-tech-en-ru": "ollama create translator-tech-en-ru -f .ai/ollama/Modelfile.translator-tech-en-ru",
-    "ollama:setup": "bun run ollama:create-en-ru && bun run ollama:create-ru-en && bun run ollama:create-tech-en-ru",
-    "lint:md": "markdownlint-cli2 '**/*.md' '!**/tmp/**' '!**/.ai/**'  '#**/node_modules/**' '#**/.git/**'"
+    "start": "bun server/index.ts",
+    "start:node": "node --experimental-strip-types server/index.ts",
+    "test": "bun test",
+    "test:node": "node --experimental-strip-types --test filesystem/*/spec/scenario.spec.ts git/*/spec/scenario.spec.ts server/*/spec/scenario.spec.ts",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.7",
+    "typescript": "5.8.3"
+  },
+  "engines": {
+    "node": ">=22.6.0"
   }
 }

@@ -1,43 +1,22 @@
 {
   "compilerOptions": {
-    // Environment setup & latest features
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
-    "target": "ESNext",
-    "module": "Preserve",
-    "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "allowJs": true,
-    "checkJs": true,
-    // Bundler mode
-    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noEmit": true,
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    "noEmit": true,
-    // Best practices
-    "strict": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    // Some stricter flags (disabled by default)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false,
-    // Path mapping
-    "baseUrl": ".",
-    "paths": {
-      "nodes": [
-        "./nodes"
-      ]
-    }
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ]
   },
+  "include": [
+    "**/*.ts"
+  ],
   "exclude": [
-    "node_modules/**/*",
-    "metafor/**/*",
-    "tmp/**/*",
-    "**/.ai"
+    "node_modules"
   ]
 }

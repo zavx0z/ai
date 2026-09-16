@@ -1,0 +1,11 @@
+{
+  "name": "@ai/server",
+  "label": "HTTP Server",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./request": "./request/index.ts",
+    "./discovery": "./discovery/index.ts"
+  }
+}
