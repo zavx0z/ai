@@ -5,157 +5,157 @@
     "": {
       "name": "@zavx0z/ai",
       "devDependencies": {
+        "@ai-filesystem/access": "workspace:*",
+        "@ai-filesystem/apply-patch": "workspace:*",
+        "@ai-filesystem/create": "workspace:*",
+        "@ai-filesystem/list": "workspace:*",
+        "@ai-filesystem/mkdir": "workspace:*",
+        "@ai-filesystem/read": "workspace:*",
+        "@ai-filesystem/read-many": "workspace:*",
+        "@ai-filesystem/remove": "workspace:*",
+        "@ai-filesystem/rename": "workspace:*",
+        "@ai-filesystem/stat": "workspace:*",
+        "@ai-filesystem/write": "workspace:*",
+        "@ai-git/status": "workspace:*",
+        "@ai-server/request": "workspace:*",
+        "@ai-tech/failure": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/server": "workspace:*",
         "@ai/testing": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@filesystem/access": "workspace:*",
-        "@filesystem/apply-patch": "workspace:*",
-        "@filesystem/create": "workspace:*",
-        "@filesystem/list": "workspace:*",
-        "@filesystem/mkdir": "workspace:*",
-        "@filesystem/read": "workspace:*",
-        "@filesystem/read-many": "workspace:*",
-        "@filesystem/remove": "workspace:*",
-        "@filesystem/rename": "workspace:*",
-        "@filesystem/stat": "workspace:*",
-        "@filesystem/write": "workspace:*",
-        "@git/status": "workspace:*",
-        "@server/request": "workspace:*",
-        "@tech/failure": "workspace:*",
-        "@tech/input": "workspace:*",
         "@types/bun": "1.4.2",
         "@types/node": "22.19.7",
         "typescript": "5.8.3",
       },
     },
     "filesystem/access": {
-      "name": "@filesystem/access",
+      "name": "@ai-filesystem/access",
       "dependencies": {
-        "@tech/failure": "workspace:*",
+        "@ai-tech/failure": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "filesystem/apply-patch": {
-      "name": "@filesystem/apply-patch",
+      "name": "@ai-filesystem/apply-patch",
       "dependencies": {
+        "@ai-filesystem/access": "workspace:*",
+        "@ai-tech/failure": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@filesystem/access": "workspace:*",
-        "@tech/failure": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "filesystem/create": {
-      "name": "@filesystem/create",
+      "name": "@ai-filesystem/create",
       "dependencies": {
+        "@ai-filesystem/access": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@filesystem/access": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "filesystem/list": {
-      "name": "@filesystem/list",
+      "name": "@ai-filesystem/list",
       "dependencies": {
+        "@ai-filesystem/access": "workspace:*",
+        "@ai-tech/failure": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@filesystem/access": "workspace:*",
-        "@tech/failure": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "filesystem/mkdir": {
-      "name": "@filesystem/mkdir",
+      "name": "@ai-filesystem/mkdir",
       "dependencies": {
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "filesystem/read": {
-      "name": "@filesystem/read",
+      "name": "@ai-filesystem/read",
       "dependencies": {
+        "@ai-filesystem/access": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@filesystem/access": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "filesystem/read-many": {
-      "name": "@filesystem/read-many",
+      "name": "@ai-filesystem/read-many",
       "dependencies": {
+        "@ai-filesystem/access": "workspace:*",
+        "@ai-filesystem/read": "workspace:*",
+        "@ai-tech/failure": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@filesystem/access": "workspace:*",
-        "@filesystem/read": "workspace:*",
-        "@tech/failure": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "filesystem/remove": {
-      "name": "@filesystem/remove",
+      "name": "@ai-filesystem/remove",
       "dependencies": {
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "filesystem/rename": {
-      "name": "@filesystem/rename",
+      "name": "@ai-filesystem/rename",
       "dependencies": {
+        "@ai-tech/failure": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@tech/failure": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "filesystem/stat": {
-      "name": "@filesystem/stat",
+      "name": "@ai-filesystem/stat",
       "dependencies": {
+        "@ai-filesystem/access": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@filesystem/access": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "filesystem/write": {
-      "name": "@filesystem/write",
+      "name": "@ai-filesystem/write",
       "dependencies": {
+        "@ai-filesystem/access": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@filesystem/access": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
+        "@ai-filesystem/read": "workspace:*",
         "@ai/testing": "workspace:*",
-        "@filesystem/read": "workspace:*",
       },
     },
     "git/status": {
-      "name": "@git/status",
+      "name": "@ai-git/status",
       "dependencies": {
+        "@ai-tech/failure": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@tech/failure": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
@@ -164,31 +164,31 @@
     "server": {
       "name": "@ai/server",
       "dependencies": {
+        "@ai-server/request": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@server/request": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/testing": "workspace:*",
       },
     },
     "server/request": {
-      "name": "@server/request",
+      "name": "@ai-server/request",
       "dependencies": {
+        "@ai-filesystem/apply-patch": "workspace:*",
+        "@ai-filesystem/create": "workspace:*",
+        "@ai-filesystem/list": "workspace:*",
+        "@ai-filesystem/mkdir": "workspace:*",
+        "@ai-filesystem/read": "workspace:*",
+        "@ai-filesystem/read-many": "workspace:*",
+        "@ai-filesystem/remove": "workspace:*",
+        "@ai-filesystem/rename": "workspace:*",
+        "@ai-filesystem/stat": "workspace:*",
+        "@ai-filesystem/write": "workspace:*",
+        "@ai-git/status": "workspace:*",
+        "@ai-tech/failure": "workspace:*",
+        "@ai-tech/input": "workspace:*",
         "@ai/workspace": "workspace:*",
-        "@filesystem/apply-patch": "workspace:*",
-        "@filesystem/create": "workspace:*",
-        "@filesystem/list": "workspace:*",
-        "@filesystem/mkdir": "workspace:*",
-        "@filesystem/read": "workspace:*",
-        "@filesystem/read-many": "workspace:*",
-        "@filesystem/remove": "workspace:*",
-        "@filesystem/rename": "workspace:*",
-        "@filesystem/stat": "workspace:*",
-        "@filesystem/write": "workspace:*",
-        "@git/status": "workspace:*",
-        "@tech/failure": "workspace:*",
-        "@tech/input": "workspace:*",
       },
       "devDependencies": {
         "@ai/server": "workspace:*",
@@ -196,12 +196,12 @@
       },
     },
     "tech/failure": {
-      "name": "@tech/failure",
+      "name": "@ai-tech/failure",
     },
     "tech/input": {
-      "name": "@tech/input",
+      "name": "@ai-tech/input",
       "dependencies": {
-        "@tech/failure": "workspace:*",
+        "@ai-tech/failure": "workspace:*",
       },
     },
     "testing": {
@@ -213,58 +213,58 @@
     "workspace": {
       "name": "@ai/workspace",
       "dependencies": {
-        "@tech/failure": "workspace:*",
-        "@tech/input": "workspace:*",
+        "@ai-tech/failure": "workspace:*",
+        "@ai-tech/input": "workspace:*",
       },
       "devDependencies": {
+        "@ai-filesystem/apply-patch": "workspace:*",
+        "@ai-filesystem/create": "workspace:*",
+        "@ai-filesystem/mkdir": "workspace:*",
+        "@ai-filesystem/read": "workspace:*",
+        "@ai-filesystem/remove": "workspace:*",
+        "@ai-filesystem/rename": "workspace:*",
+        "@ai-filesystem/write": "workspace:*",
+        "@ai-server/request": "workspace:*",
         "@ai/testing": "workspace:*",
-        "@filesystem/apply-patch": "workspace:*",
-        "@filesystem/create": "workspace:*",
-        "@filesystem/mkdir": "workspace:*",
-        "@filesystem/read": "workspace:*",
-        "@filesystem/remove": "workspace:*",
-        "@filesystem/rename": "workspace:*",
-        "@filesystem/write": "workspace:*",
-        "@server/request": "workspace:*",
       },
     },
   },
   "packages": {
+    "@ai-filesystem/access": ["@ai-filesystem/access@workspace:filesystem/access"],
+
+    "@ai-filesystem/apply-patch": ["@ai-filesystem/apply-patch@workspace:filesystem/apply-patch"],
+
+    "@ai-filesystem/create": ["@ai-filesystem/create@workspace:filesystem/create"],
+
+    "@ai-filesystem/list": ["@ai-filesystem/list@workspace:filesystem/list"],
+
+    "@ai-filesystem/mkdir": ["@ai-filesystem/mkdir@workspace:filesystem/mkdir"],
+
+    "@ai-filesystem/read": ["@ai-filesystem/read@workspace:filesystem/read"],
+
+    "@ai-filesystem/read-many": ["@ai-filesystem/read-many@workspace:filesystem/read-many"],
+
+    "@ai-filesystem/remove": ["@ai-filesystem/remove@workspace:filesystem/remove"],
+
+    "@ai-filesystem/rename": ["@ai-filesystem/rename@workspace:filesystem/rename"],
+
+    "@ai-filesystem/stat": ["@ai-filesystem/stat@workspace:filesystem/stat"],
+
+    "@ai-filesystem/write": ["@ai-filesystem/write@workspace:filesystem/write"],
+
+    "@ai-git/status": ["@ai-git/status@workspace:git/status"],
+
+    "@ai-server/request": ["@ai-server/request@workspace:server/request"],
+
+    "@ai-tech/failure": ["@ai-tech/failure@workspace:tech/failure"],
+
+    "@ai-tech/input": ["@ai-tech/input@workspace:tech/input"],
+
     "@ai/server": ["@ai/server@workspace:server"],
 
     "@ai/testing": ["@ai/testing@workspace:testing"],
 
     "@ai/workspace": ["@ai/workspace@workspace:workspace"],
-
-    "@filesystem/access": ["@filesystem/access@workspace:filesystem/access"],
-
-    "@filesystem/apply-patch": ["@filesystem/apply-patch@workspace:filesystem/apply-patch"],
-
-    "@filesystem/create": ["@filesystem/create@workspace:filesystem/create"],
-
-    "@filesystem/list": ["@filesystem/list@workspace:filesystem/list"],
-
-    "@filesystem/mkdir": ["@filesystem/mkdir@workspace:filesystem/mkdir"],
-
-    "@filesystem/read": ["@filesystem/read@workspace:filesystem/read"],
-
-    "@filesystem/read-many": ["@filesystem/read-many@workspace:filesystem/read-many"],
-
-    "@filesystem/remove": ["@filesystem/remove@workspace:filesystem/remove"],
-
-    "@filesystem/rename": ["@filesystem/rename@workspace:filesystem/rename"],
-
-    "@filesystem/stat": ["@filesystem/stat@workspace:filesystem/stat"],
-
-    "@filesystem/write": ["@filesystem/write@workspace:filesystem/write"],
-
-    "@git/status": ["@git/status@workspace:git/status"],
-
-    "@server/request": ["@server/request@workspace:server/request"],
-
-    "@tech/failure": ["@tech/failure@workspace:tech/failure"],
-
-    "@tech/input": ["@tech/input@workspace:tech/input"],
 
     "@types/bun": ["@types/bun@1.4.2", "", { "dependencies": { "bun-types": "1.4.2" } }, "sha512-GimotNn7+ZV0uVArItBbriZsR1oNf0+WTzPkdcFrzShI7k2norL0uzEaJT8T33dWr7O/c9ZDuAFQrctKCi72oQ=="],
 

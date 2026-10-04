@@ -31,17 +31,17 @@ HTTP-хост создаёт свой контекст до начала про�
 
 | Имя команды | Пакет | Возможность |
 | --- | --- | --- |
-| `filesystem.stat` | `@filesystem/stat` | Метаданные, включая конечную ссылку |
-| `filesystem.list` | `@filesystem/list` | Ограниченный список каталога |
-| `filesystem.read` | `@filesystem/read` | Диапазон байтов одного файла |
-| `filesystem.read-many` | `@filesystem/read-many` | Пакет чтения с общим бюджетом |
-| `filesystem.create` | `@filesystem/create` | Создание без перезаписи |
-| `filesystem.write` | `@filesystem/write` | Замена существующего файла |
-| `filesystem.mkdir` | `@filesystem/mkdir` | Создание каталога |
-| `filesystem.remove` | `@filesystem/remove` | Удаление записи |
-| `filesystem.rename` | `@filesystem/rename` | Перемещение без перезаписи |
-| `filesystem.apply-patch` | `@filesystem/apply-patch` | Планирование и применение текстового patch |
-| `git.status` | `@git/status` | Ограниченный Git status |
+| `filesystem.stat` | `@ai-filesystem/stat` | Метаданные, включая конечную ссылку |
+| `filesystem.list` | `@ai-filesystem/list` | Ограниченный список каталога |
+| `filesystem.read` | `@ai-filesystem/read` | Диапазон байтов одного файла |
+| `filesystem.read-many` | `@ai-filesystem/read-many` | Пакет чтения с общим бюджетом |
+| `filesystem.create` | `@ai-filesystem/create` | Создание без перезаписи |
+| `filesystem.write` | `@ai-filesystem/write` | Замена существующего файла |
+| `filesystem.mkdir` | `@ai-filesystem/mkdir` | Создание каталога |
+| `filesystem.remove` | `@ai-filesystem/remove` | Удаление записи |
+| `filesystem.rename` | `@ai-filesystem/rename` | Перемещение без перезаписи |
+| `filesystem.apply-patch` | `@ai-filesystem/apply-patch` | Планирование и применение текстового patch |
+| `git.status` | `@ai-git/status` | Ограниченный Git status |
 
 `filesystem/roots` и `filesystem/open` удалены: выбор alias больше не является
 действием агента. Метаданные самой области доступны через `stat({path: "."})`,
@@ -49,7 +49,7 @@ HTTP-хост создаёт свой контекст до начала про�
 
 ```ts
 import createWorkspace from "@ai/workspace"
-import readFile from "@filesystem/read"
+import readFile from "@ai-filesystem/read"
 
 const workspace = createWorkspace({directory: "/absolute/path/to/checkout"})
 const result = readFile({path: "README.md", maxBytes: 65536}, workspace)

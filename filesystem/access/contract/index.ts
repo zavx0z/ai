@@ -1,5 +1,5 @@
 /** Метаданные файловой записи, общие для stat и list. */
-export declare namespace FilesystemAccess {
+export declare namespace AiFilesystemAccess {
   /**
   Состояние записи без перехода по конечной символической ссылке.
 

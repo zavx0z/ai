@@ -5,14 +5,14 @@
 
 @packageDocumentation
 */
-import validation from "@tech/input"
+import validation from "@ai-tech/input"
 const {object, integer, encoding} = validation
-import access from "@filesystem/access"
+import access from "@ai-filesystem/access"
 const {readChunk, digest, MAX_BYTES} = access
 import type {AiWorkspace} from "@ai/workspace"
 
-import type {FilesystemRead} from "./contract/index.ts"
-export type {FilesystemRead} from "./contract/index.ts"
+import type {AiFilesystemRead} from "./contract/index.ts"
+export type {AiFilesystemRead} from "./contract/index.ts"
 
 /**
 Читает участок обычного файла, не превышающий заданный бюджет байтов.
@@ -27,7 +27,7 @@ export type {FilesystemRead} from "./contract/index.ts"
 
 @throws Ошибки `INVALID_INPUT`, `ROOT_NOT_ALLOWED`, `PATH_NOT_ALLOWED`, `INVALID_PATH_TYPE` и `LIMIT_EXCEEDED` при проверке аргументов, корня, пути и чтении; ошибки ОС, включая `ENOENT`, пробрасываются напрямую.
 */
-export default function readFile(input: FilesystemRead.Input, context: AiWorkspace.Output): FilesystemRead.Output {
+export default function readFile(input: AiFilesystemRead.Input, context: AiWorkspace.Output): AiFilesystemRead.Output {
   object(input, ["path", "offset", "maxBytes", "encoding"])
   context.directory()
   const offset = integer(input.offset, 0, 0, Number.MAX_SAFE_INTEGER, "offset")

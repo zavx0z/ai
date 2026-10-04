@@ -7,15 +7,15 @@
 */
 import {opendirSync, lstatSync} from "node:fs"
 import {join} from "node:path"
-import validation from "@tech/input"
+import validation from "@ai-tech/input"
 const {object, integer, boolean} = validation
-import ToolError from "@tech/failure"
-import access from "@filesystem/access"
+import ToolError from "@ai-tech/failure"
+import access from "@ai-filesystem/access"
 const {metadata} = access
 import type {AiWorkspace} from "@ai/workspace"
 
-import type {FilesystemList} from "./contract/index.ts"
-export type {FilesystemList} from "./contract/index.ts"
+import type {AiFilesystemList} from "./contract/index.ts"
+export type {AiFilesystemList} from "./contract/index.ts"
 
 /**
 Перечисляет записи каталога и при включённой рекурсии спускается только в реальные каталоги.
@@ -30,7 +30,7 @@ export type {FilesystemList} from "./contract/index.ts"
 
 @throws Ошибка `INVALID_INPUT` для неверных параметров, `ROOT_NOT_ALLOWED` если назначенный корень сменил идентичность, `INVALID_PATH_TYPE` если цель не каталог, а также ошибки разрешения пути и доступа к каталогу.
 */
-export default function listFiles(input: FilesystemList.Input, context: AiWorkspace.Output): FilesystemList.Output {
+export default function listFiles(input: AiFilesystemList.Input, context: AiWorkspace.Output): AiFilesystemList.Output {
   object(input, ["path", "recursive", "maxDepth", "maxEntries"])
   const root = context.directory()
   const start = context.resolve(input.path ?? ".", {allowRoot: true})
@@ -38,7 +38,7 @@ export default function listFiles(input: FilesystemList.Input, context: AiWorksp
   const maxDepth = integer(input.maxDepth, 3, 1, 10, "maxDepth")
   const maxEntries = integer(input.maxEntries, 1000, 1, 5000, "maxEntries")
   if (!lstatSync(start).isDirectory()) throw new ToolError("INVALID_PATH_TYPE", "Path must be a directory")
-  const entries: FilesystemList.Output["entries"] = []
+  const entries: AiFilesystemList.Output["entries"] = []
   let truncated = false
   let depthLimited = false
   /**

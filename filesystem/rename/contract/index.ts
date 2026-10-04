@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace FilesystemRename {
+export declare namespace AiFilesystemRename {
   /**
   Перемещает запись внутри одной назначенной рабочей области, если целевое имя свободно.
 

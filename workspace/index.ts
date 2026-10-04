@@ -6,8 +6,8 @@
  */
 import {realpathSync, lstatSync} from "node:fs"
 import {isAbsolute} from "node:path"
-import ToolError from "@tech/failure"
-import validation from "@tech/input"
+import ToolError from "@ai-tech/failure"
+import validation from "@ai-tech/input"
 import {pathInRoot, relativeTo} from "./src/paths.ts"
 import type {AiWorkspace} from "./contract/index.ts"
 export type {AiWorkspace} from "./contract/index.ts"

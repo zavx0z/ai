@@ -1,5 +1,5 @@
 {
-  "name": "@server/request",
+  "name": "@ai-server/request",
   "private": true,
   "type": "module",
   "exports": {
@@ -8,19 +8,19 @@
   "description": "HTTP-вход описаний и исполнения именованных инструментов в назначенной области",
   "dependencies": {
     "@ai/workspace": "workspace:*",
-    "@filesystem/apply-patch": "workspace:*",
-    "@filesystem/create": "workspace:*",
-    "@filesystem/list": "workspace:*",
-    "@filesystem/mkdir": "workspace:*",
-    "@filesystem/read": "workspace:*",
-    "@filesystem/read-many": "workspace:*",
-    "@filesystem/remove": "workspace:*",
-    "@filesystem/rename": "workspace:*",
-    "@filesystem/stat": "workspace:*",
-    "@filesystem/write": "workspace:*",
-    "@git/status": "workspace:*",
-    "@tech/failure": "workspace:*",
-    "@tech/input": "workspace:*"
+    "@ai-filesystem/apply-patch": "workspace:*",
+    "@ai-filesystem/create": "workspace:*",
+    "@ai-filesystem/list": "workspace:*",
+    "@ai-filesystem/mkdir": "workspace:*",
+    "@ai-filesystem/read": "workspace:*",
+    "@ai-filesystem/read-many": "workspace:*",
+    "@ai-filesystem/remove": "workspace:*",
+    "@ai-filesystem/rename": "workspace:*",
+    "@ai-filesystem/stat": "workspace:*",
+    "@ai-filesystem/write": "workspace:*",
+    "@ai-git/status": "workspace:*",
+    "@ai-tech/failure": "workspace:*",
+    "@ai-tech/input": "workspace:*"
   },
   "devDependencies": {
     "@ai/server": "workspace:*",

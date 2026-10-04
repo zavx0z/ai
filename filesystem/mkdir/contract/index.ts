@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace FilesystemMkdir {
+export declare namespace AiFilesystemMkdir {
   /**
   Создаёт каталог внутри назначенной рабочей области после проверки пути.
 

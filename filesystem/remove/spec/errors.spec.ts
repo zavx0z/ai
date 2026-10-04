@@ -2,7 +2,7 @@ import {describe, expect, test} from "bun:test"
 import assert from "node:assert/strict"
 import {existsSync, mkdirSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import removePath from "@filesystem/remove"
+import removePath from "@ai-filesystem/remove"
 import testing from "@ai/testing"
 
 const {fixture, hasCode} = testing

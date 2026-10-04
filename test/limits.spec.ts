@@ -1,9 +1,9 @@
 import {test, expect} from "bun:test"
 import {existsSync, readFileSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import createFile from "@filesystem/create"
-import writeFile from "@filesystem/write"
-import applyPatch from "@filesystem/apply-patch"
+import createFile from "@ai-filesystem/create"
+import writeFile from "@ai-filesystem/write"
+import applyPatch from "@ai-filesystem/apply-patch"
 import testing from "@ai/testing"
 
 test("Превышение бюджета записи отклоняется до изменения файла или создания родителей", () => testing.fixture((context, directory) => {

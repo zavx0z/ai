@@ -6,12 +6,12 @@
 @packageDocumentation
 */
 import {mkdirSync, lstatSync} from "node:fs"
-import validation from "@tech/input"
+import validation from "@ai-tech/input"
 const {object, boolean} = validation
 import type {AiWorkspace} from "@ai/workspace"
 
-import type {FilesystemMkdir} from "./contract/index.ts"
-export type {FilesystemMkdir} from "./contract/index.ts"
+import type {AiFilesystemMkdir} from "./contract/index.ts"
+export type {AiFilesystemMkdir} from "./contract/index.ts"
 
 /**
 Создаёт каталог по относительному пути внутри назначенной области.
@@ -26,7 +26,7 @@ export type {FilesystemMkdir} from "./contract/index.ts"
 
 @throws Ошибка `INVALID_INPUT` при неверной форме, `ROOT_NOT_ALLOWED` при смене идентичности корня, ошибка разрешения пути для запрещённого или неподходящего адреса, а также ошибки файловой системы.
 */
-export default function makeDirectory(input: FilesystemMkdir.Input, context: AiWorkspace.Output): FilesystemMkdir.Output {
+export default function makeDirectory(input: AiFilesystemMkdir.Input, context: AiWorkspace.Output): AiFilesystemMkdir.Output {
   object(input, ["path", "recursive"])
   const recursive = boolean(input.recursive, false, "recursive")
   context.directory()

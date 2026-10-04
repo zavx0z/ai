@@ -1,6 +1,6 @@
 import {describe, test} from "bun:test"
 import assert from "node:assert/strict"
-import makeDirectory from "@filesystem/mkdir"
+import makeDirectory from "@ai-filesystem/mkdir"
 import testing from "@ai/testing"
 
 const {fixture, hasCode} = testing

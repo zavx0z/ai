@@ -1,7 +1,7 @@
-import type {FilesystemAccess} from "@filesystem/access"
+import type {AiFilesystemAccess} from "@ai-filesystem/access"
 
 /** Публичные формы возможности. */
-export declare namespace FilesystemList {
+export declare namespace AiFilesystemList {
   /**
   Перечисляет записи каталога, не обходя символические ссылки и `.git`.
 
@@ -36,7 +36,7 @@ export declare namespace FilesystemList {
   */
   export interface Output {
     path: string
-    entries: FilesystemAccess.Output[]
+    entries: AiFilesystemAccess.Output[]
     truncated: boolean
     depthLimited: boolean
   }

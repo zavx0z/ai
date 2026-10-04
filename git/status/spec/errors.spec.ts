@@ -3,7 +3,7 @@ import assert from "node:assert/strict"
 import {spawnSync} from "node:child_process"
 import {mkdirSync} from "node:fs"
 import {join} from "node:path"
-import gitStatus from "@git/status"
+import gitStatus from "@ai-git/status"
 import createWorkspace from "@ai/workspace"
 import testing from "@ai/testing"
 

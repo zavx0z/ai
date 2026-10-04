@@ -1,7 +1,7 @@
 import type {AiWorkspace} from "@ai/workspace"
 
 /** Протокол HTTP-исполнения инструментов в контексте назначенной области. */
-export declare namespace ServerRequest {
+export declare namespace AiServerRequest {
   /**
   Доверенные зависимости хоста; поля не принимаются из JSON команды модели.
   Хост создаёт обработчик для назначенного чата и передаёт запрос именно ему.

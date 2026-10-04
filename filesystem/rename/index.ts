@@ -7,13 +7,13 @@
 */
 import {lstatSync, renameSync} from "node:fs"
 import {relative, sep} from "node:path"
-import validation from "@tech/input"
+import validation from "@ai-tech/input"
 const {object} = validation
-import ToolError from "@tech/failure"
+import ToolError from "@ai-tech/failure"
 import type {AiWorkspace} from "@ai/workspace"
 
-import type {FilesystemRename} from "./contract/index.ts"
-export type {FilesystemRename} from "./contract/index.ts"
+import type {AiFilesystemRename} from "./contract/index.ts"
+export type {AiFilesystemRename} from "./contract/index.ts"
 
 /**
 Перемещает запись по двум относительным путям внутри одной назначенной области.
@@ -28,7 +28,7 @@ export type {FilesystemRename} from "./contract/index.ts"
 
 @throws Ошибка `INVALID_INPUT` для неверной формы или попытки переместить каталог внутрь себя, `ROOT_NOT_ALLOWED` при смене идентичности корня, `CONFLICT` для существующего назначения, а также ошибки разрешения пути и файловой системы.
 */
-export default function renamePath(input: FilesystemRename.Input, context: AiWorkspace.Output): FilesystemRename.Output {
+export default function renamePath(input: AiFilesystemRename.Input, context: AiWorkspace.Output): AiFilesystemRename.Output {
   object(input, ["from", "to"])
   context.directory()
   const from = context.resolve(input.from)

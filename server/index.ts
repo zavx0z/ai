@@ -10,9 +10,9 @@ import {fileURLToPath} from "node:url"
 import {resolve} from "node:path"
 import type {AddressInfo} from "node:net"
 import createWorkspace from "@ai/workspace"
-import validation from "@tech/input"
+import validation from "@ai-tech/input"
 const {integer, text, boolean} = validation
-import createRequestHandler from "@server/request"
+import createRequestHandler from "@ai-server/request"
 
 import type {AiServer} from "./contract/index.ts"
 export type {AiServer} from "./contract/index.ts"

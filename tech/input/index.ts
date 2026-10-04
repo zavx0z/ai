@@ -1,7 +1,7 @@
 /** Проверяет форму внешних аргументов и пределы значений.
  @packageDocumentation
  */
-import ToolError from "@tech/failure"
+import ToolError from "@ai-tech/failure"
 
 /** Строгие проверки аргументов инструментов. Неизвестные поля отклоняются до выполнения. */
 const validation = {

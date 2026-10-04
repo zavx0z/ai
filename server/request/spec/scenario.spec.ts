@@ -3,7 +3,7 @@ import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {spawnSync} from "node:child_process"
 import {readFileSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import createRequestHandler from "@server/request"
+import createRequestHandler from "@ai-server/request"
 import testing from "@ai/testing"
 import {get, post, token} from "./fixture.ts"
 

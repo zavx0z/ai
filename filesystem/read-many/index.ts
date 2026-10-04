@@ -5,16 +5,16 @@
 
 @packageDocumentation
 */
-import validation from "@tech/input"
+import validation from "@ai-tech/input"
 const {object, integer, encoding, text} = validation
-import ToolError from "@tech/failure"
-import access from "@filesystem/access"
+import ToolError from "@ai-tech/failure"
+import access from "@ai-filesystem/access"
 const {MAX_BYTES} = access
-import readFile from "@filesystem/read"
+import readFile from "@ai-filesystem/read"
 import type {AiWorkspace} from "@ai/workspace"
 
-import type {FilesystemReadMany} from "./contract/index.ts"
-export type {FilesystemReadMany} from "./contract/index.ts"
+import type {AiFilesystemReadMany} from "./contract/index.ts"
+export type {AiFilesystemReadMany} from "./contract/index.ts"
 
 /**
 Читает список путей по порядку, расходуя общий бюджет на фактически прочитанные байты.
@@ -29,7 +29,7 @@ export type {FilesystemReadMany} from "./contract/index.ts"
 
 @throws Ошибка `INVALID_INPUT` для неверного списка, элемента или параметров, `ROOT_NOT_ALLOWED` если назначенный корень сменил идентичность; ошибки отдельных чтений находятся в `files`, а не прерывают весь вызов.
 */
-export default function readFiles(input: FilesystemReadMany.Input, context: AiWorkspace.Output): FilesystemReadMany.Output {
+export default function readFiles(input: AiFilesystemReadMany.Input, context: AiWorkspace.Output): AiFilesystemReadMany.Output {
   object(input, ["paths", "encoding", "maxBytesPerFile", "maxTotalBytes"])
   context.directory()
   if (!Array.isArray(input.paths) || input.paths.length === 0 || input.paths.length > 50) throw new ToolError("INVALID_INPUT", "paths must contain 1 to 50 strings")

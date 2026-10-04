@@ -5,14 +5,14 @@
 
 @packageDocumentation
 */
-import validation from "@tech/input"
+import validation from "@ai-tech/input"
 const {object, text, encoding, hash} = validation
-import access from "@filesystem/access"
+import access from "@ai-filesystem/access"
 const {decode, digest, replaceFile} = access
 import type {AiWorkspace} from "@ai/workspace"
 
-import type {FilesystemWrite} from "./contract/index.ts"
-export type {FilesystemWrite} from "./contract/index.ts"
+import type {AiFilesystemWrite} from "./contract/index.ts"
+export type {AiFilesystemWrite} from "./contract/index.ts"
 
 /**
 Заменяет содержимое существующего обычного файла атомарным переименованием временного файла.
@@ -27,7 +27,7 @@ export type {FilesystemWrite} from "./contract/index.ts"
 
 @throws Ошибка `INVALID_INPUT` для формы, кодировки или хеша; `ROOT_NOT_ALLOWED` при смене идентичности корня, `LIMIT_EXCEEDED` при превышении бюджета, `INVALID_PATH_TYPE` для не обычного файла, `CONFLICT` при несовпадении хеша, а также ошибки файловой системы.
 */
-export default function writeFile(input: FilesystemWrite.Input, context: AiWorkspace.Output): FilesystemWrite.Output {
+export default function writeFile(input: AiFilesystemWrite.Input, context: AiWorkspace.Output): AiFilesystemWrite.Output {
   object(input, ["path", "content", "encoding", "expectedHash"])
   const data = decode(text(input.content, "content", true), encoding(input.encoding))
   const expected = hash(input.expectedHash)

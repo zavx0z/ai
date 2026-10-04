@@ -5,14 +5,14 @@
 
 @packageDocumentation
 */
-import validation from "@tech/input"
+import validation from "@ai-tech/input"
 const {object} = validation
-import access from "@filesystem/access"
+import access from "@ai-filesystem/access"
 const {metadata} = access
 import type {AiWorkspace} from "@ai/workspace"
 
-import type {FilesystemStat} from "./contract/index.ts"
-export type {FilesystemStat} from "./contract/index.ts"
+import type {AiFilesystemStat} from "./contract/index.ts"
+export type {AiFilesystemStat} from "./contract/index.ts"
 
 /**
 Возвращает `lstat`-метаданные записи внутри назначенной рабочей области.
@@ -27,7 +27,7 @@ export type {FilesystemStat} from "./contract/index.ts"
 
 @throws Ошибка `INVALID_INPUT` для неверной формы входа, `ROOT_NOT_ALLOWED` если назначенный корень сменил идентичность, `PATH_NOT_ALLOWED` для запрещённого пути; отсутствие и недоступность пути дают ошибки файловой системы.
 */
-export default function statPath(input: FilesystemStat.Input, context: AiWorkspace.Output): FilesystemStat.Output {
+export default function statPath(input: AiFilesystemStat.Input, context: AiWorkspace.Output): AiFilesystemStat.Output {
   object(input, ["path"])
   const root = context.directory()
   const path = context.resolve(input.path, {allowRoot: true, finalSymlink: true})

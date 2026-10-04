@@ -4,10 +4,10 @@
 import {createHash, randomUUID} from "node:crypto"
 import {constants, openSync, closeSync, fstatSync, fchmodSync, readSync, lstatSync, writeFileSync, renameSync, unlinkSync} from "node:fs"
 import {dirname, join, relative, sep} from "node:path"
-import ToolError from "@tech/failure"
+import ToolError from "@ai-tech/failure"
 
-import type {FilesystemAccess} from "./contract/index.ts"
-export type {FilesystemAccess} from "./contract/index.ts"
+import type {AiFilesystemAccess} from "./contract/index.ts"
+export type {AiFilesystemAccess} from "./contract/index.ts"
 
 const MAX_BYTES = 8 * 1024 * 1024
 
@@ -23,7 +23,7 @@ const access = {
 
   @returns Относительный путь, вид, размер, режим доступа и время изменения записи.
   */
-  metadata(root: string, path: string): FilesystemAccess.Output {
+  metadata(root: string, path: string): AiFilesystemAccess.Output {
     const stat = lstatSync(path)
     return {path: relative(root, path).split(sep).join("/") || ".", type: stat.isSymbolicLink() ? "symlink" : stat.isFile() ? "file" : stat.isDirectory() ? "directory" : "other",
       size: stat.size, mode: stat.mode & 0o777, modifiedAt: stat.mtime.toISOString()}

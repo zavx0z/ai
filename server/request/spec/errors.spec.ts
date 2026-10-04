@@ -2,7 +2,7 @@ import {describe, expect, test} from "bun:test"
 import assert from "node:assert/strict"
 import {existsSync, readFileSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import createRequestHandler from "@server/request"
+import createRequestHandler from "@ai-server/request"
 import testing from "@ai/testing"
 import {get, post, token} from "./fixture.ts"
 

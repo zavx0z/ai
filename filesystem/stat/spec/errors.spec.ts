@@ -1,6 +1,6 @@
 import {describe, test} from "bun:test"
 import assert from "node:assert/strict"
-import statPath from "@filesystem/stat"
+import statPath from "@ai-filesystem/stat"
 import testing from "@ai/testing"
 
 const {fixture, hasCode} = testing

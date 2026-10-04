@@ -1,7 +1,7 @@
-import type {FilesystemRead} from "@filesystem/read"
+import type {AiFilesystemRead} from "@ai-filesystem/read"
 
 /** Публичные формы возможности. */
-export declare namespace FilesystemReadMany {
+export declare namespace AiFilesystemReadMany {
   /**
   Последовательно читает несколько файлов в общем бюджете байтов.
 
@@ -36,7 +36,7 @@ export declare namespace FilesystemReadMany {
   @property truncated - `true`, если хотя бы один файл прочитан не полностью либо завершился ошибкой.
   */
   export interface Output {
-    files: Array<{path: string; result: FilesystemRead.Output} | {path: string; error: {code: string; message: string}}>
+    files: Array<{path: string; result: AiFilesystemRead.Output} | {path: string; error: {code: string; message: string}}>
     bytesRead: number
     remainingBytes: number
     truncated: boolean

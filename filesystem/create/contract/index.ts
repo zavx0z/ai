@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace FilesystemCreate {
+export declare namespace AiFilesystemCreate {
   /**
   Создаёт новый файл с исключительным доступом, не перезаписывая существующий путь.
 

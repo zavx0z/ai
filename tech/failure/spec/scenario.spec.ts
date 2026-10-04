@@ -1,6 +1,6 @@
 /** Публичная ошибка сохраняет смысл отказа, HTTP-статус и разрешённые подробности. */
 import {describe, expect, test} from "bun:test"
-import ToolError from "@tech/failure"
+import ToolError from "@ai-tech/failure"
 
 describe.each([
   {name: "Конфликт содержимого", code: "CONFLICT", message: "Content changed", status: 409},

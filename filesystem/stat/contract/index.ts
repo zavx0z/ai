@@ -1,7 +1,7 @@
-import type {FilesystemAccess} from "@filesystem/access"
+import type {AiFilesystemAccess} from "@ai-filesystem/access"
 
 /** Публичные формы возможности. */
-export declare namespace FilesystemStat {
+export declare namespace AiFilesystemStat {
   /**
   Метаданные записи внутри назначенной области без перехода по конечной символической ссылке.
 
@@ -18,6 +18,6 @@ export declare namespace FilesystemStat {
   @property entry - Описание самой записи, включая тип `symlink`, если конечный путь является ссылкой.
   */
   export interface Output {
-    entry: FilesystemAccess.Output
+    entry: AiFilesystemAccess.Output
   }
 }

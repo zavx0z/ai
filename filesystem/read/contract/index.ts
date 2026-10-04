@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace FilesystemRead {
+export declare namespace AiFilesystemRead {
   /**
   Читает участок обычного файла; исполнитель проверяет параметры и путь до чтения.
 

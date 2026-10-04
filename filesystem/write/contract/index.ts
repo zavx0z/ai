@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace FilesystemWrite {
+export declare namespace AiFilesystemWrite {
   /**
   Атомарно заменяет содержимое существующего обычного файла после проверки параметров и пути.
 

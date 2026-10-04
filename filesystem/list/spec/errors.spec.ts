@@ -1,6 +1,6 @@
 import {describe, test} from "bun:test"
 import assert from "node:assert/strict"
-import listFiles from "@filesystem/list"
+import listFiles from "@ai-filesystem/list"
 import testing from "@ai/testing"
 
 const {fixture, hasCode} = testing

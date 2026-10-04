@@ -2,7 +2,7 @@ import {describe, expect, test} from "bun:test"
 import assert from "node:assert/strict"
 import {existsSync, readFileSync, symlinkSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import createFile from "@filesystem/create"
+import createFile from "@ai-filesystem/create"
 import testing from "@ai/testing"
 
 const {fixture, hasCode} = testing

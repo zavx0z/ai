@@ -8,8 +8,8 @@
   "description": "HTTP-host именованных инструментов с назначенной рабочей областью",
   "dependencies": {
     "@ai/workspace": "workspace:*",
-    "@server/request": "workspace:*",
-    "@tech/input": "workspace:*"
+    "@ai-server/request": "workspace:*",
+    "@ai-tech/input": "workspace:*"
   },
   "devDependencies": {
     "@ai/testing": "workspace:*"

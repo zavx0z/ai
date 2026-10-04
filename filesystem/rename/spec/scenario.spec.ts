@@ -1,8 +1,8 @@
 import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {existsSync, readFileSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import renamePath from "@filesystem/rename"
-import type {FilesystemRename} from "@filesystem/rename"
+import renamePath from "@ai-filesystem/rename"
+import type {AiFilesystemRename} from "@ai-filesystem/rename"
 import testing from "@ai/testing"
 
 const {createFixture} = testing
@@ -11,7 +11,7 @@ describe.each([
   {name: "Перемещение файла", from: "from", to: "to", content: "data"},
 ])("$name", ({from, to, content}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: FilesystemRename.Output
+  let result: AiFilesystemRename.Output
 
   beforeAll(() => {
     frame = createFixture()

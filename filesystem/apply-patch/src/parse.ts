@@ -1,4 +1,4 @@
-import ToolError from "@tech/failure"
+import ToolError from "@ai-tech/failure"
 
 /** Точный фрагмент замены: исходные и новые строки с необязательной привязкой к концу файла. */
 export interface Hunk {old: string[]; next: string[]; end: boolean; anchor?: string}

@@ -8,13 +8,13 @@
 import {spawnSync} from "node:child_process"
 import {lstatSync} from "node:fs"
 import {join, dirname} from "node:path"
-import ToolError from "@tech/failure"
-import validation from "@tech/input"
+import ToolError from "@ai-tech/failure"
+import validation from "@ai-tech/input"
 const {object, integer} = validation
 import type {AiWorkspace} from "@ai/workspace"
 
-import type {GitStatus} from "./contract/index.ts"
-export type {GitStatus} from "./contract/index.ts"
+import type {AiGitStatus} from "./contract/index.ts"
+export type {AiGitStatus} from "./contract/index.ts"
 
 /**
 Читает статус только явно назначенного корня через `git status --porcelain=v1`.
@@ -29,7 +29,7 @@ export type {GitStatus} from "./contract/index.ts"
 
 @throws Ошибка `INVALID_INPUT` для неверного параметра, `ROOT_NOT_ALLOWED` при смене идентичности корня, `NOT_A_REPOSITORY` если в назначенном корне нет поддерживаемого `.git`, `TIMEOUT` при превышении времени, `LIMIT_EXCEEDED` при превышении объёма вывода и `GIT_ERROR` при ошибке или неожиданном формате Git.
 */
-export default function gitStatus(input: GitStatus.Input, context: AiWorkspace.Output): GitStatus.Output {
+export default function gitStatus(input: AiGitStatus.Input, context: AiWorkspace.Output): AiGitStatus.Output {
   object(input, ["maxEntries"])
   const root = context.directory()
   const maxEntries = integer(input.maxEntries, 1000, 1, 5000, "maxEntries")
@@ -47,7 +47,7 @@ export default function gitStatus(input: GitStatus.Input, context: AiWorkspace.O
   const records = result.stdout.split("\0")
   const header = records.shift() ?? ""
   if (!header.startsWith("## ")) throw new ToolError("GIT_ERROR", "Unexpected Git status header", 502)
-  const entries: GitStatus.Output["entries"] = []
+  const entries: AiGitStatus.Output["entries"] = []
   let truncated = false
   for (let i = 0; i < records.length; i++) {
     const record = records[i]!
