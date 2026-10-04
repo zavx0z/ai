@@ -7,6 +7,6 @@ coverage/
 .DS_Store
 
 .local/
-tmp/
+**/tmp/
 .idea/
 **/meta/data/
