@@ -9,3 +9,5 @@ coverage/
 .local/
 tmp/
 .idea/
+**/meta/data/
+**/meta/date/
