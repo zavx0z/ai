@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "d38eec2f7224b2d7f8f8183f46e08827ee84278971e63e698ac7263a9459eb1a",
+  "address": "/ai/generator/code",
+  "messages": [
+    {
+      "id": "user:d437be8c-5153-4d86-a3b4-75273acb4e1b",
+      "role": "user",
+      "text": "Что ты видишь в storybook mcp?"
+    },
+    {
+      "id": "55141a70-2501-45a8-aed2-579647bd25c9",
+      "role": "assistant",
+      "text": "Проверю текущие инструменты Storybook MCP.Использую навык Storybook. В текущем каталоге доступен один инструмент — `storybook`; проверю, какие направления он раскрывает.Сейчас вижу один инструмент: `mcp__storybook__storybook({ path? })`.\n\nЖивой вызов `{}` вернул:\n\n- Область: `ai/generator/code`, метка `code`.\n- Описание: «Описание не задано владельцем».\n- `children`: пустой список.\n- Правила: Кластер, Компонент, Контейнер, Контракты, Домен, Пакет (`storybook/package/reader`), TypeDoc.\n\nОтдельных инструментов `storybook_status`, `search`, `open`, `inspect` в текущем каталоге нет.\n\n"
+    }
+  ],
+  "status": "idle",
+  "error": null,
+  "sessionId": "01a1076f-2e28-7a01-a252-8a1710373374",
+  "cwd": "/Users/zavx0z/repozitarium/zavx0z/ai/generator/code",
+  "usage": {
+    "used": 34196,
+    "size": 828400
+  }
+}
