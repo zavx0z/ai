@@ -1,7 +1,7 @@
 import {lstatSync, realpathSync} from "node:fs"
 import {isAbsolute, join, relative, resolve, sep} from "node:path"
-import ToolError from "@ai-tech/failure"
-import validation from "@ai-tech/input"
+import ToolError from "@zavx0z/ai-tech-failure"
+import validation from "@zavx0z/ai-tech-input"
 const {text} = validation
 
 export function relativePath(value: unknown, allowRoot = false): string {

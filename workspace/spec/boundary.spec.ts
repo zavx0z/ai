@@ -1,25 +1,25 @@
 import {test, expect} from "bun:test"
 import {mkdirSync, renameSync, existsSync} from "node:fs"
 import {join} from "node:path"
-import createWorkspace from "@ai/workspace"
-import type {AiWorkspace} from "@ai/workspace"
-import createFile from "@ai-filesystem/create"
-import writeFile from "@ai-filesystem/write"
-import makeDirectory from "@ai-filesystem/mkdir"
-import removePath from "@ai-filesystem/remove"
-import renamePath from "@ai-filesystem/rename"
-import applyPatch from "@ai-filesystem/apply-patch"
-import testing from "@ai/testing"
+import createWorkspace from "@zavx0z/ai-workspace"
+import type {Zavx0zAiWorkspace} from "@zavx0z/ai-workspace"
+import createFile from "@zavx0z/ai-filesystem-create"
+import writeFile from "@zavx0z/ai-filesystem-write"
+import makeDirectory from "@zavx0z/ai-filesystem-mkdir"
+import removePath from "@zavx0z/ai-filesystem-remove"
+import renamePath from "@zavx0z/ai-filesystem-rename"
+import applyPatch from "@zavx0z/ai-filesystem-apply-patch"
+import testing from "@zavx0z/ai-testing"
 import assert from "node:assert/strict"
 
 test.each([
-  {name: "create", run: (context: AiWorkspace.Output) => createFile({path: ".", content: "x"}, context)},
-  {name: "write", run: (context: AiWorkspace.Output) => writeFile({path: ".", content: "x"}, context)},
-  {name: "mkdir", run: (context: AiWorkspace.Output) => makeDirectory({path: ".", recursive: true}, context)},
-  {name: "remove", run: (context: AiWorkspace.Output) => removePath({path: ".", recursive: true}, context)},
-  {name: "rename source", run: (context: AiWorkspace.Output) => renamePath({from: ".", to: "moved"}, context)},
-  {name: "rename destination", run: (context: AiWorkspace.Output) => renamePath({from: "child", to: "."}, context)},
-  {name: "patch", run: (context: AiWorkspace.Output) => applyPatch({patch: "*** Begin Patch\n*** Delete File: .\n*** End Patch"}, context)},
+  {name: "create", run: (context: Zavx0zAiWorkspace.Output) => createFile({path: ".", content: "x"}, context)},
+  {name: "write", run: (context: Zavx0zAiWorkspace.Output) => writeFile({path: ".", content: "x"}, context)},
+  {name: "mkdir", run: (context: Zavx0zAiWorkspace.Output) => makeDirectory({path: ".", recursive: true}, context)},
+  {name: "remove", run: (context: Zavx0zAiWorkspace.Output) => removePath({path: ".", recursive: true}, context)},
+  {name: "rename source", run: (context: Zavx0zAiWorkspace.Output) => renamePath({from: ".", to: "moved"}, context)},
+  {name: "rename destination", run: (context: Zavx0zAiWorkspace.Output) => renamePath({from: "child", to: "."}, context)},
+  {name: "patch", run: (context: Zavx0zAiWorkspace.Output) => applyPatch({patch: "*** Begin Patch\n*** Delete File: .\n*** End Patch"}, context)},
 ])("$name не изменяет саму назначенную область", ({run}) => testing.fixture((context, directory) => {
   mkdirSync(join(directory, "child"))
   assert.throws(() => run(context), testing.hasCode("PATH_NOT_ALLOWED"))

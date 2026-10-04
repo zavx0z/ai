@@ -2,8 +2,8 @@ import {describe, test} from "bun:test"
 import assert from "node:assert/strict"
 import {mkdirSync, symlinkSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import readFile from "@ai-filesystem/read"
-import testing from "@ai/testing"
+import readFile from "@zavx0z/ai-filesystem-read"
+import testing from "@zavx0z/ai-testing"
 
 const {fixture, hasCode} = testing
 

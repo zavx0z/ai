@@ -6,16 +6,16 @@ GET /tools раскрывает описания доступных операц
 @packageDocumentation
 */
 import {randomUUID, timingSafeEqual} from "node:crypto"
-import ToolError from "@ai-tech/failure"
-import validation from "@ai-tech/input"
+import ToolError from "@zavx0z/ai-tech-failure"
+import validation from "@zavx0z/ai-tech-input"
 const {object, text} = validation
 import descriptions from "./src/descriptions.json" with {type: "json"}
 import {bindings} from "./src/bindings.ts"
 import {readBody} from "./src/body.ts"
 
 import type {Command, Reply} from "./src/messages.ts"
-import type {AiServerRequest} from "./contract/index.ts"
-export type {AiServerRequest} from "./contract/index.ts"
+import type {Zavx0zAiServerRequest} from "./contract/index.ts"
+export type {Zavx0zAiServerRequest} from "./contract/index.ts"
 
 /**
 Связывает токен и область хоста с исполнением именованных команд инструментов.
@@ -26,7 +26,7 @@ export type {AiServerRequest} from "./contract/index.ts"
 
 @throws ToolError при длине токена вне 32–256 символов либо рассогласовании подготовленных описаний и исполнителей.
 */
-export default function createRequestHandler(options: AiServerRequest.Input): AiServerRequest.Output {
+export default function createRequestHandler(options: Zavx0zAiServerRequest.Input): Zavx0zAiServerRequest.Output {
   const token = text(options.token, "token")
   if (token.length < 32 || token.length > 256) throw new ToolError("INVALID_INPUT", "Token must contain 32 to 256 characters")
   const expected = Buffer.from(`Bearer ${token}`)

@@ -4,7 +4,7 @@
 import {mkdtempSync, rmSync} from "node:fs"
 import {tmpdir} from "node:os"
 import {join} from "node:path"
-import createWorkspace, {type AiWorkspace} from "@ai/workspace"
+import createWorkspace, {type Zavx0zAiWorkspace} from "@zavx0z/ai-workspace"
 
 /** Подготовка и освобождение временных областей, без регистрации тестов. */
 const testing = {
@@ -17,7 +17,7 @@ const testing = {
       throw error
     }
   },
-  async fixture<T>(run: (context: AiWorkspace.Output, root: string) => T | Promise<T>): Promise<T> {
+  async fixture<T>(run: (context: Zavx0zAiWorkspace.Output, root: string) => T | Promise<T>): Promise<T> {
     const fixture = testing.createFixture()
     try { return await run(fixture.context, fixture.root) }
     finally { fixture.close() }

@@ -1,5 +1,5 @@
 /** Метаданные файловой записи, общие для stat и list. */
-export declare namespace AiFilesystemAccess {
+export declare namespace Zavx0zAiFilesystemAccess {
   /**
   Состояние записи без перехода по конечной символической ссылке.
 

@@ -1,6 +1,6 @@
 /** Числовые аргументы получают явный default или сохраняют допустимое значение. */
 import {describe, expect, test} from "bun:test"
-import validation from "@ai-tech/input"
+import validation from "@zavx0z/ai-tech-input"
 
 describe.each([
   {name: "Явное значение", value: 2, expected: 2},

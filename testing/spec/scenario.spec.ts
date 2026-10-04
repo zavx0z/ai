@@ -1,7 +1,7 @@
 /** Фикстура предоставляет отдельную временную область и явное освобождение. */
 import {afterAll, describe, expect, test} from "bun:test"
 import {existsSync, realpathSync} from "node:fs"
-import testing from "@ai/testing"
+import testing from "@zavx0z/ai-testing"
 
 describe.each([{name: "Временная область"}])("$name", () => {
   const result = testing.createFixture()

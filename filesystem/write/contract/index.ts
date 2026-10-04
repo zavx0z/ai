@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace AiFilesystemWrite {
+export declare namespace Zavx0zAiFilesystemWrite {
   /**
   Атомарно заменяет содержимое существующего обычного файла после проверки параметров и пути.
 

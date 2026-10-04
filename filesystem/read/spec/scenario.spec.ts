@@ -1,9 +1,9 @@
 import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {writeFileSync} from "node:fs"
 import {join} from "node:path"
-import readFile from "@ai-filesystem/read"
-import type {AiFilesystemRead} from "@ai-filesystem/read"
-import testing from "@ai/testing"
+import readFile from "@zavx0z/ai-filesystem-read"
+import type {Zavx0zAiFilesystemRead} from "@zavx0z/ai-filesystem-read"
+import testing from "@zavx0z/ai-testing"
 
 const {createFixture} = testing
 
@@ -15,7 +15,7 @@ describe.each([
   {name: "Бинарный диапазон", path: "binary", content: Buffer.from([0, 255, 1, 128]), input: {path: "binary", encoding: "base64" as const, offset: 1, maxBytes: 2}, expected: {content: Buffer.from([255, 1]).toString("base64"), bytesRead: 2, truncated: true, hash: "none"}},
 ])("$name", ({path, content, input, expected}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: AiFilesystemRead.Output
+  let result: Zavx0zAiFilesystemRead.Output
 
   beforeAll(() => {
     frame = createFixture()

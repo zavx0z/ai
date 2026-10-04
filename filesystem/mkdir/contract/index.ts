@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace AiFilesystemMkdir {
+export declare namespace Zavx0zAiFilesystemMkdir {
   /**
   Создаёт каталог внутри назначенной рабочей области после проверки пути.
 

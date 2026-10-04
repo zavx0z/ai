@@ -3,9 +3,9 @@ import assert from "node:assert/strict"
 import {spawnSync} from "node:child_process"
 import {mkdirSync} from "node:fs"
 import {join} from "node:path"
-import gitStatus from "@ai-git/status"
-import createWorkspace from "@ai/workspace"
-import testing from "@ai/testing"
+import gitStatus from "@zavx0z/ai-git-status"
+import createWorkspace from "@zavx0z/ai-workspace"
+import testing from "@zavx0z/ai-testing"
 
 const {fixture, hasCode} = testing
 

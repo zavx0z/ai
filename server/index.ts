@@ -9,13 +9,13 @@ import {Readable} from "node:stream"
 import {fileURLToPath} from "node:url"
 import {resolve} from "node:path"
 import type {AddressInfo} from "node:net"
-import createWorkspace from "@ai/workspace"
-import validation from "@ai-tech/input"
+import createWorkspace from "@zavx0z/ai-workspace"
+import validation from "@zavx0z/ai-tech-input"
 const {integer, text, boolean} = validation
-import createRequestHandler from "@ai-server/request"
+import createRequestHandler from "@zavx0z/ai-server-request"
 
-import type {AiServer} from "./contract/index.ts"
-export type {AiServer} from "./contract/index.ts"
+import type {Zavx0zAiServer} from "./contract/index.ts"
+export type {Zavx0zAiServer} from "./contract/index.ts"
 
 /**
 Назначает область и запускает HTTP-listener, связанный с подготовленными инструментами.
@@ -26,7 +26,7 @@ export type {AiServer} from "./contract/index.ts"
 
 @throws Ошибка конфигурации до listen либо ошибка ОС при запуске сервера.
 */
-export default async function startServer(options: AiServer.Input): Promise<AiServer.Output> {
+export default async function startServer(options: Zavx0zAiServer.Input): Promise<Zavx0zAiServer.Output> {
   const workspace = createWorkspace({directory: options.directory})
   const hostname = text(options.hostname ?? "127.0.0.1", "hostname")
   const port = integer(options.port, 8787, 0, 65535, "port")

@@ -1,7 +1,7 @@
 import {describe, test} from "bun:test"
 import assert from "node:assert/strict"
-import readFiles from "@ai-filesystem/read-many"
-import testing from "@ai/testing"
+import readFiles from "@zavx0z/ai-filesystem-read-many"
+import testing from "@zavx0z/ai-testing"
 
 const {fixture, hasCode} = testing
 

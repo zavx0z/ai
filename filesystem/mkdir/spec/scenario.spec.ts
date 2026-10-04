@@ -1,9 +1,9 @@
 import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {existsSync, mkdirSync} from "node:fs"
 import {join} from "node:path"
-import makeDirectory from "@ai-filesystem/mkdir"
-import type {AiFilesystemMkdir} from "@ai-filesystem/mkdir"
-import testing from "@ai/testing"
+import makeDirectory from "@zavx0z/ai-filesystem-mkdir"
+import type {Zavx0zAiFilesystemMkdir} from "@zavx0z/ai-filesystem-mkdir"
+import testing from "@zavx0z/ai-testing"
 
 const {createFixture} = testing
 
@@ -12,7 +12,7 @@ describe.each([
   {name: "Повторное создание", prepare: (root: string) => mkdirSync(join(root, "a/b"), {recursive: true}), input: {path: "a/b", recursive: true}, created: false},
 ])("$name", ({prepare, input, created}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: AiFilesystemMkdir.Output
+  let result: Zavx0zAiFilesystemMkdir.Output
 
   beforeAll(() => {
     frame = createFixture()

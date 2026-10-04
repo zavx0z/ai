@@ -2,8 +2,8 @@
 import {afterAll, describe, expect, test} from "bun:test"
 import {writeFileSync} from "node:fs"
 import {join} from "node:path"
-import startServer from "@ai/server"
-import testing from "@ai/testing"
+import startServer from "@zavx0z/ai-server"
+import testing from "@zavx0z/ai-testing"
 
 describe.each([
   {name: "Loopback HTTP", content: "network", token: "temporary-loopback-test-token-123456789"},

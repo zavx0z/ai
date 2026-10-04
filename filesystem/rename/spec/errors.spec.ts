@@ -2,8 +2,8 @@ import {describe, expect, test} from "bun:test"
 import assert from "node:assert/strict"
 import {mkdirSync, readFileSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import renamePath from "@ai-filesystem/rename"
-import testing from "@ai/testing"
+import renamePath from "@zavx0z/ai-filesystem-rename"
+import testing from "@zavx0z/ai-testing"
 
 const {fixture, hasCode} = testing
 

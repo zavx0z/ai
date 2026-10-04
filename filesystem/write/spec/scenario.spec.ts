@@ -2,9 +2,9 @@ import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {createHash} from "node:crypto"
 import {chmodSync, readFileSync, readdirSync, statSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import writeFile from "@ai-filesystem/write"
-import type {AiFilesystemWrite} from "@ai-filesystem/write"
-import testing from "@ai/testing"
+import writeFile from "@zavx0z/ai-filesystem-write"
+import type {Zavx0zAiFilesystemWrite} from "@zavx0z/ai-filesystem-write"
+import testing from "@zavx0z/ai-testing"
 
 const {createFixture} = testing
 
@@ -14,7 +14,7 @@ describe.each([
   {name: "Замена с подтверждённым хешем", before: "before", content: "after", mode: null, expectedBytes: 5, expectedHash: createHash("sha256").update("before").digest("hex")},
 ])("$name", ({before, content, mode, expectedBytes, expectedHash}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: AiFilesystemWrite.Output
+  let result: Zavx0zAiFilesystemWrite.Output
 
   beforeAll(() => {
     frame = createFixture()

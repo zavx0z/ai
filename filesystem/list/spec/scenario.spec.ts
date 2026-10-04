@@ -1,9 +1,9 @@
 import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {mkdirSync, symlinkSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import listFiles from "@ai-filesystem/list"
-import type {AiFilesystemList} from "@ai-filesystem/list"
-import testing from "@ai/testing"
+import listFiles from "@zavx0z/ai-filesystem-list"
+import type {Zavx0zAiFilesystemList} from "@zavx0z/ai-filesystem-list"
+import testing from "@zavx0z/ai-testing"
 
 const {createFixture} = testing
 
@@ -45,7 +45,7 @@ describe.each([
   },
 ])("$name", ({prepare, input, expected}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: AiFilesystemList.Output
+  let result: Zavx0zAiFilesystemList.Output
 
   beforeAll(() => {
     frame = createFixture()

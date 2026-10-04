@@ -5,16 +5,16 @@
 
 @packageDocumentation
 */
-import validation from "@ai-tech/input"
+import validation from "@zavx0z/ai-tech-input"
 const {object, integer, encoding, text} = validation
-import ToolError from "@ai-tech/failure"
-import access from "@ai-filesystem/access"
+import ToolError from "@zavx0z/ai-tech-failure"
+import access from "@zavx0z/ai-filesystem-access"
 const {MAX_BYTES} = access
-import readFile from "@ai-filesystem/read"
-import type {AiWorkspace} from "@ai/workspace"
+import readFile from "@zavx0z/ai-filesystem-read"
+import type {Zavx0zAiWorkspace} from "@zavx0z/ai-workspace"
 
-import type {AiFilesystemReadMany} from "./contract/index.ts"
-export type {AiFilesystemReadMany} from "./contract/index.ts"
+import type {Zavx0zAiFilesystemReadMany} from "./contract/index.ts"
+export type {Zavx0zAiFilesystemReadMany} from "./contract/index.ts"
 
 /**
 Читает список путей по порядку, расходуя общий бюджет на фактически прочитанные байты.
@@ -29,7 +29,7 @@ export type {AiFilesystemReadMany} from "./contract/index.ts"
 
 @throws Ошибка `INVALID_INPUT` для неверного списка, элемента или параметров, `ROOT_NOT_ALLOWED` если назначенный корень сменил идентичность; ошибки отдельных чтений находятся в `files`, а не прерывают весь вызов.
 */
-export default function readFiles(input: AiFilesystemReadMany.Input, context: AiWorkspace.Output): AiFilesystemReadMany.Output {
+export default function readFiles(input: Zavx0zAiFilesystemReadMany.Input, context: Zavx0zAiWorkspace.Output): Zavx0zAiFilesystemReadMany.Output {
   object(input, ["paths", "encoding", "maxBytesPerFile", "maxTotalBytes"])
   context.directory()
   if (!Array.isArray(input.paths) || input.paths.length === 0 || input.paths.length > 50) throw new ToolError("INVALID_INPUT", "paths must contain 1 to 50 strings")

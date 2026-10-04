@@ -2,11 +2,11 @@ import {test} from "node:test"
 import assert from "node:assert/strict"
 import {writeFileSync, readFileSync, existsSync} from "node:fs"
 import {join} from "node:path"
-import readFile from "@ai-filesystem/read"
-import writeFile from "@ai-filesystem/write"
-import applyPatch from "@ai-filesystem/apply-patch"
-import startServer from "@ai/server"
-import testing from "@ai/testing"
+import readFile from "@zavx0z/ai-filesystem-read"
+import writeFile from "@zavx0z/ai-filesystem-write"
+import applyPatch from "@zavx0z/ai-filesystem-apply-patch"
+import startServer from "@zavx0z/ai-server"
+import testing from "@zavx0z/ai-testing"
 
 test("Node исполняет чтение, запись с hash и patch через публичные входы", () => testing.fixture((context, directory) => {
   writeFileSync(join(directory, "file"), "before\n")

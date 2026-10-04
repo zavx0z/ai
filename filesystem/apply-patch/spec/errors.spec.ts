@@ -2,8 +2,8 @@ import {describe, expect, test} from "bun:test"
 import assert from "node:assert/strict"
 import {existsSync, readFileSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import applyPatch from "@ai-filesystem/apply-patch"
-import testing from "@ai/testing"
+import applyPatch from "@zavx0z/ai-filesystem-apply-patch"
+import testing from "@zavx0z/ai-testing"
 
 const {fixture, hasCode} = testing
 

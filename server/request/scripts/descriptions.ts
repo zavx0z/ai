@@ -16,10 +16,10 @@ const flags = process.argv.slice(2)
 const check = flags.includes("--check")
 const providerProject = flags.find(value => value !== "--check")
 if (providerProject === undefined || flags.filter(value => value !== "--check").length !== 1) {
-  throw new Error("Передайте путь к проекту с установленным @immersive/typedoc/parser; --check проверяет актуальность без записи")
+  throw new Error("Передайте путь к проекту с установленным @zavx0z/immersive-typedoc/parser; --check проверяет актуальность без записи")
 }
 const provider = createRequire(resolve(providerProject, "package.json"))
-const {analyzeTypeDoc} = provider("@immersive/typedoc/parser")
+const {analyzeTypeDoc} = provider("@zavx0z/immersive-typedoc/parser")
 const ownRequire = createRequire(import.meta.url)
 const root = fileURLToPath(new URL("../../../", import.meta.url))
 const target = fileURLToPath(new URL("../src/descriptions.json", import.meta.url))

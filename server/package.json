@@ -1,5 +1,5 @@
 {
-  "name": "@ai/server",
+  "name": "@zavx0z/ai-server",
   "private": true,
   "type": "module",
   "exports": {
@@ -7,11 +7,11 @@
   },
   "description": "HTTP-host именованных инструментов с назначенной рабочей областью",
   "dependencies": {
-    "@ai/workspace": "workspace:*",
-    "@ai-server/request": "workspace:*",
-    "@ai-tech/input": "workspace:*"
+    "@zavx0z/ai-workspace": "workspace:*",
+    "@zavx0z/ai-server-request": "workspace:*",
+    "@zavx0z/ai-tech-input": "workspace:*"
   },
   "devDependencies": {
-    "@ai/testing": "workspace:*"
+    "@zavx0z/ai-testing": "workspace:*"
   }
 }

@@ -3,7 +3,7 @@ import {afterAll, describe, expect, test} from "bun:test"
 import {mkdtempSync, realpathSync, rmSync} from "node:fs"
 import {tmpdir} from "node:os"
 import {join} from "node:path"
-import createWorkspace from "@ai/workspace"
+import createWorkspace from "@zavx0z/ai-workspace"
 
 describe.each([
   {name: "Отдельная область сессии", prefix: "ai-assigned-"},

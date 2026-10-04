@@ -1,9 +1,9 @@
 import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {symlinkSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import statPath from "@ai-filesystem/stat"
-import type {AiFilesystemStat} from "@ai-filesystem/stat"
-import testing from "@ai/testing"
+import statPath from "@zavx0z/ai-filesystem-stat"
+import type {Zavx0zAiFilesystemStat} from "@zavx0z/ai-filesystem-stat"
+import testing from "@zavx0z/ai-testing"
 
 const {createFixture} = testing
 
@@ -13,7 +13,7 @@ describe.each([
   {name: "Конечная символическая ссылка", path: "link", prepare: (root: string) => symlinkSync("/no-such-outside-target", join(root, "link")), type: "symlink", size: null},
 ])("$name", ({path, prepare, type, size}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: AiFilesystemStat.Output
+  let result: Zavx0zAiFilesystemStat.Output
 
   beforeAll(() => {
     frame = createFixture()

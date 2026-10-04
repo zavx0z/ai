@@ -1,8 +1,8 @@
 import {describe, expect, test} from "bun:test"
 import {readFileSync} from "node:fs"
 import {join} from "node:path"
-import createRequestHandler from "@ai-server/request"
-import testing from "@ai/testing"
+import createRequestHandler from "@zavx0z/ai-server-request"
+import testing from "@zavx0z/ai-testing"
 import {post, token} from "./fixture.ts"
 
 const {fixture} = testing

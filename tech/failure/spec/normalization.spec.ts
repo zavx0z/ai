@@ -1,6 +1,6 @@
 /** Диагностика ОС преобразуется в безопасный отказ без абсолютного пути. */
 import {describe, expect, test} from "bun:test"
-import ToolError from "@ai-tech/failure"
+import ToolError from "@zavx0z/ai-tech-failure"
 
 describe.each([
   {name: "Отсутствующий путь", error: {code: "ENOENT", message: "/private/path"}, code: "NOT_FOUND", status: 404},

@@ -1,7 +1,7 @@
 import {test} from "bun:test"
 import assert from "node:assert/strict"
 import {bindings, tools} from "../src/bindings.ts"
-import testing from "@ai/testing"
+import testing from "@zavx0z/ai-testing"
 
 test("реестр связывает ровно публичные имена с исполняемыми функциями", () => testing.fixture(workspace => {
   const registered = tools.map(tool => tool.name)

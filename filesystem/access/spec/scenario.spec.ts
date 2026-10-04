@@ -2,8 +2,8 @@
 import {afterAll, describe, expect, test} from "bun:test"
 import {writeFileSync} from "node:fs"
 import {join} from "node:path"
-import access from "@ai-filesystem/access"
-import testing from "@ai/testing"
+import access from "@zavx0z/ai-filesystem-access"
+import testing from "@zavx0z/ai-testing"
 
 describe.each([
   {name: "Полное чтение", offset: 0, maxBytes: 8, content: "abcdef"},

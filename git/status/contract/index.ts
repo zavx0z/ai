@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace AiGitStatus {
+export declare namespace Zavx0zAiGitStatus {
   /**
   Читает Git status только назначенного корня и не ищет родительский репозиторий.
 

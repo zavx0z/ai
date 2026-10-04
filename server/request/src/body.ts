@@ -1,4 +1,4 @@
-import ToolError from "@ai-tech/failure"
+import ToolError from "@zavx0z/ai-tech-failure"
 
 const MAX_REQUEST_BYTES = 12 * 1024 * 1024
 

@@ -1,7 +1,7 @@
 import {describe, test} from "bun:test"
 import assert from "node:assert/strict"
-import statPath from "@ai-filesystem/stat"
-import testing from "@ai/testing"
+import statPath from "@zavx0z/ai-filesystem-stat"
+import testing from "@zavx0z/ai-testing"
 
 const {fixture, hasCode} = testing
 

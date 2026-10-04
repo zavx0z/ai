@@ -14,7 +14,7 @@ interface PathOptions {
 }
 
 /** Контракт области, которую назначает доверенный хост. */
-export declare namespace AiWorkspace {
+export declare namespace Zavx0zAiWorkspace {
   /**
   Явная конфигурация хоста; не входит в аргументы агентных инструментов.
 

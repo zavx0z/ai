@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace AiFilesystemRead {
+export declare namespace Zavx0zAiFilesystemRead {
   /**
   Читает участок обычного файла; исполнитель проверяет параметры и путь до чтения.
 

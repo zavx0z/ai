@@ -1,11 +1,11 @@
 import {test, expect} from "bun:test"
 import {mkdirSync, renameSync, symlinkSync, writeFileSync, readFileSync} from "node:fs"
 import {join} from "node:path"
-import createWorkspace from "@ai/workspace"
-import readFile from "@ai-filesystem/read"
-import writeFile from "@ai-filesystem/write"
-import createRequestHandler from "@ai-server/request"
-import testing from "@ai/testing"
+import createWorkspace from "@zavx0z/ai-workspace"
+import readFile from "@zavx0z/ai-filesystem-read"
+import writeFile from "@zavx0z/ai-filesystem-write"
+import createRequestHandler from "@zavx0z/ai-server-request"
+import testing from "@zavx0z/ai-testing"
 
 const token = "temporary-workspace-isolation-token-12345"
 

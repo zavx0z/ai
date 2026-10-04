@@ -31,25 +31,25 @@ HTTP-хост создаёт свой контекст до начала про�
 
 | Имя команды | Пакет | Возможность |
 | --- | --- | --- |
-| `filesystem.stat` | `@ai-filesystem/stat` | Метаданные, включая конечную ссылку |
-| `filesystem.list` | `@ai-filesystem/list` | Ограниченный список каталога |
-| `filesystem.read` | `@ai-filesystem/read` | Диапазон байтов одного файла |
-| `filesystem.read-many` | `@ai-filesystem/read-many` | Пакет чтения с общим бюджетом |
-| `filesystem.create` | `@ai-filesystem/create` | Создание без перезаписи |
-| `filesystem.write` | `@ai-filesystem/write` | Замена существующего файла |
-| `filesystem.mkdir` | `@ai-filesystem/mkdir` | Создание каталога |
-| `filesystem.remove` | `@ai-filesystem/remove` | Удаление записи |
-| `filesystem.rename` | `@ai-filesystem/rename` | Перемещение без перезаписи |
-| `filesystem.apply-patch` | `@ai-filesystem/apply-patch` | Планирование и применение текстового patch |
-| `git.status` | `@ai-git/status` | Ограниченный Git status |
+| `filesystem.stat` | `@zavx0z/ai-filesystem-stat` | Метаданные, включая конечную ссылку |
+| `filesystem.list` | `@zavx0z/ai-filesystem-list` | Ограниченный список каталога |
+| `filesystem.read` | `@zavx0z/ai-filesystem-read` | Диапазон байтов одного файла |
+| `filesystem.read-many` | `@zavx0z/ai-filesystem-read-many` | Пакет чтения с общим бюджетом |
+| `filesystem.create` | `@zavx0z/ai-filesystem-create` | Создание без перезаписи |
+| `filesystem.write` | `@zavx0z/ai-filesystem-write` | Замена существующего файла |
+| `filesystem.mkdir` | `@zavx0z/ai-filesystem-mkdir` | Создание каталога |
+| `filesystem.remove` | `@zavx0z/ai-filesystem-remove` | Удаление записи |
+| `filesystem.rename` | `@zavx0z/ai-filesystem-rename` | Перемещение без перезаписи |
+| `filesystem.apply-patch` | `@zavx0z/ai-filesystem-apply-patch` | Планирование и применение текстового patch |
+| `git.status` | `@zavx0z/ai-git-status` | Ограниченный Git status |
 
 `filesystem/roots` и `filesystem/open` удалены: выбор alias больше не является
 действием агента. Метаданные самой области доступны через `stat({path: "."})`,
 её список — через `list({})`.
 
 ```ts
-import createWorkspace from "@ai/workspace"
-import readFile from "@ai-filesystem/read"
+import createWorkspace from "@zavx0z/ai-workspace"
+import readFile from "@zavx0z/ai-filesystem-read"
 
 const workspace = createWorkspace({directory: "/absolute/path/to/checkout"})
 const result = readFile({path: "README.md", maxBytes: 65536}, workspace)
@@ -113,7 +113,7 @@ curl --fail-with-body http://127.0.0.1:8787/tools \
 ## Подготовка описаний
 
 `server/request/scripts/descriptions.ts` вызывает существующий публичный
-`@immersive/typedoc/parser` из явно указанного проекта, где он уже установлен.
+`@zavx0z/immersive-typedoc/parser` из явно указанного проекта, где он уже установлен.
 В текущем рабочем контуре таким проектом служит Storybook:
 
 ```sh

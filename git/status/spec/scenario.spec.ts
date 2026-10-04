@@ -3,9 +3,9 @@ import assert from "node:assert/strict"
 import {spawnSync} from "node:child_process"
 import {writeFileSync} from "node:fs"
 import {join} from "node:path"
-import gitStatus from "@ai-git/status"
-import type {AiGitStatus} from "@ai-git/status"
-import testing from "@ai/testing"
+import gitStatus from "@zavx0z/ai-git-status"
+import type {Zavx0zAiGitStatus} from "@zavx0z/ai-git-status"
+import testing from "@zavx0z/ai-testing"
 
 const {createFixture} = testing
 
@@ -57,7 +57,7 @@ describe.each([
   },
 ])("$name", ({prepare, input, expected}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: AiGitStatus.Output
+  let result: Zavx0zAiGitStatus.Output
 
   beforeAll(() => {
     frame = createFixture()
