@@ -9,13 +9,13 @@ Git submodule проекта `zavx0z`. Ветка и история принад
 
 Нормативный checkout Storybook — `/Users/zavx0z/repozitarium/zavx0z/storybook`:
 
-- [Основания](../storybook/project/notes/foundations/index.md).
-- [Предметная архитектура](../storybook/repo/notes/architecture.md).
-- [Структурный контракт](../storybook/package/notes/draft-structure.md).
-- [Размещение компонентов](../storybook/component/notes/draft-placement.md).
-- [Контракты](../storybook/contracts/notes/draft-contracts.md).
-- [Экспорты](../storybook/package/notes/draft-exports.md).
-- [Документация](../storybook/package/notes/draft-documentation.md).
+- [Основания](../storybook/project/meta/notes/foundations/index.md).
+- [Предметная архитектура](../storybook/repo/meta/notes/architecture.md).
+- [Структурный контракт](../storybook/package/meta/notes/draft-structure.md).
+- [Размещение компонентов](../storybook/component/meta/notes/draft-placement.md).
+- [Контракты](../storybook/contracts/meta/notes/draft-contracts.md).
+- [Экспорты](../storybook/package/meta/notes/draft-exports.md).
+- [Документация](../storybook/package/meta/notes/draft-documentation.md).
 - [Полное руководство сценариев](../storybook/specs/scenarios/spec/scenario.spec.ts).
 
 Storybook остаётся внешним средством проверки без runtime-зависимости.
