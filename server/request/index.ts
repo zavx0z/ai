@@ -9,8 +9,7 @@ import {randomUUID, timingSafeEqual} from "node:crypto"
 import ToolError from "@zavx0z/ai-tech-failure"
 import validation from "@zavx0z/ai-tech-input"
 const {object, text} = validation
-import descriptions from "./src/descriptions.json" with {type: "json"}
-import {bindings} from "./src/bindings.ts"
+import {bindings, tools} from "./src/bindings.ts"
 import {readBody} from "./src/body.ts"
 
 import type {Command, Reply} from "./src/messages.ts"
@@ -31,6 +30,7 @@ export default function createRequestHandler(options: AiServerRequest.Input): Ai
   if (token.length < 32 || token.length > 256) throw new ToolError("INVALID_INPUT", "Token must contain 32 to 256 characters")
   const expected = Buffer.from(`Bearer ${token}`)
   const handlers = bindings(options.workspace)
+  const descriptions = tools.map(({name, description}) => ({name, ...description}))
   if (descriptions.length !== handlers.size || new Set(descriptions.map(tool => tool.name)).size !== handlers.size
     || descriptions.some(tool => !handlers.has(tool.name))) {
     throw new ToolError("INVALID_CONFIGURATION", "Tool descriptions do not match executable bindings", 500)

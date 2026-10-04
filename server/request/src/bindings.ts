@@ -1,3 +1,14 @@
+import statDescription from "@zavx0z/ai-filesystem-stat/description.json" with {type: "json"}
+import readDescription from "@zavx0z/ai-filesystem-read/description.json" with {type: "json"}
+import readManyDescription from "@zavx0z/ai-filesystem-read-many/description.json" with {type: "json"}
+import listDescription from "@zavx0z/ai-filesystem-list/description.json" with {type: "json"}
+import writeDescription from "@zavx0z/ai-filesystem-write/description.json" with {type: "json"}
+import createDescription from "@zavx0z/ai-filesystem-create/description.json" with {type: "json"}
+import mkdirDescription from "@zavx0z/ai-filesystem-mkdir/description.json" with {type: "json"}
+import removeDescription from "@zavx0z/ai-filesystem-remove/description.json" with {type: "json"}
+import renameDescription from "@zavx0z/ai-filesystem-rename/description.json" with {type: "json"}
+import patchDescription from "@zavx0z/ai-filesystem-apply-patch/description.json" with {type: "json"}
+import gitDescription from "@zavx0z/ai-git-status/description.json" with {type: "json"}
 import statPath from "@zavx0z/ai-filesystem-stat"
 import readFile from "@zavx0z/ai-filesystem-read"
 import readFiles from "@zavx0z/ai-filesystem-read-many"
@@ -13,17 +24,17 @@ import type {AiWorkspace} from "@zavx0z/ai-workspace"
 
 /** Явно подключённые инструменты; packageName нужен только генератору описаний. */
 export const tools = [
-  {name: "filesystem.stat", packageName: "@zavx0z/ai-filesystem-stat", execute: statPath},
-  {name: "filesystem.read", packageName: "@zavx0z/ai-filesystem-read", execute: readFile},
-  {name: "filesystem.read-many", packageName: "@zavx0z/ai-filesystem-read-many", execute: readFiles},
-  {name: "filesystem.list", packageName: "@zavx0z/ai-filesystem-list", execute: listFiles},
-  {name: "filesystem.write", packageName: "@zavx0z/ai-filesystem-write", execute: writeFile},
-  {name: "filesystem.create", packageName: "@zavx0z/ai-filesystem-create", execute: createFile},
-  {name: "filesystem.mkdir", packageName: "@zavx0z/ai-filesystem-mkdir", execute: makeDirectory},
-  {name: "filesystem.remove", packageName: "@zavx0z/ai-filesystem-remove", execute: removePath},
-  {name: "filesystem.rename", packageName: "@zavx0z/ai-filesystem-rename", execute: renamePath},
-  {name: "filesystem.apply-patch", packageName: "@zavx0z/ai-filesystem-apply-patch", execute: applyPatch},
-  {name: "git.status", packageName: "@zavx0z/ai-git-status", execute: gitStatus},
+  {name: "filesystem.stat", description: statDescription, packageName: "@zavx0z/ai-filesystem-stat", execute: statPath},
+  {name: "filesystem.read", description: readDescription, packageName: "@zavx0z/ai-filesystem-read", execute: readFile},
+  {name: "filesystem.read-many", description: readManyDescription, packageName: "@zavx0z/ai-filesystem-read-many", execute: readFiles},
+  {name: "filesystem.list", description: listDescription, packageName: "@zavx0z/ai-filesystem-list", execute: listFiles},
+  {name: "filesystem.write", description: writeDescription, packageName: "@zavx0z/ai-filesystem-write", execute: writeFile},
+  {name: "filesystem.create", description: createDescription, packageName: "@zavx0z/ai-filesystem-create", execute: createFile},
+  {name: "filesystem.mkdir", description: mkdirDescription, packageName: "@zavx0z/ai-filesystem-mkdir", execute: makeDirectory},
+  {name: "filesystem.remove", description: removeDescription, packageName: "@zavx0z/ai-filesystem-remove", execute: removePath},
+  {name: "filesystem.rename", description: renameDescription, packageName: "@zavx0z/ai-filesystem-rename", execute: renamePath},
+  {name: "filesystem.apply-patch", description: patchDescription, packageName: "@zavx0z/ai-filesystem-apply-patch", execute: applyPatch},
+  {name: "git.status", description: gitDescription, packageName: "@zavx0z/ai-git-status", execute: gitStatus},
 ] as const
 
 /**

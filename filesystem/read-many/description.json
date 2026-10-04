@@ -1,0 +1,169 @@
+{
+  "description": "Читает до 50 файлов с общим бюджетом байтов.",
+  "arguments": {
+    "description": "Последовательно читает несколько файлов в общем бюджете байтов.",
+    "type": "object",
+    "properties": {
+      "paths": {
+        "description": "Упорядоченный список относительных путей длиной не более 4096 байт каждый; от `1` до `50` непустых строк.\n  Обход родителей, `.git` и переходы по ссылкам запрещены.\n  Ошибка отдельного пути становится ошибкой его записи в результате.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "encoding": {
+        "description": "Кодировка содержимого каждого файла.",
+        "type": "string",
+        "enum": [
+          "base64",
+          "utf8"
+        ],
+        "default": "utf8"
+      },
+      "maxBytesPerFile": {
+        "description": "Максимум байтов для одного файла в диапазоне `[1..8388608]`.\n  Фактический предел также ограничивается остатком общего бюджета.",
+        "type": "number",
+        "default": 65536
+      },
+      "maxTotalBytes": {
+        "description": "Общий бюджет фактически прочитанных байтов в диапазоне `[1..8388608]`.\n  После его исчерпания оставшиеся пути получают ошибку `LIMIT_EXCEEDED`.",
+        "$ref": "#/properties/maxBytesPerFile",
+        "default": 2097152
+      }
+    },
+    "required": [
+      "paths"
+    ],
+    "additionalProperties": false
+  },
+  "result": {
+    "description": "Результаты чтения в исходном порядке, включая ошибки отдельных путей.",
+    "type": "object",
+    "properties": {
+      "files": {
+        "description": "Для каждого входного пути содержит результат чтения либо нормализованные код и сообщение ошибки.",
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "result": {
+                  "description": "Фактически прочитанный участок файла и его связь с исходным размером.",
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "description": "Проверенный путь относительно рабочей области.",
+                      "type": "string"
+                    },
+                    "content": {
+                      "description": "Прочитанный участок в выбранной кодировке.",
+                      "type": "string"
+                    },
+                    "encoding": {
+                      "description": "Кодировка поля `content`.",
+                      "type": "string",
+                      "enum": [
+                        "base64",
+                        "utf8"
+                      ]
+                    },
+                    "offset": {
+                      "description": "Фактическое смещение начала участка в байтах.",
+                      "type": "number"
+                    },
+                    "bytesRead": {
+                      "description": "Число фактически прочитанных байтов до декодирования.",
+                      "type": "number"
+                    },
+                    "size": {
+                      "description": "Размер файла на момент чтения, в байтах.",
+                      "type": "number"
+                    },
+                    "truncated": {
+                      "description": "`true`, если после участка в файле оставались байты.",
+                      "type": "boolean"
+                    },
+                    "contentHash": {
+                      "description": "SHA-256 всего содержимого, если ответ содержит файл целиком; иначе `null`.",
+                      "anyOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "path",
+                    "content",
+                    "encoding",
+                    "offset",
+                    "bytesRead",
+                    "size",
+                    "truncated",
+                    "contentHash"
+                  ]
+                }
+              },
+              "required": [
+                "path",
+                "result"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              },
+              "required": [
+                "path",
+                "error"
+              ]
+            }
+          ]
+        }
+      },
+      "bytesRead": {
+        "description": "Сумма фактически прочитанных байтов.",
+        "type": "number"
+      },
+      "remainingBytes": {
+        "description": "Часть общего бюджета, не израсходованная при обработке списка.",
+        "type": "number"
+      },
+      "truncated": {
+        "description": "`true`, если хотя бы один файл прочитан не полностью либо завершился ошибкой.",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "files",
+      "bytesRead",
+      "remainingBytes",
+      "truncated"
+    ]
+  }
+}

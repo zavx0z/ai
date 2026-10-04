@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./description.json": "./description.json"
   },
-  "description": "\u0427\u0438\u0442\u0430\u0435\u0442 \u0434\u043e 50 \u0444\u0430\u0439\u043b\u043e\u0432 \u0441 \u043e\u0431\u0449\u0438\u043c \u0431\u044e\u0434\u0436\u0435\u0442\u043e\u043c \u0431\u0430\u0439\u0442\u043e\u0432.",
+  "description": "Читает до 50 файлов с общим бюджетом байтов.",
   "dependencies": {
     "@zavx0z/ai-workspace": "workspace:*",
     "@zavx0z/ai-filesystem-access": "workspace:*",

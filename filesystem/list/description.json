@@ -1,0 +1,101 @@
+{
+  "description": "Строит ограниченный инвентарь каталога без обхода symlink и .git.",
+  "arguments": {
+    "description": "Перечисляет записи каталога, не обходя символические ссылки и `.git`.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Каталог относительно рабочей области длиной не более 4096 байт.\n  `.git`, обход родителей и переход по ссылкам запрещены.\n  Конечная символическая ссылка не принимается как каталог.",
+        "type": "string",
+        "default": "."
+      },
+      "recursive": {
+        "description": "Включает обход вложенных каталогов.",
+        "type": "boolean",
+        "enum": [
+          false,
+          true
+        ],
+        "default": false
+      },
+      "maxDepth": {
+        "description": "Максимальная глубина рекурсии в диапазоне `[1..10]`.\n  Корневой каталог обхода имеет глубину `1`.",
+        "type": "number",
+        "default": 3
+      },
+      "maxEntries": {
+        "description": "Максимум возвращаемых записей в диапазоне `[1..5000]`.",
+        "$ref": "#/properties/maxDepth",
+        "default": 1000
+      }
+    },
+    "additionalProperties": false
+  },
+  "result": {
+    "description": "Ограниченный снимок записей выбранного каталога.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Относительный путь обойдённого каталога.",
+        "type": "string"
+      },
+      "entries": {
+        "description": "Найденные записи, отсортированные по относительному пути.",
+        "type": "array",
+        "items": {
+          "description": "Состояние записи без перехода по конечной символической ссылке.",
+          "type": "object",
+          "properties": {
+            "path": {
+              "description": "Путь относительно назначенной области.",
+              "type": "string"
+            },
+            "type": {
+              "description": "Фактический вид записи lstat.",
+              "type": "string",
+              "enum": [
+                "directory",
+                "file",
+                "other",
+                "symlink"
+              ]
+            },
+            "size": {
+              "description": "Размер в байтах.",
+              "type": "number"
+            },
+            "mode": {
+              "description": "Unix-биты доступа, маска 0777.",
+              "type": "number"
+            },
+            "modifiedAt": {
+              "description": "Время изменения в ISO 8601.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "path",
+            "type",
+            "size",
+            "mode",
+            "modifiedAt"
+          ]
+        }
+      },
+      "truncated": {
+        "description": "`true`, когда результат неполон из-за предела глубины или количества записей.",
+        "type": "boolean"
+      },
+      "depthLimited": {
+        "description": "`true`, когда рекурсия остановилась на предельной глубине.",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path",
+      "entries",
+      "truncated",
+      "depthLimited"
+    ]
+  }
+}

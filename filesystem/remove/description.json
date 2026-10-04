@@ -1,0 +1,44 @@
+{
+  "description": "Удаляет файл, конечный symlink или каталог; рекурсия только явно.",
+  "arguments": {
+    "description": "Удаляет запись по относительному пути; конечная символическая ссылка удаляется как ссылка.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Путь записи внутри рабочей области длиной не более 4096 байт; обход родителей и `.git` запрещены. Сам корень удалить нельзя.",
+        "type": "string"
+      },
+      "recursive": {
+        "description": "Рекурсивно удалить содержимое каталога; без флага каталог должен быть пустым.",
+        "type": "boolean",
+        "enum": [
+          false,
+          true
+        ],
+        "default": false
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "additionalProperties": false
+  },
+  "result": {
+    "description": "Подтверждение успешного удаления одной записи.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Относительный путь удалённой записи.",
+        "type": "string"
+      },
+      "removed": {
+        "type": "boolean",
+        "const": true
+      }
+    },
+    "required": [
+      "path",
+      "removed"
+    ]
+  }
+}

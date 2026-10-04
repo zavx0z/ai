@@ -1,0 +1,60 @@
+{
+  "description": "Читает Git status выбранного корня без shell и произвольных аргументов.",
+  "arguments": {
+    "description": "Читает Git status только назначенного корня и не ищет родительский репозиторий.",
+    "type": "object",
+    "properties": {
+      "maxEntries": {
+        "description": "Максимум возвращаемых файловых записей в диапазоне `[1..5000]`.",
+        "type": "number",
+        "default": 1000
+      }
+    },
+    "additionalProperties": false
+  },
+  "result": {
+    "description": "Ограниченный статус Git в формате porcelain v1 с разбором имён через NUL-разделители.",
+    "type": "object",
+    "properties": {
+      "branch": {
+        "description": "Текст заголовка ветки из Git; может сообщать о detached HEAD или отсутствии коммитов.",
+        "type": "string"
+      },
+      "entries": {
+        "description": "Изменённые, добавленные, удалённые, неотслеживаемые или переименованные пути.\n  `index` и `worktree` содержат соответствующие коды porcelain v1; `originalPath` задан для rename/copy.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "string"
+            },
+            "worktree": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "originalPath": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "index",
+            "worktree",
+            "path"
+          ]
+        }
+      },
+      "truncated": {
+        "description": "`true`, если число записей превысило заданный предел.",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "branch",
+      "entries",
+      "truncated"
+    ]
+  }
+}

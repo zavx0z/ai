@@ -1,0 +1,95 @@
+{
+  "description": "Читает ограниченный диапазон байтов файла.",
+  "arguments": {
+    "description": "Читает участок обычного файла; исполнитель проверяет параметры и путь до чтения.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Путь обычного файла относительно рабочей области.\n  Обход родителей, `.git` и переход через конечную или родительскую ссылку запрещены; длина не более 4096 байт.",
+        "type": "string"
+      },
+      "offset": {
+        "description": "Смещение начала чтения в байтах; безопасное целое от `0` до `Number.MAX_SAFE_INTEGER`.",
+        "type": "number",
+        "default": 0
+      },
+      "maxBytes": {
+        "description": "Максимум байтов одного ответа в диапазоне `[1..8388608]`.\n  Ограничение применяется до декодирования текста.",
+        "$ref": "#/properties/offset",
+        "default": 65536
+      },
+      "encoding": {
+        "description": "Кодировка представления байтов; `base64` сохраняет произвольные байты и диапазоны, разделяющие UTF-8 символ.",
+        "type": "string",
+        "enum": [
+          "base64",
+          "utf8"
+        ],
+        "default": "utf8"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "additionalProperties": false
+  },
+  "result": {
+    "description": "Фактически прочитанный участок файла и его связь с исходным размером.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Проверенный путь относительно рабочей области.",
+        "type": "string"
+      },
+      "content": {
+        "description": "Прочитанный участок в выбранной кодировке.",
+        "type": "string"
+      },
+      "encoding": {
+        "description": "Кодировка поля `content`.",
+        "type": "string",
+        "enum": [
+          "base64",
+          "utf8"
+        ]
+      },
+      "offset": {
+        "description": "Фактическое смещение начала участка в байтах.",
+        "type": "number"
+      },
+      "bytesRead": {
+        "description": "Число фактически прочитанных байтов до декодирования.",
+        "type": "number"
+      },
+      "size": {
+        "description": "Размер файла на момент чтения, в байтах.",
+        "type": "number"
+      },
+      "truncated": {
+        "description": "`true`, если после участка в файле оставались байты.",
+        "type": "boolean"
+      },
+      "contentHash": {
+        "description": "SHA-256 всего содержимого, если ответ содержит файл целиком; иначе `null`.",
+        "anyOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "required": [
+      "path",
+      "content",
+      "encoding",
+      "offset",
+      "bytesRead",
+      "size",
+      "truncated",
+      "contentHash"
+    ]
+  }
+}

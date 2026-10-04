@@ -1,0 +1,72 @@
+{
+  "description": "Применяет текстовый patch формата Begin Patch с полной предварительной проверкой.",
+  "arguments": {
+    "description": "Планирует пакетный patch и применяет его после предварительной проверки операций и содержимого файлов.",
+    "type": "object",
+    "properties": {
+      "patch": {
+        "description": "Текст с маркерами `*** Begin Patch` и `*** End Patch`; поддерживаются `Add File`, `Update File`, `Delete File` и `Move to`.\n  Patch непустой, ограничен 8 MiB и 50 операциями, работает с UTF-8 и отклоняет неуникальные совпадения hunk-ов.\n  Пути операций подчиняются ограничениям рабочей области: не более 4096 байт без обхода родителей, `.git` и переходов по ссылкам.\n  Повторное изменение одного пути отклоняется; каждое изменяемое содержимое ограничено 8 MiB, общий рабочий набор — 16 MiB.",
+        "type": "string"
+      },
+      "dryRun": {
+        "description": "Вернуть план без создания каталогов и изменения файлов.\n  Ошибки планирования возникают и в этом режиме.",
+        "type": "boolean",
+        "enum": [
+          false,
+          true
+        ],
+        "default": false
+      }
+    },
+    "required": [
+      "patch"
+    ],
+    "additionalProperties": false
+  },
+  "result": {
+    "description": "План либо завершённые изменения patch. Ошибка частичного применения выбрасывается отдельно.",
+    "type": "object",
+    "properties": {
+      "applied": {
+        "description": "`false` для dry run и `true` после успешного применения всех операций.",
+        "type": "boolean"
+      },
+      "changes": {
+        "description": "Операции плана или завершённые операции в порядке patch; `from` присутствует для перемещения.\n  При удалении поле `bytes` равно `0`, для остальных операций содержит размер записываемого содержимого.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string",
+              "enum": [
+                "add",
+                "delete",
+                "move",
+                "update"
+              ]
+            },
+            "path": {
+              "type": "string"
+            },
+            "from": {
+              "type": "string"
+            },
+            "bytes": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "operation",
+            "path",
+            "bytes"
+          ]
+        }
+      }
+    },
+    "required": [
+      "applied",
+      "changes"
+    ]
+  }
+}

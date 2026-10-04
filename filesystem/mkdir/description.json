@@ -1,0 +1,44 @@
+{
+  "description": "Создаёт каталог внутри разрешённого корня.",
+  "arguments": {
+    "description": "Создаёт каталог внутри назначенной рабочей области после проверки пути.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Путь каталога относительно рабочей области длиной не более 4096 байт; сам корень, `.git` и переход через ссылки запрещены.",
+        "type": "string"
+      },
+      "recursive": {
+        "description": "Создать отсутствующие родительские каталоги.",
+        "type": "boolean",
+        "enum": [
+          false,
+          true
+        ],
+        "default": false
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "additionalProperties": false
+  },
+  "result": {
+    "description": "Состояние целевого каталога после успешного вызова.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Проверенный путь целевого каталога относительно рабочей области.",
+        "type": "string"
+      },
+      "created": {
+        "description": "`true`, если каталог отсутствовал до вызова и был создан им.",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "path",
+      "created"
+    ]
+  }
+}

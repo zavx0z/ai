@@ -1,0 +1,63 @@
+{
+  "description": "Создаёт новый файл с исключительным доступом, не перезаписывая существующий.",
+  "arguments": {
+    "description": "Создаёт новый файл с исключительным доступом, не перезаписывая существующий путь.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Путь нового файла относительно рабочей области длиной не более 4096 байт; `.git`, обход родителей и переход через ссылки запрещены.",
+        "type": "string"
+      },
+      "content": {
+        "description": "Новое содержимое в UTF-8 или, при `encoding: \"base64\"`, каноническом Base64.\n  После декодирования допускается не более 8388608 байт.\n  Пустое содержимое допустимо.",
+        "type": "string"
+      },
+      "encoding": {
+        "description": "Интерпретация строки `content`.",
+        "type": "string",
+        "enum": [
+          "base64",
+          "utf8"
+        ],
+        "default": "utf8"
+      },
+      "createParents": {
+        "description": "Создать отсутствующие родительские каталоги перед файлом.\n  При последующей ошибке записи уже созданные каталоги могут остаться.",
+        "type": "boolean",
+        "enum": [
+          false,
+          true
+        ],
+        "default": false
+      }
+    },
+    "required": [
+      "path",
+      "content"
+    ],
+    "additionalProperties": false
+  },
+  "result": {
+    "description": "Сведения о созданном файле.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Проверенный путь файла относительно рабочей области.",
+        "type": "string"
+      },
+      "bytes": {
+        "description": "Число записанных байтов.",
+        "type": "number"
+      },
+      "contentHash": {
+        "description": "SHA-256 записанных байтов в нижнем регистре.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path",
+      "bytes",
+      "contentHash"
+    ]
+  }
+}

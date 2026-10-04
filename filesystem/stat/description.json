@@ -1,0 +1,65 @@
+{
+  "description": "Возвращает метаданные пути, не разыменовывая конечную символическую ссылку.",
+  "arguments": {
+    "description": "Метаданные записи внутри назначенной области без перехода по конечной символической ссылке.",
+    "type": "object",
+    "properties": {
+      "path": {
+        "description": "Путь относительно рабочей области; `.` обозначает сам корень.\n  Родительский обход, `.git` и переход по ссылкам запрещены; конечную ссылку можно описать как отдельную запись. Путь ограничен 4096 байтами.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "additionalProperties": false
+  },
+  "result": {
+    "description": "Метаданные одного пути без разыменования конечной ссылки.",
+    "type": "object",
+    "properties": {
+      "entry": {
+        "description": "Описание самой записи, включая тип `symlink`, если конечный путь является ссылкой.",
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "Путь относительно назначенной области.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Фактический вид записи lstat.",
+            "type": "string",
+            "enum": [
+              "directory",
+              "file",
+              "other",
+              "symlink"
+            ]
+          },
+          "size": {
+            "description": "Размер в байтах.",
+            "type": "number"
+          },
+          "mode": {
+            "description": "Unix-биты доступа, маска 0777.",
+            "type": "number"
+          },
+          "modifiedAt": {
+            "description": "Время изменения в ISO 8601.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "type",
+          "size",
+          "mode",
+          "modifiedAt"
+        ]
+      }
+    },
+    "required": [
+      "entry"
+    ]
+  }
+}
