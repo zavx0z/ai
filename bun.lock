@@ -20,7 +20,6 @@
         "@filesystem/stat": "workspace:*",
         "@filesystem/write": "workspace:*",
         "@git/status": "workspace:*",
-        "@server/discovery": "workspace:*",
         "@server/request": "workspace:*",
         "@tech/failure": "workspace:*",
         "@tech/input": "workspace:*",
@@ -173,15 +172,6 @@
         "@ai/testing": "workspace:*",
       },
     },
-    "server/discovery": {
-      "name": "@server/discovery",
-      "dependencies": {
-        "@tech/failure": "workspace:*",
-      },
-      "devDependencies": {
-        "@ai/testing": "workspace:*",
-      },
-    },
     "server/request": {
       "name": "@server/request",
       "dependencies": {
@@ -197,7 +187,6 @@
         "@filesystem/stat": "workspace:*",
         "@filesystem/write": "workspace:*",
         "@git/status": "workspace:*",
-        "@server/discovery": "workspace:*",
         "@tech/failure": "workspace:*",
         "@tech/input": "workspace:*",
       },
@@ -270,8 +259,6 @@
     "@filesystem/write": ["@filesystem/write@workspace:filesystem/write"],
 
     "@git/status": ["@git/status@workspace:git/status"],
-
-    "@server/discovery": ["@server/discovery@workspace:server/discovery"],
 
     "@server/request": ["@server/request@workspace:server/request"],
 

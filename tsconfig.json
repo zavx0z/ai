@@ -12,7 +12,8 @@
     "types": [
       "node",
       "bun"
-    ]
+    ],
+    "resolveJsonModule": true
   },
   "include": [
     "**/*.ts"

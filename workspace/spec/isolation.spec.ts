@@ -8,7 +8,6 @@ import createRequestHandler from "@server/request"
 import testing from "@ai/testing"
 
 const token = "temporary-workspace-isolation-token-12345"
-const repositoryRoot = new URL("../../", import.meta.url).pathname
 
 test("Два одновременно существующих контекста читают и изменяют только свою область", async () => {
   const a = testing.createFixture()
@@ -17,13 +16,14 @@ test("Два одновременно существующих контекст�
   try {
     writeFileSync(join(a.root, "same"), "A")
     writeFileSync(join(b.root, "same"), "B")
-    const handlers = [a, b].map(item => createRequestHandler({workspace: item.context, token, repositoryRoot}))
+    const handlers = [a, b].map(item => createRequestHandler({workspace: item.context, token}))
     const request = (content: string) => new Request("http://localhost/tools", {
       method: "POST", headers: {authorization: `Bearer ${token}`, "content-type": "application/json"},
-      body: JSON.stringify({node: "ai/filesystem/write", action: "run", input: {path: "same", content}}),
+      body: JSON.stringify({name: "filesystem.write", arguments: {path: "same", content}}),
     })
     const responses = await Promise.all(handlers.map((handler, index) => handler.handle(request(index === 0 ? "AA" : "BB"))))
     expect(responses.map(response => response.status), "Оба параллельных запроса завершились успешно").toEqual([200, 200])
+    expect(await Promise.all(responses.map(async response => Object.keys(await response.json()))), "Оба ответа используют новую оболочку result").toEqual([["result"], ["result"]])
     expect(readFile({path: "same"}, a.context).content, "Первый контекст остаётся связан с A").toBe("AA")
     expect(readFile({path: "same"}, b.context).content, "Второй контекст остаётся связан с B").toBe("BB")
     expect(process.cwd(), "Параллельные обработчики не переназначают cwd").toBe(cwd)

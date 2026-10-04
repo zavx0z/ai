@@ -29,14 +29,18 @@ test("Два Node HTTP-хоста сохраняют свои области и 
       writeFileSync(join(fixture.root, "file"), content)
       hosts.push(await startServer({directory: fixture.root, token, port: 0, log: false}))
     }
-    const request = async (url: string, input: unknown) => fetch(url, {
+    const request = async (url: string, arguments_: unknown) => fetch(url, {
       method: "POST", headers: {authorization: `Bearer ${token}`, "content-type": "application/json"},
-      body: JSON.stringify({node: "ai/filesystem/read", action: "run", input}),
+      body: JSON.stringify({name: "filesystem.read", arguments: arguments_}),
     })
     const responses = await Promise.all(hosts.map(host => request(host.url, {path: "file"})))
     assert.deepEqual(responses.map(response => response.status), [200, 200])
-    assert.deepEqual(await Promise.all(responses.map(async response => (await response.json()).content)), ["A", "B"])
-    assert.equal((await request(hosts[0]!.url, {root: b.root, path: "file"})).status, 400)
+    const bodies = await Promise.all(responses.map(response => response.json()))
+    assert.deepEqual(bodies.map(body => Object.keys(body)), [["result"], ["result"]])
+    assert.deepEqual(bodies.map(body => body.result.content), ["A", "B"])
+    const rejected = await request(hosts[0]!.url, {root: b.root, path: "file"})
+    assert.equal(rejected.status, 400)
+    assert.deepEqual(Object.keys(await rejected.json()), ["error"])
   } finally {
     await Promise.all(hosts.map(host => host.close()))
     a.close()

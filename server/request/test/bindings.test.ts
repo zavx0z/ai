@@ -1,23 +1,21 @@
 import {test} from "bun:test"
 import assert from "node:assert/strict"
-import {existsSync} from "node:fs"
-import {join} from "node:path"
-import createDiscovery from "@server/discovery"
-import {bindings} from "../src/bindings.ts"
+import {bindings, tools} from "../src/bindings.ts"
 import testing from "@ai/testing"
-import {repositoryRoot} from "../spec/fixture.ts"
-const {fixture, hasCode} = testing
 
-test("every executable binding has colocated contracts and a scenario", () => fixture(filesystem => {
-  const handlers = bindings(filesystem)
-  assert.equal(handlers.size, 11)
-  for (const node of handlers.keys()) {
-    const path = node.split("/").slice(1).join("/")
-    for (const file of ["index.ts", "contract/index.ts", "spec/scenario.spec.ts"]) {
-      assert.equal(existsSync(join(repositoryRoot, path, file)), true, `${node}/${file}`)
-    }
+test("реестр связывает ровно публичные имена с исполняемыми функциями", () => testing.fixture(workspace => {
+  const registered = tools.map(tool => tool.name)
+  const bound = [...bindings(workspace).keys()]
+  assert.equal(registered.length, 11, "Опубликованы десять файловых операций и Git status")
+  assert.equal(new Set(registered).size, 11, "Имена в реестре уникальны")
+  assert.deepEqual(bound.sort(), [...registered].sort(), "Каждое публичное имя связано с исполнителем")
+  assert.deepEqual([...registered].sort(), [
+    "filesystem.apply-patch", "filesystem.create", "filesystem.list", "filesystem.mkdir",
+    "filesystem.read", "filesystem.read-many", "filesystem.remove", "filesystem.rename",
+    "filesystem.stat", "filesystem.write", "git.status",
+  ], "Технические пакеты не входят в исполняемый каталог")
+  for (const tool of tools) {
+    assert.equal(typeof tool.packageName, "string", "Связь с реальным пакетом сохранена для генерации схемы")
+    assert.equal(typeof tool.execute, "function", "Публичный адрес имеет исполняемую функцию")
   }
-  const discovery = createDiscovery({repositoryRoot, runnable: new Set(handlers.keys())})
-  assert.equal(discovery.has("ai/filesystem/read"), true)
-  assert.throws(() => discovery.describe("ai/filesystem/shared"), hasCode("UNKNOWN_NODE"))
 }))

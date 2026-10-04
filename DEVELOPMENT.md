@@ -29,19 +29,19 @@ HTTP-хост создаёт свой контекст до начала про�
 Каждая операция предоставляет `default` и собственное type-only пространство
 с формами `Input`/`Output` в `contract/index.ts`.
 
-| Адрес HTTP | Пакет | Возможность |
+| Имя команды | Пакет | Возможность |
 | --- | --- | --- |
-| `ai/filesystem/stat` | `@filesystem/stat` | Метаданные, включая конечную ссылку |
-| `ai/filesystem/list` | `@filesystem/list` | Ограниченный список каталога |
-| `ai/filesystem/read` | `@filesystem/read` | Диапазон байтов одного файла |
-| `ai/filesystem/read-many` | `@filesystem/read-many` | Пакет чтения с общим бюджетом |
-| `ai/filesystem/create` | `@filesystem/create` | Создание без перезаписи |
-| `ai/filesystem/write` | `@filesystem/write` | Замена существующего файла |
-| `ai/filesystem/mkdir` | `@filesystem/mkdir` | Создание каталога |
-| `ai/filesystem/remove` | `@filesystem/remove` | Удаление записи |
-| `ai/filesystem/rename` | `@filesystem/rename` | Перемещение без перезаписи |
-| `ai/filesystem/apply-patch` | `@filesystem/apply-patch` | Планирование и применение текстового patch |
-| `ai/git/status` | `@git/status` | Ограниченный Git status |
+| `filesystem.stat` | `@filesystem/stat` | Метаданные, включая конечную ссылку |
+| `filesystem.list` | `@filesystem/list` | Ограниченный список каталога |
+| `filesystem.read` | `@filesystem/read` | Диапазон байтов одного файла |
+| `filesystem.read-many` | `@filesystem/read-many` | Пакет чтения с общим бюджетом |
+| `filesystem.create` | `@filesystem/create` | Создание без перезаписи |
+| `filesystem.write` | `@filesystem/write` | Замена существующего файла |
+| `filesystem.mkdir` | `@filesystem/mkdir` | Создание каталога |
+| `filesystem.remove` | `@filesystem/remove` | Удаление записи |
+| `filesystem.rename` | `@filesystem/rename` | Перемещение без перезаписи |
+| `filesystem.apply-patch` | `@filesystem/apply-patch` | Планирование и применение текстового patch |
+| `git.status` | `@git/status` | Ограниченный Git status |
 
 `filesystem/roots` и `filesystem/open` удалены: выбор alias больше не является
 действием агента. Метаданные самой области доступны через `stat({path: "."})`,
@@ -61,28 +61,90 @@ const result = readFile({path: "README.md", maxBytes: 65536}, workspace)
 
 ## HTTP
 
-`GET /tools` и `POST /tools` с `{}` возвращают обзор. Все запросы требуют
-`Authorization: Bearer <token>`. Оболочка остаётся `{node?, action?, input?}`.
+Все запросы к `/tools` требуют `Authorization: Bearer <token>`.
+`POST /tools` принимает одну команду. Обе части обязательны; для инструмента
+без обязательных аргументов передаётся `arguments: {}`.
+
+```json
+{"name":"filesystem.list","arguments":{"path":"."}}
+```
+
+Например, ответ для пустого каталога:
+
+```json
+{"result":{"path":".","entries":[],"truncated":false,"depthLimited":false}}
+```
+
+Пример отказа при попытке обхода родителей:
+
+```json
+{"error":{"code":"PATH_NOT_ALLOWED","message":"Parent traversal and Git metadata are not exposed"}}
+```
+
+`details` внутри `error` присутствует только при наличии дополнительных сведений,
+например завершённых операций `apply-patch`. Успех и ошибка имеют по одному
+верхнему полю. requestId создаётся транспортом и передаётся в заголовке
+`x-request-id` и журнале; модель его не задаёт.
 
 ```sh
 curl --fail-with-body http://127.0.0.1:8787/tools \
   -H "Authorization: Bearer $AI_TOOLS_TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"node":"ai/filesystem/read","action":"run","input":{"path":"README.md","maxBytes":65536}}'
+  -d '{"name":"filesystem.read","arguments":{"path":"README.md","maxBytes":65536}}'
 ```
 
-Без `action` запрос описывает узел. `input: {"view":"contract"}` возвращает
-`{node, view, format: "typescript", source}` с полным исходником пространства
-контракта. Прежние отдельные поля `input`/`output` с исходниками заменены `source`,
-поскольку обе формы теперь принадлежат одному namespace.
-`view: "scenarios"` возвращает исходник и `executed: false`, без запуска тестов.
-Обзор извлекается из TSDoc публичного входа, а не из README.
+Команда означает исполнение. Старые `node`, `action`, `input`, а также `root`,
+адрес сущности и идентификаторы корреляции в оболочке отклоняются с 400.
+`POST {}` также отклоняется. Неизвестное имя возвращает 404 / `UNKNOWN_TOOL`.
+Поля конкретного инструмента проверяет его собственная реализация.
 
-Discovery раскрывает пакеты из корневых workspace glob. Исполняются только
-явные bindings. Технические узлы описываются, но недоступны для удалённого запуска.
-Пользовательский адрес не превращается в произвольный import или shell-команду.
-Новых transport, версий протокола, WebSocket и прогресса не добавлено.
-Интеграция с конкретным клиентом Wazy не проверена.
+`GET /tools` возвращает `{result: [...]}`. В массиве ровно 11 исполняемых
+инструментов; у каждого `name`, `description`, `arguments` и `result`.
+Два последних поля — самостоятельные JSON Schema с описаниями и, для аргументов,
+известными defaults. Схема описывает форму; числовые бюджеты и ограничения путей
+объясняются в описаниях и проверяются исполнителем. Неизвестные аргументы запрещены.
+
+Потребительский API не выдаёт исходники contract/scenarios, дерево пакетов,
+внутренние workspace/testing/tech/server или методы получения справки.
+Контракты, TSDoc и сценарии сохраняются в исходниках для разработки и Storybook.
+Имена команд связаны с конкретными публичными функциями; имя из запроса
+не превращается в import, путь или shell-команду.
+
+## Подготовка описаний
+
+`server/request/scripts/descriptions.ts` вызывает существующий публичный
+`@immersive/typedoc/parser` из явно указанного проекта, где он уже установлен.
+В текущем рабочем контуре таким проектом служит Storybook:
+
+```sh
+bun run descriptions /Users/zavx0z/repozitarium/zavx0z/storybook
+bun run check:descriptions /Users/zavx0z/repozitarium/zavx0z/storybook
+```
+
+Генератор читает только контракты явно подключённых инструментов и их package
+описания, проверяет снимки исходников и сохраняет готовый JSON. Единственный
+список исполняемых операций принадлежит `server/request/src/bindings.ts`.
+`src/descriptions.json` — генерируемый артефакт, его не редактируют вручную.
+При изменении контракта или TSDoc нужно обновить артефакт; команда `--check`
+обнаруживает устаревший результат, не перезаписывая его.
+
+HTTP использует готовый артефакт. Ему не требуются TypeDoc, Storybook,
+доступ к исходникам инструментов или прежняя настройка `repositoryRoot`.
+Отсутствие внешнего reader мешает только генерации/проверке описаний, а не запуску.
+Локальный TS-parser или копия валидатора Storybook не добавлены.
+
+## Граница интеграции чата
+
+Хост назначает область до обработки команд и сохраняет соответствие
+«чат → обработчик с workspace». Адрес сущности, права и выбор обработчика
+принадлежат хосту. Сам AI Tools не выбирает чат по полю модели и не меняет cwd.
+Разным чатам хост может назначить независимые контексты и обработчики.
+Самостоятельный HTTP listener обслуживает одну назначенную область; маршрутизация
+нескольких чатов существующей средой здесь не реализуется.
+
+Транспорт HTTP сохранён. Интеграция с чатами сущностей Storybook и конкретным
+внешним клиентом не проверена; чужой Storybook не изменяется.
+WebSocket, модельный цикл и промежуточный прогресс не входят в этот этап.
 
 ## Ограничения и диагностика
 
@@ -105,7 +167,7 @@ TLS для удалённого доступа настраивается отд
 HTTP нормализует ошибки ОС без раскрытия абсолютных путей. Статусы:
 400 — ввод, 401 — токен, 403 — запрет, 404 — отсутствие,
 409 — конфликт, 413 — лимит, 500 — внутренний сбой.
-JSONL диагностика содержит requestId, метод, узел, действие, статус, длительность
+JSONL диагностика содержит requestId, метод, имя инструмента, статус, длительность
 и код ошибки; содержимое файлов, аргументы и токены не записываются.
 Автоматического повтора изменяющих запросов нет.
 
@@ -115,6 +177,7 @@ JSONL диагностика содержит requestId, метод, узел, �
 bun run check
 bun test
 npm run test:node
+bun run check:descriptions /Users/zavx0z/repozitarium/zavx0z/storybook
 ```
 
 `scenario.spec.ts` содержит успешные примеры на `bun:test`; ожидаемые отказы

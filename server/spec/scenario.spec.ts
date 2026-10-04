@@ -15,11 +15,12 @@ describe.each([
   afterAll(() => result.close())
   const response = await fetch(result.url, {
     method: "POST", headers: {authorization: `Bearer ${token}`, "content-type": "application/json"},
-    body: JSON.stringify({node: "ai/filesystem/read", action: "run", input: {path: "file"}}),
+    body: JSON.stringify({name: "filesystem.read", arguments: {path: "file"}}),
   })
   const data = await response.json()
   test("Сетевое исполнение", () => {
     expect(response.status, "Настоящий HTTP listener обслуживает авторизованный запрос").toBe(200)
-    expect(data.content, "Исполнитель читает файл из переданной хосту области").toBe(content)
+    expect(Object.keys(data), "Успешный сетевой ответ содержит только result").toEqual(["result"])
+    expect(data.result.content, "Исполнитель читает файл из переданной хосту области").toBe(content)
   })
 })

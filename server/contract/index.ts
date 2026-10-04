@@ -11,9 +11,6 @@ export declare namespace AiServer {
 
   @property [port=8787] - Целое от 0 до 65535; 0 позволяет ОС выбрать свободный порт.
 
-  @property [repositoryRoot] - Доверенный checkout исходников инструментов для discovery;
-  по умолчанию репозиторий текущего серверного модуля. Не назначает рабочую область.
-
   @property [log=true] - Запись безопасных метаданных запросов в stderr.
   */
   export interface Input {
@@ -21,7 +18,6 @@ export declare namespace AiServer {
     token: string
     hostname?: string
     port?: number
-    repositoryRoot?: string
     log?: boolean
   }
 

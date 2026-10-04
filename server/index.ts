@@ -1,5 +1,5 @@
 /**
- Запускает независимый HTTP-host структурных инструментов.
+ Запускает независимый HTTP-host именованных инструментов.
  @remarks По умолчанию слушает только loopback. Не импортирует Interpreter UI,
  Storybook runtime, CDP или отдельный MCP-server.
  @packageDocumentation
@@ -7,7 +7,7 @@
 import {createServer} from "node:http"
 import {Readable} from "node:stream"
 import {fileURLToPath} from "node:url"
-import {dirname, resolve} from "node:path"
+import {resolve} from "node:path"
 import type {AddressInfo} from "node:net"
 import createWorkspace from "@ai/workspace"
 import validation from "@tech/input"
@@ -32,7 +32,6 @@ export default async function startServer(options: AiServer.Input): Promise<AiSe
   const port = integer(options.port, 8787, 0, 65535, "port")
   const log = boolean(options.log, true, "log")
   const handler = createRequestHandler({workspace, token: options.token,
-    repositoryRoot: options.repositoryRoot ?? resolve(dirname(fileURLToPath(import.meta.url)), ".."),
     logger: log ? event => process.stderr.write(JSON.stringify(event) + "\n") : undefined})
   const server = createServer(async (incoming, outgoing) => {
     try {

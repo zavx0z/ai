@@ -5,7 +5,7 @@
   "exports": {
     ".": "./index.ts"
   },
-  "description": "HTTP-\u0432\u0445\u043e\u0434 Wazy MCP: GET /tools \u0438 POST /tools \u0441 {node, action, input}.",
+  "description": "HTTP-вход описаний и исполнения именованных инструментов в назначенной области",
   "dependencies": {
     "@ai/workspace": "workspace:*",
     "@filesystem/apply-patch": "workspace:*",
@@ -19,7 +19,6 @@
     "@filesystem/stat": "workspace:*",
     "@filesystem/write": "workspace:*",
     "@git/status": "workspace:*",
-    "@server/discovery": "workspace:*",
     "@tech/failure": "workspace:*",
     "@tech/input": "workspace:*"
   },

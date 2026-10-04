@@ -1,0 +1,829 @@
+[
+  {
+    "name": "filesystem.stat",
+    "description": "Возвращает метаданные пути, не разыменовывая конечную символическую ссылку.",
+    "arguments": {
+      "description": "Метаданные записи внутри назначенной области без перехода по конечной символической ссылке.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Путь относительно рабочей области; `.` обозначает сам корень.\n  Родительский обход, `.git` и переход по ссылкам запрещены; конечную ссылку можно описать как отдельную запись. Путь ограничен 4096 байтами.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "Метаданные одного пути без разыменования конечной ссылки.",
+      "type": "object",
+      "properties": {
+        "entry": {
+          "description": "Описание самой записи, включая тип `symlink`, если конечный путь является ссылкой.",
+          "type": "object",
+          "properties": {
+            "path": {
+              "description": "Путь относительно назначенной области.",
+              "type": "string"
+            },
+            "type": {
+              "description": "Фактический вид записи lstat.",
+              "type": "string",
+              "enum": [
+                "directory",
+                "file",
+                "other",
+                "symlink"
+              ]
+            },
+            "size": {
+              "description": "Размер в байтах.",
+              "type": "number"
+            },
+            "mode": {
+              "description": "Unix-биты доступа, маска 0777.",
+              "type": "number"
+            },
+            "modifiedAt": {
+              "description": "Время изменения в ISO 8601.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "path",
+            "type",
+            "size",
+            "mode",
+            "modifiedAt"
+          ]
+        }
+      },
+      "required": [
+        "entry"
+      ]
+    }
+  },
+  {
+    "name": "filesystem.read",
+    "description": "Читает ограниченный диапазон байтов файла.",
+    "arguments": {
+      "description": "Читает участок обычного файла; исполнитель проверяет параметры и путь до чтения.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Путь обычного файла относительно рабочей области.\n  Обход родителей, `.git` и переход через конечную или родительскую ссылку запрещены; длина не более 4096 байт.",
+          "type": "string"
+        },
+        "offset": {
+          "description": "Смещение начала чтения в байтах; безопасное целое от `0` до `Number.MAX_SAFE_INTEGER`.",
+          "type": "number",
+          "default": 0
+        },
+        "maxBytes": {
+          "description": "Максимум байтов одного ответа в диапазоне `[1..8388608]`.\n  Ограничение применяется до декодирования текста.",
+          "$ref": "#/properties/offset",
+          "default": 65536
+        },
+        "encoding": {
+          "description": "Кодировка представления байтов; `base64` сохраняет произвольные байты и диапазоны, разделяющие UTF-8 символ.",
+          "type": "string",
+          "enum": [
+            "base64",
+            "utf8"
+          ],
+          "default": "utf8"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "Фактически прочитанный участок файла и его связь с исходным размером.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Проверенный путь относительно рабочей области.",
+          "type": "string"
+        },
+        "content": {
+          "description": "Прочитанный участок в выбранной кодировке.",
+          "type": "string"
+        },
+        "encoding": {
+          "description": "Кодировка поля `content`.",
+          "type": "string",
+          "enum": [
+            "base64",
+            "utf8"
+          ]
+        },
+        "offset": {
+          "description": "Фактическое смещение начала участка в байтах.",
+          "type": "number"
+        },
+        "bytesRead": {
+          "description": "Число фактически прочитанных байтов до декодирования.",
+          "type": "number"
+        },
+        "size": {
+          "description": "Размер файла на момент чтения, в байтах.",
+          "type": "number"
+        },
+        "truncated": {
+          "description": "`true`, если после участка в файле оставались байты.",
+          "type": "boolean"
+        },
+        "contentHash": {
+          "description": "SHA-256 всего содержимого, если ответ содержит файл целиком; иначе `null`.",
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "content",
+        "encoding",
+        "offset",
+        "bytesRead",
+        "size",
+        "truncated",
+        "contentHash"
+      ]
+    }
+  },
+  {
+    "name": "filesystem.read-many",
+    "description": "Читает до 50 файлов с общим бюджетом байтов.",
+    "arguments": {
+      "description": "Последовательно читает несколько файлов в общем бюджете байтов.",
+      "type": "object",
+      "properties": {
+        "paths": {
+          "description": "Упорядоченный список относительных путей длиной не более 4096 байт каждый; от `1` до `50` непустых строк.\n  Обход родителей, `.git` и переходы по ссылкам запрещены.\n  Ошибка отдельного пути становится ошибкой его записи в результате.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "encoding": {
+          "description": "Кодировка содержимого каждого файла.",
+          "type": "string",
+          "enum": [
+            "base64",
+            "utf8"
+          ],
+          "default": "utf8"
+        },
+        "maxBytesPerFile": {
+          "description": "Максимум байтов для одного файла в диапазоне `[1..8388608]`.\n  Фактический предел также ограничивается остатком общего бюджета.",
+          "type": "number",
+          "default": 65536
+        },
+        "maxTotalBytes": {
+          "description": "Общий бюджет фактически прочитанных байтов в диапазоне `[1..8388608]`.\n  После его исчерпания оставшиеся пути получают ошибку `LIMIT_EXCEEDED`.",
+          "$ref": "#/properties/maxBytesPerFile",
+          "default": 2097152
+        }
+      },
+      "required": [
+        "paths"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "Результаты чтения в исходном порядке, включая ошибки отдельных путей.",
+      "type": "object",
+      "properties": {
+        "files": {
+          "description": "Для каждого входного пути содержит результат чтения либо нормализованные код и сообщение ошибки.",
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "result": {
+                    "description": "Фактически прочитанный участок файла и его связь с исходным размером.",
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "description": "Проверенный путь относительно рабочей области.",
+                        "type": "string"
+                      },
+                      "content": {
+                        "description": "Прочитанный участок в выбранной кодировке.",
+                        "type": "string"
+                      },
+                      "encoding": {
+                        "description": "Кодировка поля `content`.",
+                        "type": "string",
+                        "enum": [
+                          "base64",
+                          "utf8"
+                        ]
+                      },
+                      "offset": {
+                        "description": "Фактическое смещение начала участка в байтах.",
+                        "type": "number"
+                      },
+                      "bytesRead": {
+                        "description": "Число фактически прочитанных байтов до декодирования.",
+                        "type": "number"
+                      },
+                      "size": {
+                        "description": "Размер файла на момент чтения, в байтах.",
+                        "type": "number"
+                      },
+                      "truncated": {
+                        "description": "`true`, если после участка в файле оставались байты.",
+                        "type": "boolean"
+                      },
+                      "contentHash": {
+                        "description": "SHA-256 всего содержимого, если ответ содержит файл целиком; иначе `null`.",
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "content",
+                      "encoding",
+                      "offset",
+                      "bytesRead",
+                      "size",
+                      "truncated",
+                      "contentHash"
+                    ]
+                  }
+                },
+                "required": [
+                  "path",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "error": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "code",
+                      "message"
+                    ]
+                  }
+                },
+                "required": [
+                  "path",
+                  "error"
+                ]
+              }
+            ]
+          }
+        },
+        "bytesRead": {
+          "description": "Сумма фактически прочитанных байтов.",
+          "type": "number"
+        },
+        "remainingBytes": {
+          "description": "Часть общего бюджета, не израсходованная при обработке списка.",
+          "type": "number"
+        },
+        "truncated": {
+          "description": "`true`, если хотя бы один файл прочитан не полностью либо завершился ошибкой.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "files",
+        "bytesRead",
+        "remainingBytes",
+        "truncated"
+      ]
+    }
+  },
+  {
+    "name": "filesystem.list",
+    "description": "Строит ограниченный инвентарь каталога без обхода symlink и .git.",
+    "arguments": {
+      "description": "Перечисляет записи каталога, не обходя символические ссылки и `.git`.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Каталог относительно рабочей области длиной не более 4096 байт.\n  `.git`, обход родителей и переход по ссылкам запрещены.\n  Конечная символическая ссылка не принимается как каталог.",
+          "type": "string",
+          "default": "."
+        },
+        "recursive": {
+          "description": "Включает обход вложенных каталогов.",
+          "type": "boolean",
+          "enum": [
+            false,
+            true
+          ],
+          "default": false
+        },
+        "maxDepth": {
+          "description": "Максимальная глубина рекурсии в диапазоне `[1..10]`.\n  Корневой каталог обхода имеет глубину `1`.",
+          "type": "number",
+          "default": 3
+        },
+        "maxEntries": {
+          "description": "Максимум возвращаемых записей в диапазоне `[1..5000]`.",
+          "$ref": "#/properties/maxDepth",
+          "default": 1000
+        }
+      },
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "Ограниченный снимок записей выбранного каталога.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Относительный путь обойдённого каталога.",
+          "type": "string"
+        },
+        "entries": {
+          "description": "Найденные записи, отсортированные по относительному пути.",
+          "type": "array",
+          "items": {
+            "description": "Состояние записи без перехода по конечной символической ссылке.",
+            "type": "object",
+            "properties": {
+              "path": {
+                "description": "Путь относительно назначенной области.",
+                "type": "string"
+              },
+              "type": {
+                "description": "Фактический вид записи lstat.",
+                "type": "string",
+                "enum": [
+                  "directory",
+                  "file",
+                  "other",
+                  "symlink"
+                ]
+              },
+              "size": {
+                "description": "Размер в байтах.",
+                "type": "number"
+              },
+              "mode": {
+                "description": "Unix-биты доступа, маска 0777.",
+                "type": "number"
+              },
+              "modifiedAt": {
+                "description": "Время изменения в ISO 8601.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "type",
+              "size",
+              "mode",
+              "modifiedAt"
+            ]
+          }
+        },
+        "truncated": {
+          "description": "`true`, когда результат неполон из-за предела глубины или количества записей.",
+          "type": "boolean"
+        },
+        "depthLimited": {
+          "description": "`true`, когда рекурсия остановилась на предельной глубине.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "entries",
+        "truncated",
+        "depthLimited"
+      ]
+    }
+  },
+  {
+    "name": "filesystem.write",
+    "description": "Атомарно заменяет содержимое существующего обычного файла.",
+    "arguments": {
+      "description": "Атомарно заменяет содержимое существующего обычного файла после проверки параметров и пути.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Путь обычного файла относительно рабочей области длиной не более 4096 байт; `.git`, обход родителей и переход через ссылки запрещены.",
+          "type": "string"
+        },
+        "content": {
+          "description": "Новое содержимое в UTF-8 или, при `encoding: \"base64\"`, каноническом Base64.\n  После декодирования допускается не более 8388608 байт.\n  Пустое содержимое допустимо.",
+          "type": "string"
+        },
+        "encoding": {
+          "description": "Интерпретация строки `content`.",
+          "type": "string",
+          "enum": [
+            "base64",
+            "utf8"
+          ],
+          "default": "utf8"
+        },
+        "expectedHash": {
+          "description": "Ожидаемый SHA-256 текущего содержимого для проверки до замены.\n  Принимается 64 строчных шестнадцатеричных символа. Несовпадение вызывает `CONFLICT`; проверка не является межпроцессной блокировкой.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "Сведения о содержимом после успешной замены.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Проверенный путь файла относительно рабочей области.",
+          "type": "string"
+        },
+        "bytes": {
+          "description": "Число записанных байтов.",
+          "type": "number"
+        },
+        "contentHash": {
+          "description": "SHA-256 записанных байтов в нижнем регистре.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "bytes",
+        "contentHash"
+      ]
+    }
+  },
+  {
+    "name": "filesystem.create",
+    "description": "Создаёт новый файл с исключительным доступом, не перезаписывая существующий.",
+    "arguments": {
+      "description": "Создаёт новый файл с исключительным доступом, не перезаписывая существующий путь.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Путь нового файла относительно рабочей области длиной не более 4096 байт; `.git`, обход родителей и переход через ссылки запрещены.",
+          "type": "string"
+        },
+        "content": {
+          "description": "Новое содержимое в UTF-8 или, при `encoding: \"base64\"`, каноническом Base64.\n  После декодирования допускается не более 8388608 байт.\n  Пустое содержимое допустимо.",
+          "type": "string"
+        },
+        "encoding": {
+          "description": "Интерпретация строки `content`.",
+          "type": "string",
+          "enum": [
+            "base64",
+            "utf8"
+          ],
+          "default": "utf8"
+        },
+        "createParents": {
+          "description": "Создать отсутствующие родительские каталоги перед файлом.\n  При последующей ошибке записи уже созданные каталоги могут остаться.",
+          "type": "boolean",
+          "enum": [
+            false,
+            true
+          ],
+          "default": false
+        }
+      },
+      "required": [
+        "path",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "Сведения о созданном файле.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Проверенный путь файла относительно рабочей области.",
+          "type": "string"
+        },
+        "bytes": {
+          "description": "Число записанных байтов.",
+          "type": "number"
+        },
+        "contentHash": {
+          "description": "SHA-256 записанных байтов в нижнем регистре.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "bytes",
+        "contentHash"
+      ]
+    }
+  },
+  {
+    "name": "filesystem.mkdir",
+    "description": "Создаёт каталог внутри разрешённого корня.",
+    "arguments": {
+      "description": "Создаёт каталог внутри назначенной рабочей области после проверки пути.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Путь каталога относительно рабочей области длиной не более 4096 байт; сам корень, `.git` и переход через ссылки запрещены.",
+          "type": "string"
+        },
+        "recursive": {
+          "description": "Создать отсутствующие родительские каталоги.",
+          "type": "boolean",
+          "enum": [
+            false,
+            true
+          ],
+          "default": false
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "Состояние целевого каталога после успешного вызова.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Проверенный путь целевого каталога относительно рабочей области.",
+          "type": "string"
+        },
+        "created": {
+          "description": "`true`, если каталог отсутствовал до вызова и был создан им.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "created"
+      ]
+    }
+  },
+  {
+    "name": "filesystem.remove",
+    "description": "Удаляет файл, конечный symlink или каталог; рекурсия только явно.",
+    "arguments": {
+      "description": "Удаляет запись по относительному пути; конечная символическая ссылка удаляется как ссылка.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Путь записи внутри рабочей области длиной не более 4096 байт; обход родителей и `.git` запрещены. Сам корень удалить нельзя.",
+          "type": "string"
+        },
+        "recursive": {
+          "description": "Рекурсивно удалить содержимое каталога; без флага каталог должен быть пустым.",
+          "type": "boolean",
+          "enum": [
+            false,
+            true
+          ],
+          "default": false
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "Подтверждение успешного удаления одной записи.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "Относительный путь удалённой записи.",
+          "type": "string"
+        },
+        "removed": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "path",
+        "removed"
+      ]
+    }
+  },
+  {
+    "name": "filesystem.rename",
+    "description": "Перемещает путь внутри одного корня, не перезаписывая существующую цель.",
+    "arguments": {
+      "description": "Перемещает запись внутри одной назначенной рабочей области, если целевое имя свободно.",
+      "type": "object",
+      "properties": {
+        "from": {
+          "description": "Существующий исходный путь относительно рабочей области длиной не более 4096 байт; обход родителей, `.git` и переход по ссылкам запрещены.",
+          "type": "string"
+        },
+        "to": {
+          "description": "Свободный целевой путь относительно той же рабочей области длиной не более 4096 байт; существующая цель вызывает конфликт.\n  Обход родителей, `.git` и переход по ссылкам запрещены; переместить каталог внутрь себя нельзя.\n  Проверка цели перед системным переименованием не блокирует параллельное изменение каталога.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "Относительные пути завершённого перемещения.",
+      "type": "object",
+      "properties": {
+        "from": {
+          "description": "Исходное имя до перемещения.",
+          "type": "string"
+        },
+        "to": {
+          "description": "Новое имя после перемещения.",
+          "type": "string"
+        },
+        "renamed": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "renamed"
+      ]
+    }
+  },
+  {
+    "name": "filesystem.apply-patch",
+    "description": "Применяет текстовый patch формата Begin Patch с полной предварительной проверкой.",
+    "arguments": {
+      "description": "Планирует пакетный patch и применяет его после предварительной проверки операций и содержимого файлов.",
+      "type": "object",
+      "properties": {
+        "patch": {
+          "description": "Текст с маркерами `*** Begin Patch` и `*** End Patch`; поддерживаются `Add File`, `Update File`, `Delete File` и `Move to`.\n  Patch непустой, ограничен 8 MiB и 50 операциями, работает с UTF-8 и отклоняет неуникальные совпадения hunk-ов.\n  Пути операций подчиняются ограничениям рабочей области: не более 4096 байт без обхода родителей, `.git` и переходов по ссылкам.\n  Повторное изменение одного пути отклоняется; каждое изменяемое содержимое ограничено 8 MiB, общий рабочий набор — 16 MiB.",
+          "type": "string"
+        },
+        "dryRun": {
+          "description": "Вернуть план без создания каталогов и изменения файлов.\n  Ошибки планирования возникают и в этом режиме.",
+          "type": "boolean",
+          "enum": [
+            false,
+            true
+          ],
+          "default": false
+        }
+      },
+      "required": [
+        "patch"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "План либо завершённые изменения patch. Ошибка частичного применения выбрасывается отдельно.",
+      "type": "object",
+      "properties": {
+        "applied": {
+          "description": "`false` для dry run и `true` после успешного применения всех операций.",
+          "type": "boolean"
+        },
+        "changes": {
+          "description": "Операции плана или завершённые операции в порядке patch; `from` присутствует для перемещения.\n  При удалении поле `bytes` равно `0`, для остальных операций содержит размер записываемого содержимого.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "type": "string",
+                "enum": [
+                  "add",
+                  "delete",
+                  "move",
+                  "update"
+                ]
+              },
+              "path": {
+                "type": "string"
+              },
+              "from": {
+                "type": "string"
+              },
+              "bytes": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "operation",
+              "path",
+              "bytes"
+            ]
+          }
+        }
+      },
+      "required": [
+        "applied",
+        "changes"
+      ]
+    }
+  },
+  {
+    "name": "git.status",
+    "description": "Читает Git status выбранного корня без shell и произвольных аргументов.",
+    "arguments": {
+      "description": "Читает Git status только назначенного корня и не ищет родительский репозиторий.",
+      "type": "object",
+      "properties": {
+        "maxEntries": {
+          "description": "Максимум возвращаемых файловых записей в диапазоне `[1..5000]`.",
+          "type": "number",
+          "default": 1000
+        }
+      },
+      "additionalProperties": false
+    },
+    "result": {
+      "description": "Ограниченный статус Git в формате porcelain v1 с разбором имён через NUL-разделители.",
+      "type": "object",
+      "properties": {
+        "branch": {
+          "description": "Текст заголовка ветки из Git; может сообщать о detached HEAD или отсутствии коммитов.",
+          "type": "string"
+        },
+        "entries": {
+          "description": "Изменённые, добавленные, удалённые, неотслеживаемые или переименованные пути.\n  `index` и `worktree` содержат соответствующие коды porcelain v1; `originalPath` задан для rename/copy.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "string"
+              },
+              "worktree": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "originalPath": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "index",
+              "worktree",
+              "path"
+            ]
+          }
+        },
+        "truncated": {
+          "description": "`true`, если число записей превысило заданный предел.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "branch",
+        "entries",
+        "truncated"
+      ]
+    }
+  }
+]
