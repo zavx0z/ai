@@ -1,8 +1,11 @@
-import {ToolError} from "../../../shared/errors.ts"
+import ToolError from "@tech/failure"
 
+/** Точный фрагмент замены: исходные и новые строки с необязательной привязкой к концу файла. */
 export interface Hunk {old: string[]; next: string[]; end: boolean; anchor?: string}
+/** План одного добавления, удаления или обновления файла; ещё не выполняет IO. */
 export type Operation = {kind: "add"; path: string; lines: string[]} | {kind: "delete"; path: string} | {kind: "update"; path: string; to?: string; hunks: Hunk[]}
 
+/** Разбирает команды Begin Patch, отклоняя неизвестные маркеры, пустые и несогласованные блоки. */
 export function parsePatch(patch: string): Operation[] {
   const lines = patch.replaceAll("\r\n", "\n").split("\n")
   if (lines.at(-1) === "") lines.pop()
@@ -51,6 +54,7 @@ export function parsePatch(patch: string): Operation[] {
   return operations
 }
 
+/** Применяет точные однозначные hunks к UTF-8, сохраняя CRLF и отсутствие завершающей новой строки. */
 export function applyHunks(data: Buffer, hunks: Hunk[]): Buffer {
   let before: string
   try { before = new TextDecoder("utf-8", {fatal: true}).decode(data) } catch { throw new ToolError("PATCH_REJECTED", "Patches only support UTF-8 text", 409) }

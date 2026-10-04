@@ -1,28 +1,37 @@
 /**
- * Запускает независимый HTTP-host структурных инструментов.
- * @remarks По умолчанию слушает только loopback. Не импортирует Interpreter UI,
- * Storybook runtime, CDP или отдельный MCP-server.
- * @packageDocumentation
+ Запускает независимый HTTP-host структурных инструментов.
+ @remarks По умолчанию слушает только loopback. Не импортирует Interpreter UI,
+ Storybook runtime, CDP или отдельный MCP-server.
+ @packageDocumentation
  */
 import {createServer} from "node:http"
 import {Readable} from "node:stream"
 import {fileURLToPath} from "node:url"
 import {dirname, resolve} from "node:path"
 import type {AddressInfo} from "node:net"
-import {createFilesystem} from "../filesystem/index.ts"
-import {integer, text, boolean} from "../shared/validation.ts"
-import {createRequestHandler} from "./request/index.ts"
-import type {ServerInput} from "./contract/input.ts"
-import type {ServerOutput} from "./contract/output.ts"
-export type {ServerInput} from "./contract/input.ts"
-export type {ServerOutput} from "./contract/output.ts"
+import createWorkspace from "@ai/workspace"
+import validation from "@tech/input"
+const {integer, text, boolean} = validation
+import createRequestHandler from "@server/request"
 
-export async function startServer(options: ServerInput): Promise<ServerOutput> {
-  const filesystem = createFilesystem({roots: options.roots})
+import type {AiServer} from "./contract/index.ts"
+export type {AiServer} from "./contract/index.ts"
+
+/**
+Назначает область и запускает HTTP-listener, связанный с подготовленными инструментами.
+
+@param options - Доверенная конфигурация области, токена и адреса прослушивания.
+
+@returns Фактический URL и освобождение listener после завершения запросов.
+
+@throws Ошибка конфигурации до listen либо ошибка ОС при запуске сервера.
+*/
+export default async function startServer(options: AiServer.Input): Promise<AiServer.Output> {
+  const workspace = createWorkspace({directory: options.directory})
   const hostname = text(options.hostname ?? "127.0.0.1", "hostname")
   const port = integer(options.port, 8787, 0, 65535, "port")
   const log = boolean(options.log, true, "log")
-  const handler = createRequestHandler({filesystem, token: options.token,
+  const handler = createRequestHandler({workspace, token: options.token,
     repositoryRoot: options.repositoryRoot ?? resolve(dirname(fileURLToPath(import.meta.url)), ".."),
     logger: log ? event => process.stderr.write(JSON.stringify(event) + "\n") : undefined})
   const server = createServer(async (incoming, outgoing) => {
@@ -32,7 +41,7 @@ export async function startServer(options: ServerInput): Promise<ServerOutput> {
       for (const [name, value] of Object.entries(incoming.headers)) if (value !== undefined) headers.set(name, Array.isArray(value) ? value.join(", ") : value)
       const init: RequestInit & {duplex?: "half"} = {method, headers}
       if (method !== "GET" && method !== "HEAD") {
-        init.body = Readable.toWeb(incoming) as ReadableStream<Uint8Array>
+        init.body = Readable.toWeb(incoming) as unknown as ReadableStream<Uint8Array>
         init.duplex = "half"
       }
       const response = await handler.handle(new Request(`http://localhost${incoming.url ?? "/"}`, init))
@@ -45,7 +54,10 @@ export async function startServer(options: ServerInput): Promise<ServerOutput> {
   })
   await new Promise<void>((done, reject) => {
     server.once("error", reject)
-    server.listen(port, hostname, () => {server.off("error", reject); done()})
+    server.listen(port, hostname, () => {
+      server.off("error", reject)
+      done()
+    })
   })
   const address = server.address() as AddressInfo
   const host = address.family === "IPv6" ? `[${address.address}]` : address.address
@@ -54,10 +66,13 @@ export async function startServer(options: ServerInput): Promise<ServerOutput> {
 
 if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    const roots = JSON.parse(process.env["AI_TOOLS_ROOTS"] ?? "null") as Record<string, string>
-    const host = await startServer({roots, token: process.env["AI_TOOLS_TOKEN"] ?? "",
+    const directory = process.env["AI_TOOLS_DIRECTORY"] ?? ""
+    const host = await startServer({directory, token: process.env["AI_TOOLS_TOKEN"] ?? "",
       hostname: process.env["AI_TOOLS_HOST"], port: process.env["AI_TOOLS_PORT"] === undefined ? undefined : Number(process.env["AI_TOOLS_PORT"])})
     process.stderr.write(`AI tools listening at ${host.url}\n`)
+    /**
+    Завершает принадлежащий CLI listener по сигналу процесса, отмечая ошибку закрытия кодом выхода.
+    */
     const stop = (): void => { void host.close().catch(() => {process.exitCode = 1}) }
     process.once("SIGINT", stop)
     process.once("SIGTERM", stop)

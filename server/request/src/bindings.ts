@@ -1,22 +1,18 @@
-import {listRoots} from "../../../filesystem/roots/index.ts"
-import {openWorkspace} from "../../../filesystem/open/index.ts"
-import {statPath} from "../../../filesystem/stat/index.ts"
-import {readFile} from "../../../filesystem/read/index.ts"
-import {readFiles} from "../../../filesystem/read-many/index.ts"
-import {listFiles} from "../../../filesystem/list/index.ts"
-import {writeFile} from "../../../filesystem/write/index.ts"
-import {createFile} from "../../../filesystem/create/index.ts"
-import {makeDirectory} from "../../../filesystem/mkdir/index.ts"
-import {removePath} from "../../../filesystem/remove/index.ts"
-import {renamePath} from "../../../filesystem/rename/index.ts"
-import {applyPatch} from "../../../filesystem/apply-patch/index.ts"
-import {gitStatus} from "../../../git/status/index.ts"
-import type {FilesystemOutput} from "../../../filesystem/contract/output.ts"
+import statPath from "@filesystem/stat"
+import readFile from "@filesystem/read"
+import readFiles from "@filesystem/read-many"
+import listFiles from "@filesystem/list"
+import writeFile from "@filesystem/write"
+import createFile from "@filesystem/create"
+import makeDirectory from "@filesystem/mkdir"
+import removePath from "@filesystem/remove"
+import renamePath from "@filesystem/rename"
+import applyPatch from "@filesystem/apply-patch"
+import gitStatus from "@git/status"
+import type {AiWorkspace} from "@ai/workspace"
 
-export function bindings(context: FilesystemOutput): ReadonlyMap<string, (input: unknown) => unknown> {
+export function bindings(context: AiWorkspace.Output): ReadonlyMap<string, (input: unknown) => unknown> {
   return new Map<string, (input: unknown) => unknown>([
-    ["ai/filesystem/roots", value => listRoots(value as Parameters<typeof listRoots>[0], context)],
-    ["ai/filesystem/open", value => openWorkspace(value as Parameters<typeof openWorkspace>[0], context)],
     ["ai/filesystem/stat", value => statPath(value as Parameters<typeof statPath>[0], context)],
     ["ai/filesystem/read", value => readFile(value as Parameters<typeof readFile>[0], context)],
     ["ai/filesystem/read-many", value => readFiles(value as Parameters<typeof readFiles>[0], context)],

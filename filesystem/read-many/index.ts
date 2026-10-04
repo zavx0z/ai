@@ -1,22 +1,37 @@
 /**
- * Читает до 50 файлов с общим бюджетом байтов.
- * @remarks Ошибки отдельных файлов не скрываются. Исчерпание бюджета явно отмечается.
- * @packageDocumentation
- */
-import {object, integer, encoding, text} from "../../shared/validation.ts"
-import {ToolError, asToolError} from "../../shared/errors.ts"
-import {workspace} from "../shared/paths.ts"
-import {MAX_BYTES} from "../shared/files.ts"
-import {readFile} from "../read/index.ts"
-import type {FilesystemOutput} from "../contract/output.ts"
-import type {ReadFilesInput} from "./contract/input.ts"
-import type {ReadFilesOutput} from "./contract/output.ts"
-export type {ReadFilesInput} from "./contract/input.ts"
-export type {ReadFilesOutput} from "./contract/output.ts"
+Читает до 50 файлов с общим бюджетом байтов.
 
-export function readFiles(input: ReadFilesInput, context: FilesystemOutput): ReadFilesOutput {
-  object(input, ["root", "paths", "encoding", "maxBytesPerFile", "maxTotalBytes"])
-  workspace(context, input.root)
+@remarks Ошибки отдельных файлов возвращаются в записи соответствующих путей. Исчерпание бюджета явно отмечается.
+
+@packageDocumentation
+*/
+import validation from "@tech/input"
+const {object, integer, encoding, text} = validation
+import ToolError from "@tech/failure"
+import access from "@filesystem/access"
+const {MAX_BYTES} = access
+import readFile from "@filesystem/read"
+import type {AiWorkspace} from "@ai/workspace"
+
+import type {FilesystemReadMany} from "./contract/index.ts"
+export type {FilesystemReadMany} from "./contract/index.ts"
+
+/**
+Читает список путей по порядку, расходуя общий бюджет на фактически прочитанные байты.
+
+Вход содержит от `1` до `50` путей. `maxBytesPerFile` по умолчанию равен `65536`, общий предел `maxTotalBytes` — `2097152`; каждый предел лежит в `[1..8388608]`. Ошибки конкретных файлов возвращаются внутри соответствующей записи и отмечают результат как усечённый.
+
+@param input - Пути и общие параметры кодировки и бюджетов; неизвестные поля отклоняются.
+
+@param context - Контекст назначенной хостом рабочей области, передаваемый каждому чтению.
+
+@returns Результат или ошибка для каждого пути, число прочитанных байтов и остаток общего бюджета.
+
+@throws Ошибка `INVALID_INPUT` для неверного списка, элемента или параметров, `ROOT_NOT_ALLOWED` если назначенный корень сменил идентичность; ошибки отдельных чтений находятся в `files`, а не прерывают весь вызов.
+*/
+export default function readFiles(input: FilesystemReadMany.Input, context: AiWorkspace.Output): FilesystemReadMany.Output {
+  object(input, ["paths", "encoding", "maxBytesPerFile", "maxTotalBytes"])
+  context.directory()
   if (!Array.isArray(input.paths) || input.paths.length === 0 || input.paths.length > 50) throw new ToolError("INVALID_INPUT", "paths must contain 1 to 50 strings")
   input.paths.forEach(path => text(path, "path"))
   const format = encoding(input.encoding)
@@ -27,15 +42,15 @@ export function readFiles(input: ReadFilesInput, context: FilesystemOutput): Rea
   const files = input.paths.map(path => {
     try {
       if (remaining === 0) throw new ToolError("LIMIT_EXCEEDED", "The shared read budget is exhausted", 413)
-      const result = readFile({root: input.root, path, encoding: format, maxBytes: Math.min(perFile, remaining)}, context)
+      const result = readFile({path, encoding: format, maxBytes: Math.min(perFile, remaining)}, context)
       remaining -= result.bytesRead
       truncated ||= result.truncated
       return {path, result}
     } catch (error) {
-      const failure = asToolError(error)
+      const failure = ToolError.from(error)
       truncated = true
       return {path, error: {code: failure.code, message: failure.message}}
     }
   })
-  return {root: input.root, files, bytesRead: total - remaining, remainingBytes: remaining, truncated}
+  return {files, bytesRead: total - remaining, remainingBytes: remaining, truncated}
 }

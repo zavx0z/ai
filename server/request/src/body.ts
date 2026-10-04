@@ -1,4 +1,4 @@
-import {ToolError} from "../../../shared/errors.ts"
+import ToolError from "@tech/failure"
 
 const MAX_REQUEST_BYTES = 12 * 1024 * 1024
 

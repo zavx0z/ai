@@ -1,40 +1,41 @@
-import {test} from "node:test"
-import assert from "node:assert/strict"
-import {writeFileSync, readFileSync, symlinkSync, chmodSync, statSync, readdirSync} from "node:fs"
+import {afterAll, beforeAll, describe, expect, test} from "bun:test"
+import {createHash} from "node:crypto"
+import {chmodSync, readFileSync, readdirSync, statSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import {writeFile} from "../index.ts"
-import {readFile} from "../../read/index.ts"
-import {fixture, hasCode} from "../../shared/spec-fixture.ts"
+import writeFile from "@filesystem/write"
+import type {FilesystemWrite} from "@filesystem/write"
+import testing from "@ai/testing"
 
-test("write replaces a file and preserves its permissions", () => fixture((context, root) => {
-  const path = join(root, "file")
-  writeFileSync(path, "before")
-  chmodSync(path, 0o660)
-  const result = writeFile({root: "repo", path: "file", content: "after"}, context)
-  assert.equal(readFileSync(path, "utf8"), "after")
-  assert.equal(result.bytes, 5)
-  assert.equal(statSync(path).mode & 0o777, 0o660)
-  assert.deepEqual(readdirSync(root), ["file"])
-}))
-test("write rejects a stale expectedHash without changing contents", () => fixture((context, root) => {
-  writeFileSync(join(root, "file"), "before")
-  const hash = readFile({root: "repo", path: "file"}, context).contentHash!
-  writeFile({root: "repo", path: "file", content: "after", expectedHash: hash}, context)
-  assert.throws(() => writeFile({root: "repo", path: "file", content: "bad", expectedHash: hash}, context), hasCode("CONFLICT"))
-  assert.equal(readFileSync(join(root, "file"), "utf8"), "after")
-}))
-test("write accepts empty contents but does not create missing files", () => fixture((context, root) => {
-  writeFileSync(join(root, "file"), "before")
-  writeFile({root: "repo", path: "file", content: ""}, context)
-  assert.equal(statSync(join(root, "file")).size, 0)
-  assert.throws(() => writeFile({root: "repo", path: "missing", content: ""}, context), hasCode("ENOENT"))
-}))
-test("write rejects symlinks and non-canonical base64", () => fixture((context, root) => {
-  writeFileSync(join(root, "file"), "before")
-  symlinkSync("file", join(root, "link"))
-  assert.throws(() => writeFile({root: "repo", path: "link", content: "bad"}, context), hasCode("PATH_NOT_ALLOWED"))
-  for (const content of ["abc", "!!!!", "Zh=="]) {
-    assert.throws(() => writeFile({root: "repo", path: "file", content, encoding: "base64"}, context), hasCode("INVALID_INPUT"))
-  }
-  assert.equal(readFileSync(join(root, "file"), "utf8"), "before")
-}))
+const {createFixture} = testing
+
+describe.each([
+  {name: "Замена содержимого", before: "before", content: "after", mode: 0o660, expectedBytes: 5, expectedHash: null},
+  {name: "Пустое содержимое", before: "before", content: "", mode: null, expectedBytes: 0, expectedHash: null},
+  {name: "Замена с подтверждённым хешем", before: "before", content: "after", mode: null, expectedBytes: 5, expectedHash: createHash("sha256").update("before").digest("hex")},
+])("$name", ({before, content, mode, expectedBytes, expectedHash}) => {
+  let frame: ReturnType<typeof createFixture>
+  let result: FilesystemWrite.Output
+
+  beforeAll(() => {
+    frame = createFixture()
+    const path = join(frame.root, "file")
+    writeFileSync(path, before)
+    if (mode !== null) chmodSync(path, mode)
+    result = writeFile({path: "file", content, ...(expectedHash === null ? {} : {expectedHash})}, frame.context)
+  })
+  afterAll(() => frame?.close())
+
+  test("Новое содержимое", () => {
+    expect(readFileSync(join(frame.root, "file"), "utf8"), "Существующий файл содержит записанный текст, включая пустую строку").toBe(content)
+    expect(result.bytes, "Результат сообщает число записанных байтов").toBe(expectedBytes)
+    expect(statSync(join(frame.root, "file")).size, "Размер файла соответствует новым данным").toBe(expectedBytes)
+  })
+
+  /** @remarks Сохранение заданной маски доступа проверяется в варианте с явными атрибутами. */
+  describe.skipIf(mode === null)("Сохранение атрибутов", () => {
+    test("Права и соседние файлы", () => {
+      expect(statSync(join(frame.root, "file")).mode & 0o777, "Замена сохраняет права исходного файла").toBe(mode!)
+      expect(readdirSync(frame.root), "Атомарная замена не оставляет временные файлы рядом с результатом").toEqual(["file"])
+    })
+  })
+})

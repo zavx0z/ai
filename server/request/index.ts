@@ -1,25 +1,34 @@
 /**
- * HTTP-вход Wazy MCP: GET /tools и POST /tools с {node, action, input}.
- * @remarks Без версии URL и без собственного MCP runtime. Описание инструмента
- * не выполняет его. Все операции, включая чтение каталога, требуют Bearer token.
- * @packageDocumentation
+ HTTP-вход Wazy MCP: GET /tools и POST /tools с {node, action, input}.
+ @remarks Без версии URL и без собственного MCP runtime. Описание инструмента
+ не выполняет его. Все операции, включая чтение каталога, требуют Bearer token.
+ @packageDocumentation
  */
 import {randomUUID, timingSafeEqual} from "node:crypto"
-import {ToolError, asToolError} from "../../shared/errors.ts"
-import {object, text} from "../../shared/validation.ts"
-import {createDiscovery} from "../discovery/index.ts"
+import ToolError from "@tech/failure"
+import validation from "@tech/input"
+const {object, text} = validation
+import createDiscovery from "@server/discovery"
 import {bindings} from "./src/bindings.ts"
 import {readBody} from "./src/body.ts"
-import type {RequestInput} from "./contract/input.ts"
-import type {RequestOutput} from "./contract/output.ts"
-export type {RequestInput} from "./contract/input.ts"
-export type {RequestOutput} from "./contract/output.ts"
 
-export function createRequestHandler(options: RequestInput): RequestOutput {
+import type {ServerRequest} from "./contract/index.ts"
+export type {ServerRequest} from "./contract/index.ts"
+
+/**
+Связывает проверенный токен и назначенную область с явным набором HTTP-действий.
+
+@param options - Контекст исполнения, trusted каталог исходников и безопасный logger хоста.
+
+@returns Обработчик запросов с нормализацией ошибок; создание не запускает listener.
+
+@throws ToolError при длине токена вне 32–256 символов либо ошибке структуры каталога.
+*/
+export default function createRequestHandler(options: ServerRequest.Input): ServerRequest.Output {
   const token = text(options.token, "token")
   if (token.length < 32 || token.length > 256) throw new ToolError("INVALID_INPUT", "Token must contain 32 to 256 characters")
   const expected = Buffer.from(`Bearer ${token}`)
-  const handlers = bindings(options.filesystem)
+  const handlers = bindings(options.workspace)
   const discovery = createDiscovery({repositoryRoot: options.repositoryRoot, runnable: new Set(handlers.keys())})
   return {handle: async request => {
     const requestId = randomUUID()
@@ -55,7 +64,7 @@ export function createRequestHandler(options: RequestInput): RequestOutput {
         data = await handler(body.input ?? {})
       }
     } catch (error) {
-      const failure = asToolError(error)
+      const failure = ToolError.from(error)
       status = failure.status
       errorCode = failure.code
       data = {error: {code: failure.code, message: failure.message, ...(failure.details === undefined ? {} : {details: failure.details})}, requestId}

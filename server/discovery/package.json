@@ -1,0 +1,15 @@
+{
+  "name": "@server/discovery",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "description": "\u0420\u0430\u0441\u043a\u0440\u044b\u0432\u0430\u0435\u0442 package.json workspaces/exports \u0438 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u044b\u0435 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u044b \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u043e\u0433\u043e \u0443\u0437\u043b\u0430.",
+  "dependencies": {
+    "@tech/failure": "workspace:*"
+  },
+  "devDependencies": {
+    "@ai/testing": "workspace:*"
+  }
+}

@@ -1,29 +1,35 @@
 # AI Tools
 
-Проект владеет структурными инструментами и HTTP-входом Wazy MCP.
-Перед изменениями читать README.md, MIGRATION.md и контракт конкретного инструмента.
-Не считать первый файловый этап завершённым переносом debugger/runtime.
+Репозиторий владеет инструментами и существующим HTTP-входом.
+Начинать с README.md, DEVELOPMENT.md, MIGRATION.md и контракта изменяемой возможности.
+Чат, цикл модели, браузерные адаптеры, ACP и самостоятельный MCP runtime сюда не добавлять.
 
-Нормы организации берутся из Storybook Archetypes, в частности
-`archetypes/notes/draft-structure.md`, `archetypes/entity/notes/draft-placement.md`
-и `archetypes/specs/contracts/notes/draft-contracts.md`. Storybook остаётся внешним
-инструментом и не становится runtime-зависимостью этого репозитория.
+Нормативный checkout Storybook — `/Users/zavx0z/repozitarium/zavx0z/storybook`:
 
-Сохранять реализацию сущности в index.ts, её форму Input/Output в contract/,
-проверяемый публичный сценарий в spec/. Не добавлять barrel-фасады, вторые
-каталоги контрактов или автоматический import пользовательского адреса.
-Изменение поведения сопровождается изменением контракта и сценария в том же срезе.
+- [Основания](../zavx0z/storybook/project/notes/foundations/index.md).
+- [Предметная архитектура](../zavx0z/storybook/repo/notes/architecture.md).
+- [Структурный контракт](../zavx0z/storybook/package/notes/draft-structure.md).
+- [Размещение компонентов](../zavx0z/storybook/component/notes/draft-placement.md).
+- [Контракты](../zavx0z/storybook/contracts/notes/draft-contracts.md).
+- [Экспорты](../zavx0z/storybook/package/notes/draft-exports.md).
+- [Документация](../zavx0z/storybook/package/notes/draft-documentation.md).
+- [Полное руководство сценариев](../zavx0z/storybook/specs/scenarios/spec/scenario.spec.ts).
 
-Браузер, CDP, browser-agent, UI и самостоятельный MCP runtime сюда не возвращаются.
-Не добавлять /v1 или schemaVersion. Не заменять source-edit/remap/replay простым
-filesystem.write и не переписывать debugger lifecycle во время переноса файлов.
+Storybook остаётся внешним средством проверки без runtime-зависимости.
+Для работающего Storybook использовать его MCP по
+[навыку](../zavx0z/storybook/.agents/skills/storybook/SKILL.md).
+Не копировать сюда его классификаторы и нормативные проверки.
 
-До публикации: bun run check, bun test и npm run test:node.
-Явно сообщать, какие среды и проверки фактически были доступны. Тесты работают
-только с принадлежащими им временными данными, не с пользовательскими корнями.
-Проверять обход корня, symlink, конфликты, byte budgets, повтор вызова и ошибки
-до/после побочного эффекта. Права корней не заменяют OS sandbox.
+Область назначается хостом через `@ai/workspace`; модель не выбирает root.
+Проверять traversal, symlink, запрет изменения корня, конфликты, byte budgets,
+повтор вызова, ошибки до/после эффекта и независимость контекстов.
+Тесты используют только свои временные директории. Назначение области не является OS sandbox.
 
-Историю main не переписывать. Удаление старого дерева должно быть обычным
-коммитом с текущим main в качестве родителя, без force push. Не менять другой
-репозиторий, слушатель, dirty worktree или пользовательский процесс неявно.
+До завершения исполняемой правки: `bun run check`, `bun test`, `npm run test:node`.
+Не выдавать чтение исходника, исторический результат и живую проверку за одно свидетельство.
+Не менять серверный транспорт без отдельного поручения.
+
+Сохранять main, историю и чужие изменения. Не создавать ветки, клоны или worktree
+без прямого поручения. Push требует прямого поручения Владимира.
+Не читать и не изменять архивный `/Users/zavx0z/production`.
+Временные материалы текущей задачи размещать в `tmp/` или `.local/`, исключённых из Git.

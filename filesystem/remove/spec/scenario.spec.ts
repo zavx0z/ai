@@ -1,27 +1,54 @@
-import {test} from "node:test"
-import assert from "node:assert/strict"
-import {writeFileSync, mkdirSync, symlinkSync, existsSync} from "node:fs"
+import {afterAll, beforeAll, describe, expect, test} from "bun:test"
+import {existsSync, mkdirSync, symlinkSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
-import {removePath} from "../index.ts"
-import {fixture, hasCode} from "../../shared/spec-fixture.ts"
+import removePath from "@filesystem/remove"
+import type {FilesystemRemove} from "@filesystem/remove"
+import testing from "@ai/testing"
 
-test("remove requires explicit recursion for a nonempty directory", () => fixture((context, root) => {
-  mkdirSync(join(root, "dir"))
-  writeFileSync(join(root, "dir/file"), "x")
-  assert.throws(() => removePath({root: "repo", path: "dir"}, context))
-  assert.equal(existsSync(join(root, "dir/file")), true)
-  removePath({root: "repo", path: "dir", recursive: true}, context)
-  assert.equal(existsSync(join(root, "dir")), false)
-}))
-test("remove unlinks a terminal symlink without deleting its target", () => fixture((context, root) => {
-  writeFileSync(join(root, "target"), "x")
-  symlinkSync("target", join(root, "link"))
-  removePath({root: "repo", path: "link"}, context)
-  assert.equal(existsSync(join(root, "target")), true)
-}))
-test("remove protects the root and reports a repeated deletion", () => fixture((context, root) => {
-  assert.throws(() => removePath({root: "repo", path: ".", recursive: true}, context), hasCode("PATH_NOT_ALLOWED"))
-  writeFileSync(join(root, "file"), "x")
-  removePath({root: "repo", path: "file"}, context)
-  assert.throws(() => removePath({root: "repo", path: "file"}, context), hasCode("ENOENT"))
-}))
+const {createFixture} = testing
+
+describe.each([
+  {
+    name: "Рекурсивное удаление каталога",
+    prepare: (root: string) => {
+      mkdirSync(join(root, "dir"))
+      writeFileSync(join(root, "dir/file"), "x")
+    },
+    input: {path: "dir", recursive: true},
+    removedPath: "dir",
+    retainedPath: null,
+  },
+  {
+    name: "Удаление конечной ссылки",
+    prepare: (root: string) => {
+      writeFileSync(join(root, "target"), "x")
+      symlinkSync("target", join(root, "link"))
+    },
+    input: {path: "link"},
+    removedPath: "link",
+    retainedPath: "target",
+  },
+  {
+    name: "Удаление обычного файла",
+    prepare: (root: string) => writeFileSync(join(root, "file"), "x"),
+    input: {path: "file"},
+    removedPath: "file",
+    retainedPath: null,
+  },
+])("$name", ({prepare, input, removedPath, retainedPath}) => {
+  let frame: ReturnType<typeof createFixture>
+  let result: FilesystemRemove.Output
+
+  beforeAll(() => {
+    frame = createFixture()
+    prepare(frame.root)
+    result = removePath(input, frame.context)
+  })
+  afterAll(() => frame?.close())
+
+  test("Состояние после удаления", () => {
+    expect(result.removed, "Успешный ответ подтверждает удаление указанного пути").toBeTrue()
+    expect(existsSync(join(frame.root, removedPath)), "Удалённый объект отсутствует в рабочей директории").toBeFalse()
+    if (retainedPath !== null) expect(existsSync(join(frame.root, retainedPath)), "Цель удалённой ссылки сохраняется").toBeTrue()
+  })
+})

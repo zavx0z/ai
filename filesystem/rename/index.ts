@@ -1,24 +1,38 @@
 /**
- * Перемещает путь внутри одного корня, не перезаписывая существующую цель.
- * @remarks Повтор не идемпотентен. Проверка цели не является межпроцессной блокировкой; каталоги должны быть доверенными.
- * @packageDocumentation
- */
+Перемещает путь внутри одного корня, не перезаписывая существующую цель.
+
+@remarks Повтор не идемпотентен. Проверка цели не является межпроцессной блокировкой; каталоги должны оставаться доверенными.
+
+@packageDocumentation
+*/
 import {lstatSync, renameSync} from "node:fs"
 import {relative, sep} from "node:path"
-import {object} from "../../shared/validation.ts"
-import {ToolError} from "../../shared/errors.ts"
-import {workspace, pathInRoot, relativeTo} from "../shared/paths.ts"
-import type {FilesystemOutput} from "../contract/output.ts"
-import type {RenamePathInput} from "./contract/input.ts"
-import type {RenamePathOutput} from "./contract/output.ts"
-export type {RenamePathInput} from "./contract/input.ts"
-export type {RenamePathOutput} from "./contract/output.ts"
+import validation from "@tech/input"
+const {object} = validation
+import ToolError from "@tech/failure"
+import type {AiWorkspace} from "@ai/workspace"
 
-export function renamePath(input: RenamePathInput, context: FilesystemOutput): RenamePathOutput {
-  object(input, ["root", "from", "to"])
-  const root = workspace(context, input.root)
-  const from = pathInRoot(root, input.from)
-  const to = pathInRoot(root, input.to, {missing: true})
+import type {FilesystemRename} from "./contract/index.ts"
+export type {FilesystemRename} from "./contract/index.ts"
+
+/**
+Перемещает запись по двум относительным путям внутри одной назначенной области.
+
+Цель проверяется перед переименованием и при наличии вызывает `CONFLICT`. Каталог нельзя переместить внутрь самого себя. Проверка и системный вызов не образуют блокировку от параллельного локального процесса; каталоги должны оставаться доверенными.
+
+@param input - Исходный путь `from` и назначение `to`; неизвестные поля отклоняются.
+
+@param context - Контекст назначенной хостом рабочей области.
+
+@returns Относительные исходный и целевой пути после успешного перемещения.
+
+@throws Ошибка `INVALID_INPUT` для неверной формы или попытки переместить каталог внутрь себя, `ROOT_NOT_ALLOWED` при смене идентичности корня, `CONFLICT` для существующего назначения, а также ошибки разрешения пути и файловой системы.
+*/
+export default function renamePath(input: FilesystemRename.Input, context: AiWorkspace.Output): FilesystemRename.Output {
+  object(input, ["from", "to"])
+  context.directory()
+  const from = context.resolve(input.from)
+  const to = context.resolve(input.to, {missing: true})
   try {
     lstatSync(to)
     throw new ToolError("CONFLICT", "Destination already exists", 409)
@@ -28,5 +42,5 @@ export function renamePath(input: RenamePathInput, context: FilesystemOutput): R
     throw new ToolError("INVALID_INPUT", "A directory cannot be moved into itself")
   }
   renameSync(from, to)
-  return {root: input.root, from: relativeTo(root, from), to: relativeTo(root, to), renamed: true}
+  return {from: context.relative(from), to: context.relative(to), renamed: true}
 }

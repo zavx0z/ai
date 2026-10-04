@@ -1,0 +1,30 @@
+{
+  "name": "@server/request",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "description": "HTTP-\u0432\u0445\u043e\u0434 Wazy MCP: GET /tools \u0438 POST /tools \u0441 {node, action, input}.",
+  "dependencies": {
+    "@ai/workspace": "workspace:*",
+    "@filesystem/apply-patch": "workspace:*",
+    "@filesystem/create": "workspace:*",
+    "@filesystem/list": "workspace:*",
+    "@filesystem/mkdir": "workspace:*",
+    "@filesystem/read": "workspace:*",
+    "@filesystem/read-many": "workspace:*",
+    "@filesystem/remove": "workspace:*",
+    "@filesystem/rename": "workspace:*",
+    "@filesystem/stat": "workspace:*",
+    "@filesystem/write": "workspace:*",
+    "@git/status": "workspace:*",
+    "@server/discovery": "workspace:*",
+    "@tech/failure": "workspace:*",
+    "@tech/input": "workspace:*"
+  },
+  "devDependencies": {
+    "@ai/server": "workspace:*",
+    "@ai/testing": "workspace:*"
+  }
+}

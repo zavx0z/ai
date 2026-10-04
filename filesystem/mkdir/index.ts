@@ -1,24 +1,38 @@
 /**
- * Создаёт каталог внутри разрешённого корня.
- * @remarks С recursive:true повтор для существующего каталога успешен; created:false. Корень изменять нельзя.
- * @packageDocumentation
- */
-import {mkdirSync, lstatSync} from "node:fs"
-import {object, boolean} from "../../shared/validation.ts"
-import {workspace, pathInRoot, relativeTo} from "../shared/paths.ts"
-import type {FilesystemOutput} from "../contract/output.ts"
-import type {MakeDirectoryInput} from "./contract/input.ts"
-import type {MakeDirectoryOutput} from "./contract/output.ts"
-export type {MakeDirectoryInput} from "./contract/input.ts"
-export type {MakeDirectoryOutput} from "./contract/output.ts"
+Создаёт каталог внутри назначенной рабочей области.
 
-export function makeDirectory(input: MakeDirectoryInput, context: FilesystemOutput): MakeDirectoryOutput {
-  object(input, ["root", "path", "recursive"])
+@remarks При `recursive: true` повтор для существующего каталога успешен и возвращает `created: false`. Сам корень изменять нельзя.
+
+@packageDocumentation
+*/
+import {mkdirSync, lstatSync} from "node:fs"
+import validation from "@tech/input"
+const {object, boolean} = validation
+import type {AiWorkspace} from "@ai/workspace"
+
+import type {FilesystemMkdir} from "./contract/index.ts"
+export type {FilesystemMkdir} from "./contract/index.ts"
+
+/**
+Создаёт каталог по относительному пути внутри назначенной области.
+
+Без `recursive` отсутствующие промежуточные каталоги не создаются; при `recursive: true` они создаются вместе с целевым. Флаг `created` отражает, существовал ли целевой каталог до вызова.
+
+@param input - Путь и необязательный режим рекурсивного создания; неизвестные поля отклоняются.
+
+@param context - Контекст назначенной хостом рабочей области.
+
+@returns Относительный путь и признак того, что целевой каталог был создан этим вызовом.
+
+@throws Ошибка `INVALID_INPUT` при неверной форме, `ROOT_NOT_ALLOWED` при смене идентичности корня, ошибка разрешения пути для запрещённого или неподходящего адреса, а также ошибки файловой системы.
+*/
+export default function makeDirectory(input: FilesystemMkdir.Input, context: AiWorkspace.Output): FilesystemMkdir.Output {
+  object(input, ["path", "recursive"])
   const recursive = boolean(input.recursive, false, "recursive")
-  const root = workspace(context, input.root)
-  const path = pathInRoot(root, input.path, {missing: true})
+  context.directory()
+  const path = context.resolve(input.path, {missing: true})
   let existed = false
   try { existed = lstatSync(path).isDirectory() } catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error }
   mkdirSync(path, {recursive})
-  return {root: input.root, path: relativeTo(root, path), created: !existed}
+  return {path: context.relative(path), created: !existed}
 }

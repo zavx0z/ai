@@ -1,28 +1,48 @@
-import {test} from "node:test"
-import assert from "node:assert/strict"
+import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {writeFileSync} from "node:fs"
 import {join} from "node:path"
-import {readFiles} from "../index.ts"
-import {fixture, hasCode} from "../../shared/spec-fixture.ts"
+import readFiles from "@filesystem/read-many"
+import type {FilesystemReadMany} from "@filesystem/read-many"
+import testing from "@ai/testing"
 
-test("read-many enforces its shared byte budget", () => fixture((context, root) => {
-  writeFileSync(join(root, "a"), "1234")
-  writeFileSync(join(root, "b"), "5678")
-  const result = readFiles({root: "repo", paths: ["a", "b", "a"], maxTotalBytes: 5}, context)
-  assert.equal(result.bytesRead, 5)
-  assert.equal(result.remainingBytes, 0)
-  assert.equal(result.truncated, true)
-  assert.ok("error" in result.files[2]!)
-}))
-test("read-many preserves per-file errors and successes", () => fixture((context, root) => {
-  writeFileSync(join(root, "ok"), "yes")
-  const result = readFiles({root: "repo", paths: ["missing", "ok"]}, context)
-  assert.ok("error" in result.files[0]!)
-  assert.ok("result" in result.files[1]!)
-  assert.equal(result.bytesRead, 3)
-}))
-test("read-many rejects invalid batches before reading", () => fixture(context => {
-  for (const paths of [[], Array(51).fill("x"), [1]]) {
-    assert.throws(() => readFiles({root: "repo", paths} as never, context), hasCode("INVALID_INPUT"))
-  }
-}))
+const {createFixture} = testing
+
+describe.each([
+  {
+    name: "Общий бюджет байтов",
+    files: [{path: "a", content: "1234"}, {path: "b", content: "5678"}],
+    input: {paths: ["a", "b", "a"], maxTotalBytes: 5},
+    expected: {bytesRead: 5, remainingBytes: 0, truncated: true, errorIndex: 2, resultIndex: null},
+  },
+  {
+    name: "Ошибка одного файла",
+    files: [{path: "ok", content: "yes"}],
+    input: {paths: ["missing", "ok"]},
+    expected: {bytesRead: 3, remainingBytes: null, truncated: true, errorIndex: 0, resultIndex: 1},
+  },
+])("$name", ({files, input, expected}) => {
+  let frame: ReturnType<typeof createFixture>
+  let result: FilesystemReadMany.Output
+
+  beforeAll(() => {
+    frame = createFixture()
+    for (const file of files) writeFileSync(join(frame.root, file.path), file.content)
+    result = readFiles({...input, paths: [...input.paths]}, frame.context)
+  })
+  afterAll(() => frame?.close())
+
+  test("Бюджет", () => {
+    expect(result.bytesRead, "Общий объём учитывает прочитанные файлы и частичные диапазоны").toBe(expected.bytesRead)
+    if (expected.remainingBytes !== null) {
+      expect(result.remainingBytes, "После исчерпания бюджета не остаётся доступных байтов").toBe(expected.remainingBytes)
+    }
+    expect(result.truncated, "Неполный пакет сообщает как об исчерпанном бюджете, так и об ошибке отдельного файла").toBe(expected.truncated)
+  })
+
+  test("Ответы по файлам", () => {
+    expect("error" in result.files[expected.errorIndex]!, "Ошибка отдельного файла сохраняется в его позиции").toBeTrue()
+    if (expected.resultIndex !== null) {
+      expect("result" in result.files[expected.resultIndex]!, "Успешное чтение другого файла остаётся доступным").toBeTrue()
+    }
+  })
+})

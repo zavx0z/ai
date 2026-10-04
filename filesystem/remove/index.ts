@@ -1,26 +1,40 @@
 /**
- * Удаляет файл, конечный symlink или каталог; рекурсия только явно.
- * @remarks Удаление разрушительно. Повтор после успеха возвращает NOT_FOUND. Корень и .git запрещены.
- * @packageDocumentation
- */
-import {lstatSync, unlinkSync, rmSync, rmdirSync} from "node:fs"
-import {object, boolean} from "../../shared/validation.ts"
-import {workspace, pathInRoot, relativeTo} from "../shared/paths.ts"
-import type {FilesystemOutput} from "../contract/output.ts"
-import type {RemovePathInput} from "./contract/input.ts"
-import type {RemovePathOutput} from "./contract/output.ts"
-export type {RemovePathInput} from "./contract/input.ts"
-export type {RemovePathOutput} from "./contract/output.ts"
+Удаляет файл, конечную символическую ссылку или каталог; рекурсия только явно.
 
-export function removePath(input: RemovePathInput, context: FilesystemOutput): RemovePathOutput {
-  object(input, ["root", "path", "recursive"])
+@remarks Удаление необратимо. Повтор после успеха завершается ошибкой отсутствующего пути. Корень и `.git` запрещены.
+
+@packageDocumentation
+*/
+import {lstatSync, unlinkSync, rmSync, rmdirSync} from "node:fs"
+import validation from "@tech/input"
+const {object, boolean} = validation
+import type {AiWorkspace} from "@ai/workspace"
+
+import type {FilesystemRemove} from "./contract/index.ts"
+export type {FilesystemRemove} from "./contract/index.ts"
+
+/**
+Удаляет файл, саму конечную символическую ссылку либо каталог внутри рабочей области.
+
+Корень области недоступен для удаления. Каталог удаляется только пустым, если `recursive` не включён; рекурсивное удаление не является обратимым. Перехода по конечной ссылке нет.
+
+@param input - Относительный путь и необязательный флаг рекурсии; неизвестные поля отклоняются.
+
+@param context - Контекст назначенной хостом рабочей области.
+
+@returns Относительный путь удалённой записи и `removed: true`.
+
+@throws Ошибка `INVALID_INPUT` при неверной форме, `ROOT_NOT_ALLOWED` при смене идентичности корня и `PATH_NOT_ALLOWED` для запрещённого адреса; отсутствие пути и непустой каталог дают системные ошибки файловой системы.
+*/
+export default function removePath(input: FilesystemRemove.Input, context: AiWorkspace.Output): FilesystemRemove.Output {
+  object(input, ["path", "recursive"])
   const recursive = boolean(input.recursive, false, "recursive")
-  const root = workspace(context, input.root)
-  const path = pathInRoot(root, input.path, {finalSymlink: true})
+  context.directory()
+  const path = context.resolve(input.path, {finalSymlink: true})
   const stat = lstatSync(path)
   if (stat.isDirectory()) {
     if (recursive) rmSync(path, {recursive: true, force: false})
     else rmdirSync(path)
   } else unlinkSync(path)
-  return {root: input.root, path: relativeTo(root, path), removed: true}
+  return {path: context.relative(path), removed: true}
 }

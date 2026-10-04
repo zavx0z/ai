@@ -1,6 +1,6 @@
 import {lstatSync, openSync, closeSync, readSync, constants, realpathSync} from "node:fs"
 import {dirname, relative, resolve, sep, isAbsolute} from "node:path"
-import {ToolError} from "../../../shared/errors.ts"
+import ToolError from "@tech/failure"
 
 export function source(root: string, name: string, optional = false): string | null {
   const path = resolve(root, name)

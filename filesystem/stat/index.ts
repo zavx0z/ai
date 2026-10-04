@@ -1,20 +1,35 @@
 /**
- * Возвращает метаданные пути, не разыменовывая конечную символическую ссылку.
- * @remarks Чтение идемпотентно при неизменном файле. Цель symlink не возвращается.
- * @packageDocumentation
- */
-import {object} from "../../shared/validation.ts"
-import {workspace, pathInRoot} from "../shared/paths.ts"
-import {metadata} from "../shared/files.ts"
-import type {FilesystemOutput} from "../contract/output.ts"
-import type {StatPathInput} from "./contract/input.ts"
-import type {StatPathOutput} from "./contract/output.ts"
-export type {StatPathInput} from "./contract/input.ts"
-export type {StatPathOutput} from "./contract/output.ts"
+Возвращает метаданные пути, не разыменовывая конечную символическую ссылку.
 
-export function statPath(input: StatPathInput, context: FilesystemOutput): StatPathOutput {
-  object(input, ["root", "path"])
-  const root = workspace(context, input.root)
-  const path = pathInRoot(root, input.path, {allowRoot: true, finalSymlink: true})
-  return {root: input.root, entry: metadata(root, path)}
+@remarks Чтение идемпотентно при неизменной записи. Для конечной ссылки возвращаются метаданные ссылки.
+
+@packageDocumentation
+*/
+import validation from "@tech/input"
+const {object} = validation
+import access from "@filesystem/access"
+const {metadata} = access
+import type {AiWorkspace} from "@ai/workspace"
+
+import type {FilesystemStat} from "./contract/index.ts"
+export type {FilesystemStat} from "./contract/index.ts"
+
+/**
+Возвращает `lstat`-метаданные записи внутри назначенной рабочей области.
+
+Разрешает сам корень и конечную символическую ссылку, но не следует по ссылке; результат описывает саму запись, а не цель ссылки.
+
+@param input - Относительный путь; допускается `.` для самой области. Другие поля отклоняются.
+
+@param context - Контекст назначенной хостом рабочей области.
+
+@returns Путь, тип записи, размер, права доступа и время изменения.
+
+@throws Ошибка `INVALID_INPUT` для неверной формы входа, `ROOT_NOT_ALLOWED` если назначенный корень сменил идентичность, `PATH_NOT_ALLOWED` для запрещённого пути; отсутствие и недоступность пути дают ошибки файловой системы.
+*/
+export default function statPath(input: FilesystemStat.Input, context: AiWorkspace.Output): FilesystemStat.Output {
+  object(input, ["path"])
+  const root = context.directory()
+  const path = context.resolve(input.path, {allowRoot: true, finalSymlink: true})
+  return {entry: metadata(root, path)}
 }
