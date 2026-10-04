@@ -2,7 +2,7 @@ import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {existsSync, readFileSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
 import applyPatch from "@zavx0z/ai-filesystem-apply-patch"
-import type {Zavx0zAiFilesystemApplyPatch} from "@zavx0z/ai-filesystem-apply-patch"
+import type {AiFilesystemApplyPatch} from "@zavx0z/ai-filesystem-apply-patch"
 import testing from "@zavx0z/ai-testing"
 
 const {createFixture} = testing
@@ -40,7 +40,7 @@ describe.each([
   },
 ])("$name", ({files, input, expected}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: Zavx0zAiFilesystemApplyPatch.Output
+  let result: AiFilesystemApplyPatch.Output
 
   beforeAll(() => {
     frame = createFixture()

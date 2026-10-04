@@ -9,8 +9,8 @@ import {isAbsolute} from "node:path"
 import ToolError from "@zavx0z/ai-tech-failure"
 import validation from "@zavx0z/ai-tech-input"
 import {pathInRoot, relativeTo} from "./src/paths.ts"
-import type {Zavx0zAiWorkspace} from "./contract/index.ts"
-export type {Zavx0zAiWorkspace} from "./contract/index.ts"
+import type {AiWorkspace} from "./contract/index.ts"
+export type {AiWorkspace} from "./contract/index.ts"
 
 /**
  Проверяет назначение хоста и создаёт неизменяемый контекст.
@@ -18,7 +18,7 @@ export type {Zavx0zAiWorkspace} from "./contract/index.ts"
  @returns Контекст с проверкой границы перед каждым разрешением пути.
  @throws ToolError при неверной конфигурации; ошибки ОС при недоступной директории.
  */
-export default function createWorkspace(input: Zavx0zAiWorkspace.Input): Zavx0zAiWorkspace.Output {
+export default function createWorkspace(input: AiWorkspace.Input): AiWorkspace.Output {
   validation.object(input, ["directory"])
   const configured = validation.text(input.directory, "directory")
   if (!isAbsolute(configured)) throw new ToolError("INVALID_INPUT", "Workspace directory must be absolute")
@@ -44,5 +44,5 @@ export default function createWorkspace(input: Zavx0zAiWorkspace.Input): Zavx0zA
     directory: check,
     resolve: (path, options) => pathInRoot(check(), path, options),
     relative: path => relativeTo(check(), path),
-  } satisfies Zavx0zAiWorkspace.Output)
+  } satisfies AiWorkspace.Output)
 }

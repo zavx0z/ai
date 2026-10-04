@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace Zavx0zAiFilesystemApplyPatch {
+export declare namespace AiFilesystemApplyPatch {
   /**
   Планирует пакетный patch и применяет его после предварительной проверки операций и содержимого файлов.
 

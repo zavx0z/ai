@@ -9,7 +9,7 @@ import removePath from "@zavx0z/ai-filesystem-remove"
 import renamePath from "@zavx0z/ai-filesystem-rename"
 import applyPatch from "@zavx0z/ai-filesystem-apply-patch"
 import gitStatus from "@zavx0z/ai-git-status"
-import type {Zavx0zAiWorkspace} from "@zavx0z/ai-workspace"
+import type {AiWorkspace} from "@zavx0z/ai-workspace"
 
 /** Явно подключённые инструменты; packageName нужен только генератору описаний. */
 export const tools = [
@@ -33,6 +33,6 @@ export const tools = [
 
 @returns Карта исполняемых имён; имена не интерпретируются как пути или import.
 */
-export function bindings(context: Zavx0zAiWorkspace.Output): ReadonlyMap<string, (input: unknown) => unknown> {
+export function bindings(context: AiWorkspace.Output): ReadonlyMap<string, (input: unknown) => unknown> {
   return new Map(tools.map(tool => [tool.name, (input: unknown) => tool.execute(input as never, context)]))
 }

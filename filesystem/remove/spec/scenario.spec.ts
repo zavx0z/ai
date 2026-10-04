@@ -2,7 +2,7 @@ import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {existsSync, mkdirSync, symlinkSync, writeFileSync} from "node:fs"
 import {join} from "node:path"
 import removePath from "@zavx0z/ai-filesystem-remove"
-import type {Zavx0zAiFilesystemRemove} from "@zavx0z/ai-filesystem-remove"
+import type {AiFilesystemRemove} from "@zavx0z/ai-filesystem-remove"
 import testing from "@zavx0z/ai-testing"
 
 const {createFixture} = testing
@@ -37,7 +37,7 @@ describe.each([
   },
 ])("$name", ({prepare, input, removedPath, retainedPath}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: Zavx0zAiFilesystemRemove.Output
+  let result: AiFilesystemRemove.Output
 
   beforeAll(() => {
     frame = createFixture()

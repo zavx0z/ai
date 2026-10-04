@@ -14,8 +14,8 @@ import validation from "@zavx0z/ai-tech-input"
 const {integer, text, boolean} = validation
 import createRequestHandler from "@zavx0z/ai-server-request"
 
-import type {Zavx0zAiServer} from "./contract/index.ts"
-export type {Zavx0zAiServer} from "./contract/index.ts"
+import type {AiServer} from "./contract/index.ts"
+export type {AiServer} from "./contract/index.ts"
 
 /**
 Назначает область и запускает HTTP-listener, связанный с подготовленными инструментами.
@@ -26,7 +26,7 @@ export type {Zavx0zAiServer} from "./contract/index.ts"
 
 @throws Ошибка конфигурации до listen либо ошибка ОС при запуске сервера.
 */
-export default async function startServer(options: Zavx0zAiServer.Input): Promise<Zavx0zAiServer.Output> {
+export default async function startServer(options: AiServer.Input): Promise<AiServer.Output> {
   const workspace = createWorkspace({directory: options.directory})
   const hostname = text(options.hostname ?? "127.0.0.1", "hostname")
   const port = integer(options.port, 8787, 0, 65535, "port")

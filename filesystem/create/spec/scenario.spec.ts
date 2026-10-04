@@ -2,7 +2,7 @@ import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {existsSync, readFileSync, statSync} from "node:fs"
 import {join} from "node:path"
 import createFile from "@zavx0z/ai-filesystem-create"
-import type {Zavx0zAiFilesystemCreate} from "@zavx0z/ai-filesystem-create"
+import type {AiFilesystemCreate} from "@zavx0z/ai-filesystem-create"
 import testing from "@zavx0z/ai-testing"
 
 const {createFixture} = testing
@@ -12,7 +12,7 @@ describe.each([
   {name: "Создание родительских каталогов", input: {path: "a/file", content: "", createParents: true}, expected: {path: "a/file", content: "", bytes: 0}},
 ])("$name", ({input, expected}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: Zavx0zAiFilesystemCreate.Output
+  let result: AiFilesystemCreate.Output
 
   beforeAll(() => {
     frame = createFixture()

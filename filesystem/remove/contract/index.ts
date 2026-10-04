@@ -1,5 +1,5 @@
 /** Публичные формы возможности. */
-export declare namespace Zavx0zAiFilesystemRemove {
+export declare namespace AiFilesystemRemove {
   /**
   Удаляет запись по относительному пути; конечная символическая ссылка удаляется как ссылка.
 

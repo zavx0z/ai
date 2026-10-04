@@ -11,10 +11,10 @@ import validation from "@zavx0z/ai-tech-input"
 const {object, text, encoding, boolean} = validation
 import access from "@zavx0z/ai-filesystem-access"
 const {decode, digest} = access
-import type {Zavx0zAiWorkspace} from "@zavx0z/ai-workspace"
+import type {AiWorkspace} from "@zavx0z/ai-workspace"
 
-import type {Zavx0zAiFilesystemCreate} from "./contract/index.ts"
-export type {Zavx0zAiFilesystemCreate} from "./contract/index.ts"
+import type {AiFilesystemCreate} from "./contract/index.ts"
+export type {AiFilesystemCreate} from "./contract/index.ts"
 
 /**
 Создаёт файл с режимом `0600`, используя исключительное открытие, поэтому существующий путь не перезаписывается.
@@ -29,7 +29,7 @@ export type {Zavx0zAiFilesystemCreate} from "./contract/index.ts"
 
 @throws Ошибка `INVALID_INPUT` при неверной форме или кодировке, `ROOT_NOT_ALLOWED` при смене идентичности корня, `LIMIT_EXCEEDED` при превышении бюджета; `EEXIST` и другие ошибки записи файловой системы пробрасываются напрямую.
 */
-export default function createFile(input: Zavx0zAiFilesystemCreate.Input, context: Zavx0zAiWorkspace.Output): Zavx0zAiFilesystemCreate.Output {
+export default function createFile(input: AiFilesystemCreate.Input, context: AiWorkspace.Output): AiFilesystemCreate.Output {
   object(input, ["path", "content", "encoding", "createParents"])
   const data = decode(text(input.content, "content", true), encoding(input.encoding))
   const parents = boolean(input.createParents, false, "createParents")

@@ -1,7 +1,7 @@
-import type {Zavx0zAiFilesystemAccess} from "@zavx0z/ai-filesystem-access"
+import type {AiFilesystemAccess} from "@zavx0z/ai-filesystem-access"
 
 /** Публичные формы возможности. */
-export declare namespace Zavx0zAiFilesystemStat {
+export declare namespace AiFilesystemStat {
   /**
   Метаданные записи внутри назначенной области без перехода по конечной символической ссылке.
 
@@ -18,6 +18,6 @@ export declare namespace Zavx0zAiFilesystemStat {
   @property entry - Описание самой записи, включая тип `symlink`, если конечный путь является ссылкой.
   */
   export interface Output {
-    entry: Zavx0zAiFilesystemAccess.Output
+    entry: AiFilesystemAccess.Output
   }
 }

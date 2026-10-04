@@ -8,10 +8,10 @@
 import {lstatSync, unlinkSync, rmSync, rmdirSync} from "node:fs"
 import validation from "@zavx0z/ai-tech-input"
 const {object, boolean} = validation
-import type {Zavx0zAiWorkspace} from "@zavx0z/ai-workspace"
+import type {AiWorkspace} from "@zavx0z/ai-workspace"
 
-import type {Zavx0zAiFilesystemRemove} from "./contract/index.ts"
-export type {Zavx0zAiFilesystemRemove} from "./contract/index.ts"
+import type {AiFilesystemRemove} from "./contract/index.ts"
+export type {AiFilesystemRemove} from "./contract/index.ts"
 
 /**
 Удаляет файл, саму конечную символическую ссылку либо каталог внутри рабочей области.
@@ -26,7 +26,7 @@ export type {Zavx0zAiFilesystemRemove} from "./contract/index.ts"
 
 @throws Ошибка `INVALID_INPUT` при неверной форме, `ROOT_NOT_ALLOWED` при смене идентичности корня и `PATH_NOT_ALLOWED` для запрещённого адреса; отсутствие пути и непустой каталог дают системные ошибки файловой системы.
 */
-export default function removePath(input: Zavx0zAiFilesystemRemove.Input, context: Zavx0zAiWorkspace.Output): Zavx0zAiFilesystemRemove.Output {
+export default function removePath(input: AiFilesystemRemove.Input, context: AiWorkspace.Output): AiFilesystemRemove.Output {
   object(input, ["path", "recursive"])
   const recursive = boolean(input.recursive, false, "recursive")
   context.directory()

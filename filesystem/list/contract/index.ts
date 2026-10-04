@@ -1,7 +1,7 @@
-import type {Zavx0zAiFilesystemAccess} from "@zavx0z/ai-filesystem-access"
+import type {AiFilesystemAccess} from "@zavx0z/ai-filesystem-access"
 
 /** Публичные формы возможности. */
-export declare namespace Zavx0zAiFilesystemList {
+export declare namespace AiFilesystemList {
   /**
   Перечисляет записи каталога, не обходя символические ссылки и `.git`.
 
@@ -36,7 +36,7 @@ export declare namespace Zavx0zAiFilesystemList {
   */
   export interface Output {
     path: string
-    entries: Zavx0zAiFilesystemAccess.Output[]
+    entries: AiFilesystemAccess.Output[]
     truncated: boolean
     depthLimited: boolean
   }

@@ -2,7 +2,7 @@ import {afterAll, beforeAll, describe, expect, test} from "bun:test"
 import {writeFileSync} from "node:fs"
 import {join} from "node:path"
 import readFiles from "@zavx0z/ai-filesystem-read-many"
-import type {Zavx0zAiFilesystemReadMany} from "@zavx0z/ai-filesystem-read-many"
+import type {AiFilesystemReadMany} from "@zavx0z/ai-filesystem-read-many"
 import testing from "@zavx0z/ai-testing"
 
 const {createFixture} = testing
@@ -22,7 +22,7 @@ describe.each([
   },
 ])("$name", ({files, input, expected}) => {
   let frame: ReturnType<typeof createFixture>
-  let result: Zavx0zAiFilesystemReadMany.Output
+  let result: AiFilesystemReadMany.Output
 
   beforeAll(() => {
     frame = createFixture()

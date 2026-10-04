@@ -6,8 +6,8 @@ import {constants, openSync, closeSync, fstatSync, fchmodSync, readSync, lstatSy
 import {dirname, join, relative, sep} from "node:path"
 import ToolError from "@zavx0z/ai-tech-failure"
 
-import type {Zavx0zAiFilesystemAccess} from "./contract/index.ts"
-export type {Zavx0zAiFilesystemAccess} from "./contract/index.ts"
+import type {AiFilesystemAccess} from "./contract/index.ts"
+export type {AiFilesystemAccess} from "./contract/index.ts"
 
 const MAX_BYTES = 8 * 1024 * 1024
 
@@ -23,7 +23,7 @@ const access = {
 
   @returns Относительный путь, вид, размер, режим доступа и время изменения записи.
   */
-  metadata(root: string, path: string): Zavx0zAiFilesystemAccess.Output {
+  metadata(root: string, path: string): AiFilesystemAccess.Output {
     const stat = lstatSync(path)
     return {path: relative(root, path).split(sep).join("/") || ".", type: stat.isSymbolicLink() ? "symlink" : stat.isFile() ? "file" : stat.isDirectory() ? "directory" : "other",
       size: stat.size, mode: stat.mode & 0o777, modifiedAt: stat.mtime.toISOString()}

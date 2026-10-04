@@ -9,10 +9,10 @@ import validation from "@zavx0z/ai-tech-input"
 const {object, integer, encoding} = validation
 import access from "@zavx0z/ai-filesystem-access"
 const {readChunk, digest, MAX_BYTES} = access
-import type {Zavx0zAiWorkspace} from "@zavx0z/ai-workspace"
+import type {AiWorkspace} from "@zavx0z/ai-workspace"
 
-import type {Zavx0zAiFilesystemRead} from "./contract/index.ts"
-export type {Zavx0zAiFilesystemRead} from "./contract/index.ts"
+import type {AiFilesystemRead} from "./contract/index.ts"
+export type {AiFilesystemRead} from "./contract/index.ts"
 
 /**
 Читает участок обычного файла, не превышающий заданный бюджет байтов.
@@ -27,7 +27,7 @@ export type {Zavx0zAiFilesystemRead} from "./contract/index.ts"
 
 @throws Ошибки `INVALID_INPUT`, `ROOT_NOT_ALLOWED`, `PATH_NOT_ALLOWED`, `INVALID_PATH_TYPE` и `LIMIT_EXCEEDED` при проверке аргументов, корня, пути и чтении; ошибки ОС, включая `ENOENT`, пробрасываются напрямую.
 */
-export default function readFile(input: Zavx0zAiFilesystemRead.Input, context: Zavx0zAiWorkspace.Output): Zavx0zAiFilesystemRead.Output {
+export default function readFile(input: AiFilesystemRead.Input, context: AiWorkspace.Output): AiFilesystemRead.Output {
   object(input, ["path", "offset", "maxBytes", "encoding"])
   context.directory()
   const offset = integer(input.offset, 0, 0, Number.MAX_SAFE_INTEGER, "offset")

@@ -1,5 +1,5 @@
 /** Конфигурация и жизненный цикл самостоятельного HTTP-хоста. */
-export declare namespace Zavx0zAiServer {
+export declare namespace AiServer {
   /**
   Доверенная конфигурация до запуска listener.
 
