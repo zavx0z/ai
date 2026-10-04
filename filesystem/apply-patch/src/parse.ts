@@ -46,7 +46,7 @@ export function parsePatch(patch: string): Operation[] {
       }
       if (hunks.length === 0 && to === undefined) throw new ToolError("PATCH_REJECTED", "Update has no hunks", 409)
       if (hunks.some(h => h.old.length === 0 && h.next.length === 0)) throw new ToolError("PATCH_REJECTED", "Empty hunks are not allowed", 409)
-      operations.push({kind: "update", path, to, hunks})
+      operations.push({kind: "update", path, ...(to === undefined ? {} : {to}), hunks})
     } else throw new ToolError("PATCH_REJECTED", "Unknown patch operation", 409)
     if (operations.length > 50) throw new ToolError("LIMIT_EXCEEDED", "A patch may affect at most 50 files", 413)
   }
