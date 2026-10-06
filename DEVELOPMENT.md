@@ -114,11 +114,12 @@ curl --fail-with-body http://127.0.0.1:8787/tools \
 
 `server/request/scripts/descriptions.ts` вызывает существующий публичный
 `@zavx0z/immersive-typedoc/parser` из явно указанного проекта, где он уже установлен.
-В текущем рабочем контуре таким проектом служит Storybook:
+В текущем рабочем контуре таким проектом служит Storybook. Переменная
+`STORYBOOK_ROOT` задаётся локальным окружением и содержит его фактическое расположение:
 
 ```sh
-bun run descriptions /Users/zavx0z/repozitarium/zavx0z/storybook
-bun run check:descriptions /Users/zavx0z/repozitarium/zavx0z/storybook
+bun run descriptions "$STORYBOOK_ROOT"
+bun run check:descriptions "$STORYBOOK_ROOT"
 ```
 
 Генератор читает контракты пакетов, объявивших публичный ресурс `description.json`,
@@ -182,7 +183,7 @@ JSONL диагностика содержит requestId, метод, имя ин
 bun run check
 bun test
 npm run test:node
-bun run check:descriptions /Users/zavx0z/repozitarium/zavx0z/storybook
+bun run check:descriptions "$STORYBOOK_ROOT"
 ```
 
 `scenario.spec.ts` содержит успешные примеры на `bun:test`; ожидаемые отказы
