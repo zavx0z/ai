@@ -10,9 +10,9 @@ Git submodule проекта `zavx0z`. Ветка и история принад
 Нормативный checkout Storybook — `/Users/zavx0z/repozitarium/zavx0z/storybook`:
 
 - [Основания](../../../storybook/project/meta/notes/foundations/index.md).
-- [Предметная архитектура](../../../storybook/repo/meta/notes/architecture.md).
-- [Структурный контракт](../../../storybook/package/meta/notes/draft-structure.md).
-- [Размещение компонентов](../../../storybook/component/meta/notes/draft-placement.md).
+- [Предметная архитектура](../../../storybook/repo/src/architecture.md).
+- [Структурный контракт](../../../storybook/package/src/architecture.md).
+- [Размещение компонентов](../../../storybook/component/src/architecture.md).
 - [Контракты](../../../storybook/contracts/meta/notes/draft-contracts.md).
 - [Экспорты](../../../storybook/package/meta/notes/draft-exports.md).
 - [Документация](../../../storybook/package/meta/notes/draft-documentation.md).
