@@ -15,11 +15,5 @@
   "devDependencies": {
     "@zavx0z/ai-testing": "workspace:*",
     "@zavx0z/ai-filesystem-read": "workspace:*"
-  },
-  "files": [
-    "index.ts",
-    "contract",
-    "src",
-    "description.json"
-  ]
+  }
 }
