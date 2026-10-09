@@ -13,7 +13,7 @@ describe.each([
   {name: "Пустой файл", path: "empty", content: "", input: {path: "empty"}, expected: {content: "", bytesRead: 0, truncated: false, hash: "whole"}},
   {name: "Смещение за концом файла", path: "empty", content: "", input: {path: "empty", offset: 100}, expected: {content: "", bytesRead: 0, truncated: false, hash: "none"}},
   {name: "Бинарный диапазон", path: "binary", content: Buffer.from([0, 255, 1, 128]), input: {path: "binary", encoding: "base64" as const, offset: 1, maxBytes: 2}, expected: {content: Buffer.from([255, 1]).toString("base64"), bytesRead: 2, truncated: true, hash: "none"}},
-])("$name", ({path, content, input, expected}) => {
+])("$name", ({name, path, content, input, expected}) => {
   let frame: ReturnType<typeof createFixture>
   let result: AiFilesystemRead.Output
 
@@ -39,7 +39,7 @@ describe.each([
   })
 
   /** @remarks Побайтовое сравнение относится к варианту с base64-кодированием. */
-  describe.skipIf(path !== "binary")("Бинарные данные", () => {
+  describe.skipIf(name !== "Бинарный диапазон")("Бинарные данные", () => {
     test("Точные байты", () => {
       expect(Buffer.from(result.content, "base64"), "Base64 сохраняет байты, включая неполные последовательности UTF-8").toEqual(Buffer.from([255, 1]))
     })

@@ -12,7 +12,7 @@ describe.each([
   {name: "Замена содержимого", before: "before", content: "after", mode: 0o660, expectedBytes: 5, expectedHash: null},
   {name: "Пустое содержимое", before: "before", content: "", mode: null, expectedBytes: 0, expectedHash: null},
   {name: "Замена с подтверждённым хешем", before: "before", content: "after", mode: null, expectedBytes: 5, expectedHash: createHash("sha256").update("before").digest("hex")},
-])("$name", ({before, content, mode, expectedBytes, expectedHash}) => {
+])("$name", ({name, before, content, mode, expectedBytes, expectedHash}) => {
   let frame: ReturnType<typeof createFixture>
   let result: AiFilesystemWrite.Output
 
@@ -32,7 +32,7 @@ describe.each([
   })
 
   /** @remarks Сохранение заданной маски доступа проверяется в варианте с явными атрибутами. */
-  describe.skipIf(mode === null)("Сохранение атрибутов", () => {
+  describe.skipIf(name !== "Замена содержимого")("Сохранение атрибутов", () => {
     test("Права и соседние файлы", () => {
       expect(statSync(join(frame.root, "file")).mode & 0o777, "Замена сохраняет права исходного файла").toBe(mode!)
       expect(readdirSync(frame.root), "Атомарная замена не оставляет временные файлы рядом с результатом").toEqual(["file"])

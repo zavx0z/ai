@@ -14,25 +14,21 @@ describe.each([
     name: "Каталог инструментов",
     request: null,
     prepare: (_root: string) => {},
-    kind: "catalog",
   },
   {
     name: "Чтение файла",
     request: {name: "filesystem.read", arguments: {path: "file"}},
     prepare: (root: string) => writeFileSync(join(root, "file"), "данные"),
-    kind: "read",
   },
   {
     name: "Создание файла",
     request: {name: "filesystem.create", arguments: {path: "created", content: "новый"}},
     prepare: (_root: string) => {},
-    kind: "create",
   },
   {
     name: "Список пустой директории",
     request: {name: "filesystem.list", arguments: {}},
     prepare: (_root: string) => {},
-    kind: "list",
   },
   {
     name: "Git status",
@@ -41,9 +37,8 @@ describe.each([
       const git = spawnSync("git", ["init", "-q"], {cwd: root})
       if (git.status !== 0) throw new Error(`git init: ${git.stderr.toString()}`)
     },
-    kind: "git",
   },
-])("$name", ({request, prepare, kind}) => {
+])("$name", ({name, request, prepare}) => {
   let frame: ReturnType<typeof createFixture>
   let response: Response
   let data: Record<string, unknown>
@@ -63,7 +58,7 @@ describe.each([
   })
 
   /** @remarks Только запрос GET возвращает каталог, а не результат одной операции. */
-  describe.skipIf(kind !== "catalog")("Каталог", () => {
+  describe.skipIf(name !== "Каталог инструментов")("Каталог", () => {
     test("Имена и схемы", () => {
       const descriptors = data.result as Array<Record<string, unknown>>
       const names = descriptors.map(item => item.name)
@@ -84,7 +79,7 @@ describe.each([
   })
 
   /** @remarks Чтение файла применимо только к варианту filesystem.read. */
-  describe.skipIf(kind !== "read")("Чтение", () => {
+  describe.skipIf(name !== "Чтение файла")("Чтение", () => {
     test("Содержимое", () => {
       const result = data.result as {content: string}
       expect(result.content, "Инструмент читает данные в назначенной хостом директории").toBe("данные")
@@ -92,7 +87,7 @@ describe.each([
   })
 
   /** @remarks Создание файла применимо только к варианту filesystem.create. */
-  describe.skipIf(kind !== "create")("Создание", () => {
+  describe.skipIf(name !== "Создание файла")("Создание", () => {
     test("Побочный эффект", () => {
       const result = data.result as {bytes: number}
       expect(result.bytes, "Ответ сообщает записанный объём UTF-8").toBe(Buffer.byteLength("новый"))
@@ -101,7 +96,7 @@ describe.each([
   })
 
   /** @remarks Пустой список применим только к варианту filesystem.list. */
-  describe.skipIf(kind !== "list")("Список", () => {
+  describe.skipIf(name !== "Список пустой директории")("Список", () => {
     test("Пустая директория", () => {
       const result = data.result as {entries: unknown[]}
       expect(result.entries, "Пустая назначенная директория возвращает пустой инвентарь").toEqual([])
@@ -109,7 +104,7 @@ describe.each([
   })
 
   /** @remarks Git status применим только к варианту с созданным репозиторием. */
-  describe.skipIf(kind !== "git")("Git", () => {
+  describe.skipIf(name !== "Git status")("Git", () => {
     test("Пустой индекс", () => {
       const result = data.result as {entries: unknown[]}
       expect(result.entries, "Инициализированный репозиторий не содержит изменений").toEqual([])

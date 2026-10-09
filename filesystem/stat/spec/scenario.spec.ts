@@ -11,7 +11,7 @@ describe.each([
   {name: "Обычный файл", path: "file.txt", prepare: (root: string) => writeFileSync(join(root, "file.txt"), "abc"), type: "file", size: 3},
   {name: "Корневой каталог", path: ".", prepare: (_root: string) => {}, type: "directory", size: null},
   {name: "Конечная символическая ссылка", path: "link", prepare: (root: string) => symlinkSync("/no-such-outside-target", join(root, "link")), type: "symlink", size: null},
-])("$name", ({path, prepare, type, size}) => {
+])("$name", ({name, path, prepare, type, size}) => {
   let frame: ReturnType<typeof createFixture>
   let result: AiFilesystemStat.Output
 
@@ -27,14 +27,14 @@ describe.each([
   })
 
   /** @remarks Точный размер задан только для подготовленного обычного файла. */
-  describe.skipIf(size === null)("Обычный файл", () => {
+  describe.skipIf(name !== "Обычный файл")("Обычный файл", () => {
     test("Размер", () => {
       expect(result.entry.size, "Размер файла равен числу записанных байтов").toBe(size!)
     })
   })
 
   /** @remarks Неразыменование конечной ссылки относится только к варианту symlink. */
-  describe.skipIf(type !== "symlink")("Конечная символическая ссылка", () => {
+  describe.skipIf(name !== "Конечная символическая ссылка")("Конечная символическая ссылка", () => {
     test("Скрытие цели", () => {
       expect(JSON.stringify(result).includes("outside-target"), "Ответ не раскрывает внешний адрес цели ссылки").toBeFalse()
     })
